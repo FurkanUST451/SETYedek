@@ -1,0 +1,28 @@
+import 'package:intl/intl.dart';
+
+class Formatters {
+  Formatters._();
+
+  static final DateFormat _shortDate = DateFormat('dd.MM.yyyy');
+  static final DateFormat _longDate = DateFormat('dd MMMM yyyy', 'tr_TR');
+  static final DateFormat _time = DateFormat('HH:mm');
+  static final NumberFormat _currency = NumberFormat.currency(
+    locale: 'tr_TR',
+    symbol: '₺',
+    decimalDigits: 0,
+  );
+
+  static String shortDate(DateTime date) => _shortDate.format(date);
+  static String longDate(DateTime date) => _longDate.format(date);
+  static String time(DateTime date) => _time.format(date);
+  static String currency(num amount) => _currency.format(amount);
+
+  static String relativeTime(DateTime date) {
+    final diff = DateTime.now().difference(date);
+    if (diff.inSeconds < 60) return 'şimdi';
+    if (diff.inMinutes < 60) return '${diff.inMinutes} dk';
+    if (diff.inHours < 24) return '${diff.inHours} sa';
+    if (diff.inDays < 7) return '${diff.inDays} g';
+    return shortDate(date);
+  }
+}
