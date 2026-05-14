@@ -1,16 +1,11 @@
 class AppAssets {
   AppAssets._();
 
-  // Base paths (assets klasörü pubspec.yaml'a eklenince doldurulacak)
   static const String _images = 'assets/images';
-  static const String _icons = 'assets/icons';
+  static const String _roleSelection = '$_images/role_selection';
 
-  // Placeholder örnekler — gerçek dosyalar eklendiğinde aktif edilecek
-  static const String logo = '$_images/logo.png';
-  static const String onboarding1 = '$_images/onboarding_1.png';
-  static const String onboarding2 = '$_images/onboarding_2.png';
-  static const String onboarding3 = '$_images/onboarding_3.png';
-
-  static const String iconCamera = '$_icons/camera.svg';
-  static const String iconMic = '$_icons/mic.svg';
+  // Role selection screen
+  static const String roleProjectClient = '$_roleSelection/project_client.png';
+  static const String roleProjectClient2 = '$_roleSelection/project_client2.jpeg';
+  static const String roleFreelancer = '$_roleSelection/freelancer.png';
 }

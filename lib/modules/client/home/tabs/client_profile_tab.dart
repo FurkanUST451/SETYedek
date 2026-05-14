@@ -8,6 +8,7 @@ import '../../../../routes/app_routes.dart';
 import '../../../../widgets/set_avatar.dart';
 import '../../../../widgets/set_button.dart';
 import '../../../../widgets/set_card.dart';
+import '../../../../widgets/set_section_header.dart';
 import '../../../app/auth_controller.dart';
 import '../../../app/theme_controller.dart';
 import '../../../app/user_controller.dart';
@@ -17,19 +18,34 @@ class ClientProfileTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final secondaryColor =
+        isDark ? AppColors.textSecondary : AppColors.textSecondaryLight;
     final user = Get.find<UserController>();
     final theme = Get.find<ThemeController>();
     final auth = Get.find<AuthController>();
 
     return SafeArea(
+      bottom: false,
       child: ListView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.lg,
+          AppSpacing.lg,
+          120,
+        ),
         children: [
-          const Text('Profil', style: AppTextStyles.heading1),
-          const SizedBox(height: AppSpacing.lg),
+          SetSectionHeader(
+            eyebrow: 'ACCOUNT',
+            title: 'Profil',
+            large: true,
+          ),
+          const SizedBox(height: AppSpacing.xl),
           Obx(() {
             final u = user.currentUser;
             return SetCard(
+              glow: true,
+              padding: const EdgeInsets.all(AppSpacing.lg),
               child: Row(
                 children: [
                   SetAvatar(name: u?.name ?? 'Misafir', size: 64),
@@ -38,12 +54,22 @@ class ClientProfileTab extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(u?.name ?? 'Misafir',
-                            style: AppTextStyles.heading3),
+                        Text(
+                          'MEMBER',
+                          style: AppTextStyles.eyebrow.copyWith(
+                            color: AppColors.accentCyan,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          u?.name ?? 'Misafir',
+                          style: AppTextStyles.heading2,
+                        ),
+                        const SizedBox(height: 4),
                         Text(
                           u?.email ?? '',
                           style: AppTextStyles.body2.copyWith(
-                            color: AppColors.textSecondary,
+                            color: secondaryColor,
                           ),
                         ),
                       ],
@@ -53,12 +79,30 @@ class ClientProfileTab extends StatelessWidget {
               ),
             );
           }),
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.xl),
+          SetSectionHeader(eyebrow: 'PREFERENCES', title: 'Görünüm'),
+          const SizedBox(height: AppSpacing.md),
           SetCard(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: 4,
+            ),
             child: Obx(() => SwitchListTile(
                   value: theme.isDark,
                   onChanged: (_) => theme.toggle(),
-                  title: const Text('Karanlık tema'),
+                  title: Text(
+                    'Karanlık tema',
+                    style: AppTextStyles.body1.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  subtitle: Text(
+                    'Cinematic mood için aç',
+                    style: AppTextStyles.caption.copyWith(
+                      color: secondaryColor,
+                    ),
+                  ),
+                  activeThumbColor: AppColors.primary,
                   contentPadding: EdgeInsets.zero,
                 )),
           ),
@@ -73,6 +117,7 @@ class ClientProfileTab extends StatelessWidget {
           SetButton(
             text: 'Çıkış Yap',
             variant: SetButtonVariant.outline,
+            icon: Icons.logout,
             onPressed: () async {
               await auth.logout();
               Get.offAllNamed(AppRoutes.login);

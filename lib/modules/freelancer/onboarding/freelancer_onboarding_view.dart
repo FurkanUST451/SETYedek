@@ -105,7 +105,7 @@ class _CategoryStep extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Kategorin nedir?', style: AppTextStyles.heading2),
+          Text('Kategorin nedir?', style: AppTextStyles.heading2),
           const SizedBox(height: AppSpacing.lg),
           Expanded(
             child: Obx(() => GridView.count(
@@ -152,7 +152,7 @@ class _BioStep extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Kendinden bahset', style: AppTextStyles.heading2),
+          Text('Kendinden bahset', style: AppTextStyles.heading2),
           const SizedBox(height: AppSpacing.lg),
           SetTextField(
             label: 'Kısa biyografi',
@@ -199,8 +199,8 @@ class _ReviewStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.all(AppSpacing.lg),
+    return Padding(
+      padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

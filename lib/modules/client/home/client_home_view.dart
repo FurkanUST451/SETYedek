@@ -27,6 +27,7 @@ class ClientHomeView extends GetView<ClientHomeController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       body: Obx(() => IndexedStack(
             index: controller.currentIndex.value,
             children: _tabs,

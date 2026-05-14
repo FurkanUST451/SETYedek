@@ -13,7 +13,7 @@ class AppTheme {
     const colorScheme = ColorScheme.dark(
       primary: AppColors.primary,
       onPrimary: AppColors.textPrimary,
-      secondary: AppColors.primaryLight,
+      secondary: AppColors.accentCyan,
       onSecondary: AppColors.textPrimary,
       surface: AppColors.surfaceDark,
       onSurface: AppColors.textPrimary,
@@ -115,7 +115,7 @@ class AppTheme {
     const colorScheme = ColorScheme.light(
       primary: AppColors.primary,
       onPrimary: AppColors.textPrimary,
-      secondary: AppColors.primaryDark,
+      secondary: AppColors.primaryDeep,
       onSecondary: AppColors.textPrimary,
       surface: AppColors.surfaceLight,
       onSurface: AppColors.textPrimaryLight,

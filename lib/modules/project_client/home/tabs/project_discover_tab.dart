@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/app_text_styles.dart';
-import '../../../../widgets/set_card.dart';
+import '../../../../widgets/set_hero_card.dart';
+import '../../../../widgets/set_section_header.dart';
 
 class ProjectDiscoverTab extends StatelessWidget {
   const ProjectDiscoverTab({super.key});
@@ -12,48 +10,44 @@ class ProjectDiscoverTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final reels = const [
-      'Volkan Otomotiv - Marka Filmi',
-      'Yıldız Kahve - Reklam',
-      'Aydın Hospital - Tanıtım',
-      'Ayza - Müzik Videosu',
+      ('FILM', 'Volkan Otomotiv', 'Marka Filmi', Icons.directions_car_outlined),
+      ('AD', 'Yıldız Kahve', 'TV Reklamı', Icons.local_cafe_outlined),
+      ('DOC', 'Aydın Hospital', 'Tanıtım Filmi', Icons.health_and_safety_outlined),
+      ('MV', 'Ayza', 'Müzik Videosu', Icons.music_note_outlined),
     ];
+
     return SafeArea(
+      bottom: false,
       child: ListView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.lg,
+          AppSpacing.lg,
+          120,
+        ),
         children: [
-          const Text('SET\'in işleri', style: AppTextStyles.heading1),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            'Önceki prodüksiyonlarımızdan örnekler.',
-            style: AppTextStyles.body2.copyWith(
-              color: AppColors.textSecondary,
-            ),
+          SetSectionHeader(
+            eyebrow: 'PORTFOLIO',
+            title: 'SET\'in işleri',
+            description: 'Önceki prodüksiyonlarımızdan örnekler.',
+            large: true,
           ),
-          const SizedBox(height: AppSpacing.lg),
-          ...reels.map((r) => Padding(
-                padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                child: SetCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        height: 160,
-                        decoration: BoxDecoration(
-                          color: AppColors.surfaceDarkElevated,
-                          borderRadius:
-                              BorderRadius.circular(AppRadius.md),
-                        ),
-                        child: const Center(
-                          child: Icon(Icons.play_circle_outline,
-                              size: 48, color: AppColors.primary),
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.md),
-                      Text(r, style: AppTextStyles.heading3),
-                    ],
-                  ),
-                ),
-              )),
+          const SizedBox(height: AppSpacing.xl),
+          ...reels.asMap().entries.map((e) {
+            final r = e.value;
+            return Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.md),
+              child: SetHeroCard(
+                eyebrow: r.$1,
+                title: r.$2,
+                subtitle: r.$3,
+                decorativeIcon: r.$4,
+                tag: 'REEL',
+                aspectRatio: 16 / 10,
+                featured: e.key == 0,
+              ),
+            );
+          }),
         ],
       ),
     );

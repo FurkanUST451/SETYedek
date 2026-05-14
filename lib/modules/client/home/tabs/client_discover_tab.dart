@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -9,28 +10,65 @@ import '../../../../data/models/user_model.dart';
 import '../../../../routes/app_routes.dart';
 import '../../../../widgets/set_avatar.dart';
 import '../../../../widgets/set_card.dart';
-import 'package:get/get.dart';
+import '../../../../widgets/set_chip.dart';
+import '../../../../widgets/set_hero_card.dart';
+import '../../../../widgets/set_section_header.dart';
 
-class ClientDiscoverTab extends StatelessWidget {
+class ClientDiscoverTab extends StatefulWidget {
   const ClientDiscoverTab({super.key});
 
   @override
+  State<ClientDiscoverTab> createState() => _ClientDiscoverTabState();
+}
+
+class _ClientDiscoverTabState extends State<ClientDiscoverTab> {
+  int _selectedCategory = 0;
+
+  @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final secondaryColor =
+        isDark ? AppColors.textSecondary : AppColors.textSecondaryLight;
     final freelancers = DummyData.freelancers;
+
     return SafeArea(
+      bottom: false,
       child: ListView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.lg,
+          AppSpacing.lg,
+          120,
+        ),
         children: [
-          const Text('Keşfet', style: AppTextStyles.heading1),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            'Projelerin için doğru freelancer\'ı bul.',
-            style: AppTextStyles.body2.copyWith(
-              color: AppColors.textSecondary,
-            ),
+          SetSectionHeader(
+            eyebrow: 'DISCOVER',
+            title: 'Keşfet',
+            description: 'Projelerin için doğru freelancer\'ı bul.',
+            large: true,
           ),
-          const SizedBox(height: AppSpacing.lg),
-          _Categories(),
+          const SizedBox(height: AppSpacing.xl),
+          // Featured hero card
+          SetHeroCard(
+            eyebrow: 'FEATURED',
+            title: 'Bu hafta öne çıkan setler',
+            subtitle: 'En çok talep gören prodüksiyon ekipleri',
+            decorativeIcon: Icons.local_movies_outlined,
+            tag: 'TRENDING',
+            aspectRatio: 16 / 9,
+            featured: true,
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          // Categories
+          _Categories(
+            selectedIndex: _selectedCategory,
+            onSelect: (i) => setState(() => _selectedCategory = i),
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          SetSectionHeader(
+            eyebrow: 'CREATORS',
+            title: 'Önerilen freelancerlar',
+          ),
           const SizedBox(height: AppSpacing.lg),
           ...freelancers.map((f) {
             final user = DummyData.users.firstWhere(
@@ -45,7 +83,11 @@ class ClientDiscoverTab extends StatelessWidget {
             );
             return Padding(
               padding: const EdgeInsets.only(bottom: AppSpacing.md),
-              child: _FreelancerTile(freelancer: f, user: user),
+              child: _FreelancerTile(
+                freelancer: f,
+                user: user,
+                secondaryColor: secondaryColor,
+              ),
             );
           }),
         ],
@@ -55,28 +97,24 @@ class ClientDiscoverTab extends StatelessWidget {
 }
 
 class _Categories extends StatelessWidget {
+  const _Categories({required this.selectedIndex, required this.onSelect});
+
+  final int selectedIndex;
+  final ValueChanged<int> onSelect;
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 36,
+      height: 34,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: DummyData.categories.length,
         separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
         itemBuilder: (_, i) {
-          final c = DummyData.categories[i];
-          return Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.md,
-              vertical: AppSpacing.sm,
-            ),
-            decoration: BoxDecoration(
-              color: AppColors.surfaceDarkElevated,
-              borderRadius: BorderRadius.circular(999),
-              border: Border.all(color: AppColors.border),
-            ),
-            alignment: Alignment.center,
-            child: Text(c, style: AppTextStyles.body2),
+          return SetChip(
+            label: DummyData.categories[i],
+            selected: i == selectedIndex,
+            onTap: () => onSelect(i),
           );
         },
       ),
@@ -85,14 +123,20 @@ class _Categories extends StatelessWidget {
 }
 
 class _FreelancerTile extends StatelessWidget {
-  const _FreelancerTile({required this.freelancer, required this.user});
+  const _FreelancerTile({
+    required this.freelancer,
+    required this.user,
+    required this.secondaryColor,
+  });
 
   final FreelancerModel freelancer;
   final UserModel user;
+  final Color secondaryColor;
 
   @override
   Widget build(BuildContext context) {
     return SetCard(
+      padding: const EdgeInsets.all(AppSpacing.md),
       onTap: () => Get.toNamed(
         AppRoutes.freelancerDetail,
         arguments: {'freelancer': freelancer, 'user': user},
@@ -109,24 +153,37 @@ class _FreelancerTile extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   '${freelancer.category} · ${freelancer.location}',
-                  style: AppTextStyles.body2.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+                  style: AppTextStyles.body2.copyWith(color: secondaryColor),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
                 Row(
                   children: [
-                    const Icon(Icons.star, size: 14, color: AppColors.primary),
+                    Icon(
+                      Icons.star_rounded,
+                      size: 16,
+                      color: AppColors.accentCyan,
+                    ),
                     const SizedBox(width: 4),
                     Text(
                       freelancer.rating.toStringAsFixed(1),
-                      style: AppTextStyles.caption,
+                      style: AppTextStyles.caption.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Container(
+                      width: 3,
+                      height: 3,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: secondaryColor,
+                      ),
                     ),
                     const SizedBox(width: AppSpacing.sm),
                     Text(
-                      '${freelancer.experience} yıl',
+                      '${freelancer.experience} yıl deneyim',
                       style: AppTextStyles.caption.copyWith(
-                        color: AppColors.textSecondary,
+                        color: secondaryColor,
                       ),
                     ),
                   ],
@@ -134,6 +191,7 @@ class _FreelancerTile extends StatelessWidget {
               ],
             ),
           ),
+          Icon(Icons.chevron_right, color: secondaryColor, size: 22),
         ],
       ),
     );

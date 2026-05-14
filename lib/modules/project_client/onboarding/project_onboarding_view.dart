@@ -105,7 +105,7 @@ class _VideoTypeStep extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Ne çekiyoruz?', style: AppTextStyles.heading2),
+          Text('Ne çekiyoruz?', style: AppTextStyles.heading2),
           const SizedBox(height: AppSpacing.lg),
           Expanded(
             child: Obx(() => ListView.separated(
@@ -152,7 +152,7 @@ class _BudgetStep extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Bütçen ne aralıkta?', style: AppTextStyles.heading2),
+          Text('Bütçen ne aralıkta?', style: AppTextStyles.heading2),
           const SizedBox(height: AppSpacing.lg),
           Obx(() => Wrap(
                 spacing: AppSpacing.sm,

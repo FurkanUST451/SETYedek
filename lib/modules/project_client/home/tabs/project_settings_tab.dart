@@ -7,6 +7,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../routes/app_routes.dart';
 import '../../../../widgets/set_button.dart';
 import '../../../../widgets/set_card.dart';
+import '../../../../widgets/set_section_header.dart';
 import '../../../app/auth_controller.dart';
 import '../../../app/theme_controller.dart';
 
@@ -15,43 +16,69 @@ class ProjectSettingsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final secondaryColor =
+        isDark ? AppColors.textSecondary : AppColors.textSecondaryLight;
     final theme = Get.find<ThemeController>();
     final auth = Get.find<AuthController>();
 
     return SafeArea(
+      bottom: false,
       child: ListView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.lg,
+          AppSpacing.lg,
+          120,
+        ),
         children: [
-          const Text('Ayarlar', style: AppTextStyles.heading1),
-          const SizedBox(height: AppSpacing.lg),
+          SetSectionHeader(
+            eyebrow: 'SETTINGS',
+            title: 'Ayarlar',
+            large: true,
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          SetSectionHeader(eyebrow: 'PROJECT', title: 'Proje Bilgileri'),
+          const SizedBox(height: AppSpacing.md),
           SetCard(
+            glow: true,
+            padding: const EdgeInsets.all(AppSpacing.lg),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Proje Bilgileri', style: AppTextStyles.heading3),
-                const SizedBox(height: AppSpacing.sm),
                 Text(
                   'Brief\'i ve bütçeni daha sonra güncelleyebilirsin.',
-                  style: AppTextStyles.body2.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+                  style: AppTextStyles.body1.copyWith(color: secondaryColor),
                 ),
-                const SizedBox(height: AppSpacing.md),
+                const SizedBox(height: AppSpacing.lg),
                 SetButton(
-                  text: 'Briefi Düzenle',
+                  text: 'Brief\'i Düzenle',
                   variant: SetButtonVariant.outline,
+                  icon: Icons.edit_outlined,
                   onPressed: () =>
                       Get.toNamed(AppRoutes.projectOnboarding),
                 ),
               ],
             ),
           ),
+          const SizedBox(height: AppSpacing.xl),
+          SetSectionHeader(eyebrow: 'PREFERENCES', title: 'Görünüm'),
           const SizedBox(height: AppSpacing.md),
           SetCard(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: 4,
+            ),
             child: Obx(() => SwitchListTile(
                   value: theme.isDark,
                   onChanged: (_) => theme.toggle(),
-                  title: const Text('Karanlık tema'),
+                  title: Text(
+                    'Karanlık tema',
+                    style: AppTextStyles.body1.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  activeThumbColor: AppColors.primary,
                   contentPadding: EdgeInsets.zero,
                 )),
           ),
@@ -66,6 +93,7 @@ class ProjectSettingsTab extends StatelessWidget {
           SetButton(
             text: 'Çıkış Yap',
             variant: SetButtonVariant.outline,
+            icon: Icons.logout,
             onPressed: () async {
               await auth.logout();
               Get.offAllNamed(AppRoutes.login);

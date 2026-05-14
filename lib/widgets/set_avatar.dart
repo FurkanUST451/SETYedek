@@ -12,42 +12,54 @@ class SetAvatar extends StatelessWidget {
     this.name,
     this.size = 48,
     this.borderColor,
+    this.ring = true,
   });
 
   final String? imageUrl;
   final String? name;
   final double size;
   final Color? borderColor;
+  final bool ring;
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final initials = (name ?? '').initials;
-    final fallbackColor = AppColors.primary.withValues(alpha: 0.18);
+    final ringColor = borderColor ??
+        (isDark
+            ? Colors.white.withValues(alpha: 0.08)
+            : AppColors.borderLight);
 
     final container = Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: fallbackColor,
-        border: borderColor != null
-            ? Border.all(color: borderColor!, width: 1.5)
-            : null,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.primary.withValues(alpha: 0.22),
+            AppColors.accentCyan.withValues(alpha: 0.12),
+          ],
+        ),
+        border: ring ? Border.all(color: ringColor, width: 0.5) : null,
       ),
       alignment: Alignment.center,
       child: Text(
         initials.isEmpty ? '?' : initials,
-        style: AppTextStyles.body1.copyWith(
+        style: AppTextStyles.heading3.copyWith(
           color: AppColors.primary,
           fontWeight: FontWeight.w600,
           fontSize: size * 0.36,
+          height: 1,
         ),
       ),
     );
 
     if (imageUrl == null || imageUrl!.isEmpty) return container;
 
-    return ClipOval(
+    final image = ClipOval(
       child: SizedBox(
         width: size,
         height: size,
@@ -58,6 +70,16 @@ class SetAvatar extends StatelessWidget {
           errorWidget: (_, _, _) => container,
         ),
       ),
+    );
+
+    if (!ring) return image;
+
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: ringColor, width: 0.5),
+      ),
+      child: image,
     );
   }
 }

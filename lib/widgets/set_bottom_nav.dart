@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 import '../core/theme/app_colors.dart';
@@ -27,60 +29,131 @@ class SetBottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
+    final bg = (isDark ? AppColors.surfaceDarkElevated : AppColors.surfaceLight)
+        .withValues(alpha: isDark ? 0.7 : 0.85);
     final inactive = isDark
         ? AppColors.textSecondary
         : AppColors.textSecondaryLight;
-    final borderColor = isDark ? AppColors.border : AppColors.borderLight;
+    final borderColor = (isDark ? AppColors.border : AppColors.borderLight)
+        .withValues(alpha: 0.6);
 
     return SafeArea(
       top: false,
-      child: Container(
-        decoration: BoxDecoration(
-          color: bg,
-          border: Border(top: BorderSide(color: borderColor)),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.md,
+          0,
+          AppSpacing.md,
+          AppSpacing.md,
         ),
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.sm,
-          vertical: AppSpacing.sm,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: List.generate(items.length, (i) {
-            final item = items[i];
-            final selected = i == currentIndex;
-            return Expanded(
-              child: InkWell(
-                onTap: () => onTap(i),
-                borderRadius: BorderRadius.circular(AppRadius.md),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: AppSpacing.sm,
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        item.icon,
-                        size: 22,
-                        color: selected ? AppColors.primary : inactive,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(
+                color: isDark
+                    ? const Color(0x80000000)
+                    : const Color(0x1A0E1419),
+                blurRadius: 32,
+                offset: const Offset(0, 16),
+                spreadRadius: -4,
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(28),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: bg,
+                  borderRadius: BorderRadius.circular(28),
+                  border: Border.all(color: borderColor, width: 0.5),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.sm,
+                  vertical: AppSpacing.sm,
+                ),
+                height: 64,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: List.generate(items.length, (i) {
+                    final item = items[i];
+                    final selected = i == currentIndex;
+                    return Expanded(
+                      child: _NavItemTile(
+                        item: item,
+                        selected: selected,
+                        inactiveColor: inactive,
+                        onTap: () => onTap(i),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        item.label,
-                        style: AppTextStyles.caption.copyWith(
-                          color: selected ? AppColors.primary : inactive,
-                          fontWeight: selected
-                              ? FontWeight.w600
-                              : FontWeight.w400,
-                        ),
-                      ),
-                    ],
-                  ),
+                    );
+                  }),
                 ),
               ),
-            );
-          }),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NavItemTile extends StatelessWidget {
+  const _NavItemTile({
+    required this.item,
+    required this.selected,
+    required this.inactiveColor,
+    required this.onTap,
+  });
+
+  final SetNavItem item;
+  final bool selected;
+  final Color inactiveColor;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = selected ? AppColors.primary : inactiveColor;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppRadius.full),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOutCubic,
+        padding: EdgeInsets.symmetric(
+          horizontal: selected ? 12 : 8,
+          vertical: 6,
+        ),
+        decoration: BoxDecoration(
+          color: selected
+              ? AppColors.primary.withValues(alpha: 0.16)
+              : AppColors.transparent,
+          borderRadius: BorderRadius.circular(AppRadius.full),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(item.icon, size: 20, color: color),
+            AnimatedSize(
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeOutCubic,
+              child: selected
+                  ? Padding(
+                      padding: const EdgeInsets.only(left: 6),
+                      child: Text(
+                        item.label,
+                        style: AppTextStyles.caption.copyWith(
+                          color: color,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+            ),
+          ],
         ),
       ),
     );
