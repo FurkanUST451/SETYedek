@@ -5,7 +5,6 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
-import '../../../widgets/set_section_header.dart';
 import 'category_picker_controller.dart';
 
 class CategoryPickerView extends GetView<CategoryPickerController> {
@@ -13,79 +12,105 @@ class CategoryPickerView extends GetView<CategoryPickerController> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final secondaryColor =
-        isDark ? AppColors.textSecondary : AppColors.textSecondaryLight;
-
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
-      body: Stack(
-        children: [
-          Positioned(
-            top: -120,
-            left: -80,
-            child: Container(
-              width: 320,
-              height: 320,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    AppColors.primary.withValues(alpha: isDark ? 0.22 : 0.14),
-                    Colors.transparent,
-                  ],
-                ),
-              ),
-            ),
+      appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            AppSpacing.sm,
+            AppSpacing.lg,
+            AppSpacing.lg,
           ),
-          SafeArea(
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.lg,
-                AppSpacing.md,
-                AppSpacing.lg,
-                AppSpacing.xxl,
-              ),
-              children: [
-                SetSectionHeader(
-                  eyebrow: 'NEW PROJECT',
-                  title: 'Hangi alanda çalışacaksın?',
-                  description:
-                      'Bir kategori seç, sana o alandaki freelancer\'ları gösterelim.',
-                  large: true,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Service Category\nSelection',
+                style: AppTextStyles.heading1.copyWith(
+                  color: AppColors.textPrimary,
                 ),
-                const SizedBox(height: AppSpacing.xl),
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Avoid boring lists to elements.',
+                style: AppTextStyles.body2.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              Expanded(
+                child: GridView.builder(
                   itemCount: controller.categories.length,
                   gridDelegate:
                       const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    mainAxisSpacing: AppSpacing.md,
-                    crossAxisSpacing: AppSpacing.md,
-                    childAspectRatio: 1,
+                    mainAxisSpacing: AppSpacing.sm,
+                    crossAxisSpacing: AppSpacing.sm,
+                    childAspectRatio: 0.85,
                   ),
                   itemBuilder: (_, i) {
                     final cat = controller.categories[i];
-                    return _CategoryCard(
+                    return _CinematicCard(
                       label: cat,
+                      gradient: _gradientFor(cat),
                       icon: _iconFor(cat),
                       onTap: () => controller.selectCategory(cat),
-                      secondaryColor: secondaryColor,
                     );
                   },
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
+  }
+
+  LinearGradient _gradientFor(String category) {
+    switch (category) {
+      case 'Videographer':
+        return const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF0D1B2A), Color(0xFF1B3A5C)],
+        );
+      case 'Sound Design':
+        return const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF1A0D2E), Color(0xFF3D1F6E)],
+        );
+      case 'Video Edit':
+        return const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF0E1C1A), Color(0xFF183B35)],
+        );
+      case 'AI/CGI':
+        return const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF1C1200), Color(0xFF3D2A00)],
+        );
+      case 'Drone':
+        return const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF081820), Color(0xFF0D3040)],
+        );
+      case 'Photographer':
+        return const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF1A1000), Color(0xFF2E1F00)],
+        );
+      default:
+        return const LinearGradient(
+          colors: [Color(0xFF151B23), Color(0xFF1B232C)],
+        );
+    }
   }
 
   IconData _iconFor(String category) {
@@ -108,94 +133,82 @@ class CategoryPickerView extends GetView<CategoryPickerController> {
   }
 }
 
-class _CategoryCard extends StatelessWidget {
-  const _CategoryCard({
+class _CinematicCard extends StatelessWidget {
+  const _CinematicCard({
     required this.label,
+    required this.gradient,
     required this.icon,
     required this.onTap,
-    required this.secondaryColor,
   });
 
   final String label;
+  final LinearGradient gradient;
   final IconData icon;
   final VoidCallback onTap;
-  final Color secondaryColor;
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final radius = BorderRadius.circular(AppRadius.lg);
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
+    return GestureDetector(
+      onTap: onTap,
+      child: ClipRRect(
         borderRadius: radius,
         child: Container(
-          padding: const EdgeInsets.all(AppSpacing.lg),
           decoration: BoxDecoration(
+            gradient: gradient,
             borderRadius: radius,
-            color: isDark
-                ? AppColors.surfaceDarkElevated
-                : AppColors.surfaceLightElevated,
-            border: Border.all(
-              color: (isDark ? AppColors.border : AppColors.borderLight)
-                  .withValues(alpha: 0.7),
-              width: 0.5,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.12),
-                blurRadius: 20,
-                spreadRadius: -6,
-              ),
-            ],
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: Stack(
             children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      AppColors.primary.withValues(alpha: 0.3),
-                      AppColors.accentCyan.withValues(alpha: 0.15),
-                    ],
+              // Large decorative icon fills upper portion
+              Positioned(
+                top: -10,
+                right: -10,
+                child: Icon(
+                  icon,
+                  size: 120,
+                  color: Colors.white.withValues(alpha: 0.08),
+                ),
+              ),
+              // Centered icon — clearer, medium size
+              Positioned(
+                top: 28,
+                left: 0,
+                right: 0,
+                child: Icon(
+                  icon,
+                  size: 52,
+                  color: Colors.white.withValues(alpha: 0.55),
+                ),
+              ),
+              // Bottom gradient overlay
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      stops: const [0.4, 1.0],
+                      colors: [
+                        Colors.transparent,
+                        Colors.black.withValues(alpha: 0.65),
+                      ],
+                    ),
                   ),
                 ),
-                child: Icon(icon, color: AppColors.primary, size: 24),
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: AppTextStyles.heading3.copyWith(fontSize: 17),
+              // Label at bottom left
+              Positioned(
+                left: 12,
+                right: 12,
+                bottom: 12,
+                child: Text(
+                  label,
+                  style: AppTextStyles.heading3.copyWith(
+                    color: Colors.white,
+                    fontSize: 15,
                   ),
-                  const SizedBox(height: 2),
-                  Row(
-                    children: [
-                      Text(
-                        'Keşfet',
-                        style: AppTextStyles.caption.copyWith(
-                          color: secondaryColor,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Icon(
-                        Icons.arrow_forward_rounded,
-                        size: 14,
-                        color: secondaryColor,
-                      ),
-                    ],
-                  ),
-                ],
+                ),
               ),
             ],
           ),

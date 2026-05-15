@@ -5,11 +5,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
-import '../../../widgets/set_avatar.dart';
-import '../../../widgets/set_button.dart';
-import '../../../widgets/set_card.dart';
-import '../../../widgets/set_chip.dart';
-import '../../../widgets/set_section_header.dart';
+import '../../../data/models/freelancer_model.dart';
 import 'freelancer_detail_controller.dart';
 
 class FreelancerDetailView extends GetView<FreelancerDetailController> {
@@ -17,184 +13,185 @@ class FreelancerDetailView extends GetView<FreelancerDetailController> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final secondaryColor =
-        isDark ? AppColors.textSecondary : AppColors.textSecondaryLight;
     final f = controller.freelancer;
     final u = controller.user;
     final name = u?.name ?? 'Freelancer';
 
     return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0),
+      backgroundColor: AppColors.backgroundDark,
+      extendBody: true,
+      bottomNavigationBar: _BottomBar(onInvite: controller.sendOffer),
       body: Stack(
         children: [
-          // Hero glow
-          Positioned(
-            top: -120,
-            left: -100,
-            child: Container(
-              width: 320,
-              height: 320,
+          CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: _HeroSection(
+                  name: name,
+                  role: f?.category ?? '',
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.lg,
+                    AppSpacing.lg,
+                    AppSpacing.lg,
+                    0,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (f != null) _StatsRow(freelancer: f),
+                      const SizedBox(height: AppSpacing.xl),
+                      if (f != null) ...[
+                        // Biography
+                        Text(
+                          'Biography',
+                          style: AppTextStyles.caption.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          f.bio,
+                          style: AppTextStyles.body1.copyWith(
+                            color: AppColors.textPrimary,
+                            height: 1.65,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.xl),
+                        // Portfolio
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text('Portfolio',
+                                style: AppTextStyles.heading3
+                                    .copyWith(color: AppColors.textPrimary)),
+                            Text(
+                              'View All',
+                              style: AppTextStyles.caption.copyWith(
+                                color: AppColors.accentGold,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        _PortfolioRow(freelancer: f),
+                      ],
+                      const SizedBox(height: 110),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          // Overlay nav buttons on hero
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _OverlayButton(
+                      icon: Icons.arrow_back, onTap: () => Get.back()),
+                  _OverlayButton(icon: Icons.more_horiz, onTap: () {}),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Hero ───────────────────────────────────────────────────────────────────
+
+class _HeroSection extends StatelessWidget {
+  const _HeroSection({required this.name, required this.role});
+  final String name;
+  final String role;
+
+  @override
+  Widget build(BuildContext context) {
+    final initials = name
+        .split(' ')
+        .map((w) => w.isNotEmpty ? w[0] : '')
+        .take(2)
+        .join();
+
+    return SizedBox(
+      height: 320,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Dark cinematic gradient background (photo placeholder)
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color(0xFF1C1C1E),
+                  Color(0xFF2C2416),
+                  Color(0xFF0B0F14),
+                ],
+                stops: [0.0, 0.55, 1.0],
+              ),
+            ),
+          ),
+          // Large translucent initials as "photo" stand-in
+          Center(
+            child: Text(
+              initials,
+              style: TextStyle(
+                fontSize: 120,
+                fontWeight: FontWeight.w700,
+                color: Colors.white.withValues(alpha: 0.06),
+                height: 1,
+              ),
+            ),
+          ),
+          // Bottom fade to backgroundDark
+          Positioned.fill(
+            child: DecoratedBox(
               decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  stops: const [0.35, 1.0],
                   colors: [
-                    AppColors.primary.withValues(alpha: isDark ? 0.25 : 0.14),
                     Colors.transparent,
+                    AppColors.backgroundDark,
                   ],
                 ),
               ),
             ),
           ),
-          SafeArea(
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.lg,
-                AppSpacing.md,
-                AppSpacing.lg,
-                AppSpacing.xxl,
-              ),
+          // Name + role overlay at bottom
+          Positioned(
+            left: AppSpacing.lg,
+            right: AppSpacing.lg,
+            bottom: AppSpacing.lg,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Hero avatar block
-                Center(
-                  child: Column(
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.primary.withValues(alpha: 0.35),
-                              blurRadius: 40,
-                              spreadRadius: 2,
-                            ),
-                          ],
-                        ),
-                        child: SetAvatar(name: name, size: 112),
-                      ),
-                      const SizedBox(height: AppSpacing.lg),
-                      if (f != null)
-                        Text(
-                          f.category.toUpperCase(),
-                          style: AppTextStyles.eyebrow.copyWith(
-                            color: AppColors.accentCyan,
-                          ),
-                        ),
-                      const SizedBox(height: AppSpacing.sm),
-                      Text(name, style: AppTextStyles.displayXL),
-                      if (f != null) ...[
-                        const SizedBox(height: AppSpacing.sm),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.location_on_outlined,
-                              size: 16,
-                              color: secondaryColor,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              f.location,
-                              style: AppTextStyles.body2.copyWith(
-                                color: secondaryColor,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ],
+                Text(
+                  name,
+                  style: AppTextStyles.heading1.copyWith(
+                    color: Colors.white,
+                    fontSize: 30,
                   ),
                 ),
-                const SizedBox(height: AppSpacing.xl),
-                // Stats row
-                if (f != null)
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _StatTile(
-                          icon: Icons.star_rounded,
-                          value: f.rating.toStringAsFixed(1),
-                          label: 'Puan',
-                          color: AppColors.accentCyan,
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.md),
-                      Expanded(
-                        child: _StatTile(
-                          icon: Icons.work_outline,
-                          value: '${f.experience}y',
-                          label: 'Deneyim',
-                          color: AppColors.primary,
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.md),
-                      Expanded(
-                        child: _StatTile(
-                          icon: Icons.payments_outlined,
-                          value: '₺15K',
-                          label: 'Min günlük',
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ],
+                const SizedBox(height: 2),
+                Text(
+                  role,
+                  style: AppTextStyles.body2.copyWith(
+                    color: Colors.white.withValues(alpha: 0.65),
                   ),
-                const SizedBox(height: AppSpacing.xl),
-                // About section
-                if (f != null) ...[
-                  SetSectionHeader(eyebrow: 'ABOUT', title: 'Hakkında'),
-                  const SizedBox(height: AppSpacing.md),
-                  SetCard(
-                    padding: const EdgeInsets.all(AppSpacing.lg),
-                    child: Text(
-                      f.bio,
-                      style: AppTextStyles.body1.copyWith(height: 1.6),
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.xl),
-                  // Reels grid
-                  SetSectionHeader(eyebrow: 'REELS', title: 'Vitrindeki işler'),
-                  const SizedBox(height: AppSpacing.md),
-                  GridView.builder(
-                    physics: const NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: AppSpacing.md,
-                      crossAxisSpacing: AppSpacing.md,
-                      childAspectRatio: 9 / 14,
-                    ),
-                    itemCount: 4,
-                    itemBuilder: (_, i) => _ReelTile(index: i),
-                  ),
-                  const SizedBox(height: AppSpacing.xl),
-                  SetSectionHeader(eyebrow: 'SKILLS', title: 'Uzmanlıklar'),
-                  const SizedBox(height: AppSpacing.md),
-                  Wrap(
-                    spacing: AppSpacing.sm,
-                    runSpacing: AppSpacing.sm,
-                    children: const [
-                      SetChip(label: 'Reklam Filmi'),
-                      SetChip(label: 'Müzik Videosu'),
-                      SetChip(label: 'Color Grading'),
-                      SetChip(label: 'Steadicam'),
-                    ],
-                  ),
-                ],
-                const SizedBox(height: AppSpacing.xxl),
-                SetButton(
-                  text: 'Teklif Gönder',
-                  icon: Icons.send_outlined,
-                  onPressed: controller.sendOffer,
-                  size: SetButtonSize.hero,
-                ),
-                const SizedBox(height: AppSpacing.md),
-                SetButton(
-                  text: 'Mesaj Gönder',
-                  variant: SetButtonVariant.outline,
-                  icon: Icons.chat_bubble_outline,
-                  onPressed: controller.openChat,
                 ),
               ],
             ),
@@ -205,42 +202,172 @@ class FreelancerDetailView extends GetView<FreelancerDetailController> {
   }
 }
 
-class _StatTile extends StatelessWidget {
-  const _StatTile({
-    required this.icon,
-    required this.value,
-    required this.label,
-    required this.color,
-  });
+// ─── Stats Row ───────────────────────────────────────────────────────────────
 
-  final IconData icon;
-  final String value;
-  final String label;
-  final Color color;
+class _StatsRow extends StatelessWidget {
+  const _StatsRow({required this.freelancer});
+  final FreelancerModel freelancer;
+
+  String get _priceRange {
+    final exp = freelancer.experience;
+    if (exp <= 2) return '\$1K–\$3K';
+    if (exp <= 4) return '\$2K–\$5K';
+    if (exp <= 6) return '\$3K–\$8K';
+    if (exp <= 8) return '\$5K–\$15K';
+    return '\$8K–\$20K';
+  }
+
+  int get _trustPercent =>
+      ((freelancer.rating / 5.0) * 100).round();
+
+  int get _reviewCount => freelancer.experience * 18;
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final secondaryColor =
-        isDark ? AppColors.textSecondary : AppColors.textSecondaryLight;
-
-    return SetCard(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.md,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 18, color: color),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            value,
-            style: AppTextStyles.heading2.copyWith(fontSize: 22),
+    return Row(
+      children: [
+        // Trust badge
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            border: Border.all(color: AppColors.accentGold.withValues(alpha: 0.6)),
+            borderRadius: BorderRadius.circular(AppRadius.full),
           ),
-          Text(
-            label.toUpperCase(),
-            style: AppTextStyles.eyebrow.copyWith(color: secondaryColor),
+          child: Text(
+            'TRUST $_trustPercent%',
+            style: AppTextStyles.caption.copyWith(
+              color: AppColors.accentGold,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.8,
+            ),
+          ),
+        ),
+        const SizedBox(width: AppSpacing.md),
+        // Star rating + review count
+        const Icon(Icons.star_rounded, size: 16, color: AppColors.accentGold),
+        const SizedBox(width: 4),
+        Text(
+          '${freelancer.rating.toStringAsFixed(1)} ($_reviewCount)',
+          style: AppTextStyles.body2.copyWith(color: AppColors.textPrimary),
+        ),
+        const SizedBox(width: AppSpacing.md),
+        // Divider
+        Container(width: 1, height: 14, color: AppColors.border),
+        const SizedBox(width: AppSpacing.md),
+        // Price
+        Text(
+          _priceRange,
+          style: AppTextStyles.body2.copyWith(color: AppColors.textPrimary),
+        ),
+      ],
+    );
+  }
+}
+
+// ─── Portfolio Row ────────────────────────────────────────────────────────────
+
+class _PortfolioRow extends StatelessWidget {
+  const _PortfolioRow({required this.freelancer});
+  final FreelancerModel freelancer;
+
+  List<List<Color>> get _thumbColors {
+    final seed = freelancer.userId.codeUnits.fold(0, (a, b) => a + b);
+    final palettes = [
+      [const Color(0xFF0D1B2A), const Color(0xFF1B3A5C)],
+      [const Color(0xFF1A1000), const Color(0xFF3D2A00)],
+      [const Color(0xFF1A0D2E), const Color(0xFF3D1F6E)],
+      [const Color(0xFF081820), const Color(0xFF0D3040)],
+      [const Color(0xFF1B3A2D), const Color(0xFF2D6A4E)],
+      [const Color(0xFF2D1B4E), const Color(0xFF5C3A8A)],
+    ];
+    return [
+      palettes[seed % palettes.length],
+      palettes[(seed + 2) % palettes.length],
+      palettes[(seed + 4) % palettes.length],
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = _thumbColors;
+    return Row(
+      children: List.generate(3, (i) {
+        return Expanded(
+          child: Container(
+            margin: EdgeInsets.only(right: i < 2 ? 8 : 0),
+            height: 90,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: colors[i],
+              ),
+            ),
+          ),
+        );
+      }),
+    );
+  }
+}
+
+// ─── Bottom Bar ──────────────────────────────────────────────────────────────
+
+class _BottomBar extends StatelessWidget {
+  const _BottomBar({required this.onInvite});
+  final VoidCallback onInvite;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.md,
+        AppSpacing.lg,
+        AppSpacing.lg + MediaQuery.of(context).padding.bottom,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundDark,
+        border: Border(top: BorderSide(color: AppColors.border)),
+      ),
+      child: Row(
+        children: [
+          // Bookmark
+          Container(
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              color: AppColors.surfaceDarkElevated,
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: const Icon(
+              Icons.bookmark_border_rounded,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          // Invite button
+          Expanded(
+            child: GestureDetector(
+              onTap: onInvite,
+              child: Container(
+                height: 52,
+                decoration: BoxDecoration(
+                  color: AppColors.accentGold,
+                  borderRadius: BorderRadius.circular(AppRadius.full),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  'Invite to Project',
+                  style: AppTextStyles.button.copyWith(
+                    color: Colors.black,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -248,62 +375,26 @@ class _StatTile extends StatelessWidget {
   }
 }
 
-class _ReelTile extends StatelessWidget {
-  const _ReelTile({required this.index});
+// ─── Overlay Button ──────────────────────────────────────────────────────────
 
-  final int index;
+class _OverlayButton extends StatelessWidget {
+  const _OverlayButton({required this.icon, required this.onTap});
+  final IconData icon;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final icons = [
-      Icons.videocam_outlined,
-      Icons.movie_outlined,
-      Icons.local_movies_outlined,
-      Icons.music_note_outlined,
-    ];
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(AppRadius.lg),
-      child: DecoratedBox(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF1B232C), Color(0xFF0B0F14)],
-          ),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 38,
+        height: 38,
+        decoration: BoxDecoration(
+          color: Colors.black.withValues(alpha: 0.35),
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
         ),
-        child: Stack(
-          children: [
-            Positioned(
-              bottom: -10,
-              right: -10,
-              child: Icon(
-                icons[index % icons.length],
-                size: 120,
-                color: AppColors.primary.withValues(alpha: 0.12),
-              ),
-            ),
-            Center(
-              child: Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white.withValues(alpha: 0.18),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.3),
-                    width: 0.5,
-                  ),
-                ),
-                child: const Icon(
-                  Icons.play_arrow_rounded,
-                  color: Colors.white,
-                  size: 24,
-                ),
-              ),
-            ),
-          ],
-        ),
+        child: Icon(icon, color: Colors.white, size: 20),
       ),
     );
   }
