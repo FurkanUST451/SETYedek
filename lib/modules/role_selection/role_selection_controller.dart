@@ -14,8 +14,6 @@ class RoleSelectionController extends GetxController {
         Get.offAllNamed(AppRoutes.clientHome);
       case UserRole.freelancer:
         Get.offAllNamed(AppRoutes.freelancerOnboarding);
-      case UserRole.projectClient:
-        Get.offAllNamed(AppRoutes.projectOnboarding);
     }
   }
 }

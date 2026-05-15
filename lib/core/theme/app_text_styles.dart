@@ -75,4 +75,12 @@ class AppTextStyles {
         height: 1.0,
         letterSpacing: -1.5,
       );
+
+  // Editorial serif headline — used on cinematic onboarding pages
+  static TextStyle get editorialDisplay => GoogleFonts.cormorantGaramond(
+        fontSize: 56,
+        fontWeight: FontWeight.w500,
+        height: 1.02,
+        letterSpacing: -0.5,
+      );
 }

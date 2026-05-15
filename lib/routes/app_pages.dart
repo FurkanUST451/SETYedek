@@ -4,10 +4,14 @@ import '../modules/auth/login/login_binding.dart';
 import '../modules/auth/login/login_view.dart';
 import '../modules/auth/register/register_binding.dart';
 import '../modules/auth/register/register_view.dart';
+import '../modules/client/category_picker/category_picker_binding.dart';
+import '../modules/client/category_picker/category_picker_view.dart';
 import '../modules/client/chat_detail/chat_detail_binding.dart';
 import '../modules/client/chat_detail/chat_detail_view.dart';
 import '../modules/client/freelancer_detail/freelancer_detail_binding.dart';
 import '../modules/client/freelancer_detail/freelancer_detail_view.dart';
+import '../modules/client/freelancers_by_category/freelancers_by_category_binding.dart';
+import '../modules/client/freelancers_by_category/freelancers_by_category_view.dart';
 import '../modules/client/home/client_home_binding.dart';
 import '../modules/client/home/client_home_view.dart';
 import '../modules/client/send_offer/send_offer_binding.dart';
@@ -18,10 +22,6 @@ import '../modules/freelancer/onboarding/freelancer_onboarding_binding.dart';
 import '../modules/freelancer/onboarding/freelancer_onboarding_view.dart';
 import '../modules/onboarding/onboarding_binding.dart';
 import '../modules/onboarding/onboarding_view.dart';
-import '../modules/project_client/home/project_client_home_binding.dart';
-import '../modules/project_client/home/project_client_home_view.dart';
-import '../modules/project_client/onboarding/project_onboarding_binding.dart';
-import '../modules/project_client/onboarding/project_onboarding_view.dart';
 import '../modules/role_selection/role_selection_binding.dart';
 import '../modules/role_selection/role_selection_view.dart';
 import '../modules/splash/splash_binding.dart';
@@ -58,11 +58,21 @@ class AppPages {
       binding: RoleSelectionBinding(),
     ),
 
-    // Client
+    // Client (Hizmet Al)
     GetPage(
       name: AppRoutes.clientHome,
       page: () => const ClientHomeView(),
       binding: ClientHomeBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.categoryPicker,
+      page: () => const CategoryPickerView(),
+      binding: CategoryPickerBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.freelancersByCategory,
+      page: () => const FreelancersByCategoryView(),
+      binding: FreelancersByCategoryBinding(),
     ),
     GetPage(
       name: AppRoutes.freelancerDetail,
@@ -80,7 +90,7 @@ class AppPages {
       binding: ChatDetailBinding(),
     ),
 
-    // Freelancer
+    // Freelancer (Hizmet Ver) — implementation pending
     GetPage(
       name: AppRoutes.freelancerOnboarding,
       page: () => const FreelancerOnboardingView(),
@@ -90,18 +100,6 @@ class AppPages {
       name: AppRoutes.freelancerHome,
       page: () => const FreelancerHomeView(),
       binding: FreelancerHomeBinding(),
-    ),
-
-    // Project Client
-    GetPage(
-      name: AppRoutes.projectOnboarding,
-      page: () => const ProjectOnboardingView(),
-      binding: ProjectOnboardingBinding(),
-    ),
-    GetPage(
-      name: AppRoutes.projectClientHome,
-      page: () => const ProjectClientHomeView(),
-      binding: ProjectClientHomeBinding(),
     ),
   ];
 }

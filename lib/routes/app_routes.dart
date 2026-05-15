@@ -12,17 +12,15 @@ class AppRoutes {
   // Role
   static const String roleSelection = '/role-selection';
 
-  // Client flow
+  // Client (Hizmet Al) flow
   static const String clientHome = '/client/home';
+  static const String categoryPicker = '/client/category-picker';
+  static const String freelancersByCategory = '/client/freelancers-by-category';
   static const String freelancerDetail = '/client/freelancer-detail';
   static const String sendOffer = '/client/send-offer';
   static const String chatDetail = '/client/chat-detail';
 
-  // Freelancer flow
+  // Freelancer (Hizmet Ver) flow — implementation pending
   static const String freelancerOnboarding = '/freelancer/onboarding';
   static const String freelancerHome = '/freelancer/home';
-
-  // Project client flow
-  static const String projectOnboarding = '/project/onboarding';
-  static const String projectClientHome = '/project/home';
 }

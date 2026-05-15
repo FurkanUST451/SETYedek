@@ -1,7 +1,6 @@
 enum UserRole {
   client,
-  freelancer,
-  projectClient;
+  freelancer;
 
   static UserRole fromName(String? value) {
     return UserRole.values.firstWhere(

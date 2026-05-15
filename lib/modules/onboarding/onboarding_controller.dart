@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../core/constants/app_assets.dart';
 import '../../data/services/storage_service.dart';
 import '../../routes/app_routes.dart';
 
@@ -8,12 +9,14 @@ class OnboardingPageData {
   const OnboardingPageData({
     required this.title,
     required this.subtitle,
-    required this.icon,
+    this.icon,
+    this.backgroundImage,
   });
 
   final String title;
   final String subtitle;
-  final IconData icon;
+  final IconData? icon;
+  final String? backgroundImage;
 }
 
 class OnboardingController extends GetxController {
@@ -22,22 +25,19 @@ class OnboardingController extends GetxController {
 
   static const List<OnboardingPageData> pages = [
     OnboardingPageData(
-      title: 'Doğru ekibi bul',
-      subtitle:
-          'Türkiye\'nin en yetenekli video prodüksiyon freelancer\'ları tek çatı altında.',
-      icon: Icons.search,
+      title: 'Yaratıcılık,\nuygulamayla\nbuluşur.',
+      subtitle: 'Vizyonunu hayata geçirmenin akıllı yolu.',
+      backgroundImage: AppAssets.splashScreen1,
     ),
     OnboardingPageData(
-      title: 'Bütçeni kontrol et',
-      subtitle:
-          'Şeffaf teklifler ve net fiyatlandırma ile sürpriz yok.',
-      icon: Icons.attach_money,
+      title: 'Güvenilir yetenek.\nSinematik sonuçlar.',
+      subtitle: 'Projeniz için özenle seçilmiş, üst düzey kreatifler.',
+      backgroundImage: AppAssets.splashScreen2,
     ),
     OnboardingPageData(
-      title: 'Projeni SET teslim etsin',
-      subtitle:
-          'Tam servis prodüksiyon istiyorsan ekibimiz işin başında.',
-      icon: Icons.verified,
+      title: 'Siz hayal edin.\nBiz hayata geçirelim.',
+      subtitle: 'Konseptten kurguya kadar her şeyi biz hallediyoruz.',
+      backgroundImage: AppAssets.splashScreen3,
     ),
   ];
 

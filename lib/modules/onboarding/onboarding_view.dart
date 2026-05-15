@@ -6,98 +6,75 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
-import '../../widgets/set_button.dart';
 import 'onboarding_controller.dart';
+
+// Warm gold tone — matches the cinematic photo accents.
+const Color _cinematicGold = Color(0xFFD9B36A);
+const Color _cinematicCream = Color(0xFFE8D8B8);
+// Deep warm black — readable on the cream button background.
+const Color _cinematicInk = Color(0xFF1A1410);
 
 class OnboardingView extends GetView<OnboardingController> {
   const OnboardingView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
+      backgroundColor: AppColors.backgroundDark,
       body: Stack(
         children: [
-          // Background radial blue glow
-          Positioned(
-            top: -120,
-            right: -100,
-            child: Container(
-              width: 360,
-              height: 360,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    AppColors.primary.withValues(alpha: isDark ? 0.22 : 0.14),
-                    Colors.transparent,
-                  ],
-                ),
-              ),
-            ),
+          // Per-page full-bleed background layer.
+          Positioned.fill(
+            child: Obx(() {
+              final bg = OnboardingController
+                  .pages[controller.currentPage.value].backgroundImage;
+              return AnimatedSwitcher(
+                duration: const Duration(milliseconds: 400),
+                child: bg != null
+                    ? Image.asset(
+                        bg,
+                        key: ValueKey(bg),
+                        fit: BoxFit.cover,
+                      )
+                    : const SizedBox.shrink(key: ValueKey('no-bg')),
+              );
+            }),
           ),
-          Positioned(
-            bottom: -160,
-            left: -120,
-            child: Container(
-              width: 380,
-              height: 380,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    AppColors.accentCyan.withValues(alpha: isDark ? 0.14 : 0.08),
-                    Colors.transparent,
-                  ],
-                ),
-              ),
-            ),
-          ),
+          // Foreground UI
           SafeArea(
             child: Column(
               children: [
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: Padding(
-                    padding: const EdgeInsets.all(AppSpacing.md),
-                    child: TextButton(
-                      onPressed: controller.skip,
-                      child: Text(
-                        'Atla',
-                        style: AppTextStyles.button.copyWith(
-                          color: isDark
-                              ? AppColors.textSecondary
-                              : AppColors.textSecondaryLight,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+                _TopBar(onSkip: controller.skip),
                 Expanded(
                   child: PageView.builder(
                     controller: controller.pageController,
                     onPageChanged: controller.onPageChanged,
                     itemCount: OnboardingController.pages.length,
                     itemBuilder: (_, i) =>
-                        _OnboardingPage(data: OnboardingController.pages[i]),
+                        _CinematicPage(data: OnboardingController.pages[i]),
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.lg,
+                    AppSpacing.md,
+                    AppSpacing.lg,
+                    AppSpacing.xl,
+                  ),
                   child: Column(
                     children: [
-                      Obx(() => _ProgressLine(
+                      Obx(() => _ProgressBars(
                             count: OnboardingController.pages.length,
                             activeIndex: controller.currentPage.value,
                           )),
-                      const SizedBox(height: AppSpacing.xl),
-                      Obx(() => SetButton(
-                            text: controller.isLastPage
-                                ? 'Başla'
-                                : AppStrings.continueLabel,
-                            onPressed: controller.next,
-                            size: SetButtonSize.hero,
+                      Obx(() => Padding(
+                            padding: const EdgeInsets.only(top: AppSpacing.lg),
+                            child: _CinematicButton(
+                              text: controller.isLastPage
+                                  ? 'Başla'
+                                  : AppStrings.continueLabel,
+                              onPressed: controller.next,
+                            ),
                           )),
                     ],
                   ),
@@ -111,79 +88,47 @@ class OnboardingView extends GetView<OnboardingController> {
   }
 }
 
-class _OnboardingPage extends StatelessWidget {
-  const _OnboardingPage({required this.data});
+class _TopBar extends StatelessWidget {
+  const _TopBar({required this.onSkip});
 
-  final OnboardingPageData data;
+  final VoidCallback onSkip;
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final secondaryColor =
-        isDark ? AppColors.textSecondary : AppColors.textSecondaryLight;
-
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.md,
+        AppSpacing.md,
+        0,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Stacked decorative circles + icon
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              Container(
-                width: 180,
-                height: 180,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      AppColors.primary.withValues(alpha: 0.18),
-                      AppColors.accentCyan.withValues(alpha: 0.08),
-                    ],
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.2),
-                      blurRadius: 60,
-                      spreadRadius: -10,
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: isDark
-                      ? AppColors.surfaceDarkElevated
-                      : AppColors.surfaceLightElevated,
-                  border: Border.all(
-                    color: AppColors.primary.withValues(alpha: 0.4),
-                    width: 0.5,
-                  ),
-                ),
-                child: Icon(data.icon, size: 56, color: AppColors.primary),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.xxl),
           Text(
-            'CHAPTER',
-            style: AppTextStyles.eyebrow.copyWith(
-              color: AppColors.accentCyan,
+            AppStrings.appName,
+            style: AppTextStyles.wordmark.copyWith(
+              fontSize: 20,
+              letterSpacing: 4,
+              color: _cinematicCream,
             ),
           ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(data.title, style: AppTextStyles.displayXL),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            data.subtitle,
-            style: AppTextStyles.body1.copyWith(color: secondaryColor),
+          TextButton(
+            onPressed: onSkip,
+            style: TextButton.styleFrom(
+              foregroundColor: _cinematicCream,
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: AppSpacing.sm,
+              ),
+            ),
+            child: Text(
+              'Atla',
+              style: AppTextStyles.button.copyWith(
+                color: _cinematicCream,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
           ),
         ],
       ),
@@ -191,38 +136,126 @@ class _OnboardingPage extends StatelessWidget {
   }
 }
 
-class _ProgressLine extends StatelessWidget {
-  const _ProgressLine({required this.count, required this.activeIndex});
+class _CinematicPage extends StatelessWidget {
+  const _CinematicPage({required this.data});
+
+  final OnboardingPageData data;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.xl,
+        AppSpacing.lg,
+        0,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            data.title,
+            style: AppTextStyles.editorialDisplay.copyWith(
+              color: _cinematicCream,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Text(
+            data.subtitle,
+            style: AppTextStyles.body1.copyWith(
+              color: _cinematicCream.withValues(alpha: 0.78),
+              height: 1.45,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CinematicButton extends StatelessWidget {
+  const _CinematicButton({
+    required this.text,
+    required this.onPressed,
+  });
+
+  final String text;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(AppRadius.full);
+    return SizedBox(
+      width: double.infinity,
+      height: 60,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: _cinematicCream,
+          borderRadius: radius,
+          boxShadow: [
+            BoxShadow(
+              color: _cinematicCream.withValues(alpha: 0.3),
+              blurRadius: 28,
+              offset: const Offset(0, 10),
+              spreadRadius: -6,
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onPressed,
+            borderRadius: radius,
+            splashColor: _cinematicGold.withValues(alpha: 0.3),
+            highlightColor: _cinematicGold.withValues(alpha: 0.15),
+            child: Center(
+              child: Text(
+                text,
+                style: AppTextStyles.button.copyWith(
+                  color: _cinematicInk,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.4,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ProgressBars extends StatelessWidget {
+  const _ProgressBars({required this.count, required this.activeIndex});
 
   final int count;
   final int activeIndex;
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final inactiveColor = isDark ? AppColors.border : AppColors.borderLight;
-
     return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(count, (i) {
         final active = i == activeIndex;
-        final past = i < activeIndex;
-        return Expanded(
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 350),
-            margin: const EdgeInsets.symmetric(horizontal: 3),
-            height: 2,
-            decoration: BoxDecoration(
-              color: active || past ? AppColors.primary : inactiveColor,
-              borderRadius: BorderRadius.circular(AppRadius.full),
-              boxShadow: active
-                  ? [
-                      BoxShadow(
-                        color: AppColors.primary.withValues(alpha: 0.5),
-                        blurRadius: 8,
-                      ),
-                    ]
-                  : null,
-            ),
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 350),
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          width: 44,
+          height: 3,
+          decoration: BoxDecoration(
+            color: active
+                ? _cinematicGold
+                : _cinematicCream.withValues(alpha: 0.28),
+            borderRadius: BorderRadius.circular(AppRadius.full),
+            boxShadow: active
+                ? [
+                    BoxShadow(
+                      color: _cinematicGold.withValues(alpha: 0.5),
+                      blurRadius: 6,
+                    ),
+                  ]
+                : null,
           ),
         );
       }),
