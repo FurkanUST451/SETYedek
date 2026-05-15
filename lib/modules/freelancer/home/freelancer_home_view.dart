@@ -24,7 +24,7 @@ class FreelancerHomeView extends GetView<FreelancerHomeController> {
     SetNavItem(
         icon: Icons.chat_bubble_outline, label: AppStrings.tabChat),
     SetNavItem(
-        icon: Icons.work_outline, label: AppStrings.tabProjects),
+        icon: Icons.work_outline, label: AppStrings.tabMyProjects),
     SetNavItem(icon: Icons.person_outline, label: AppStrings.tabProfile),
   ];
 

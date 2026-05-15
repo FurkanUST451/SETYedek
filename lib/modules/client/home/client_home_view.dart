@@ -6,7 +6,9 @@ import '../../../widgets/set_bottom_nav.dart';
 import 'client_home_controller.dart';
 import 'tabs/client_chat_tab.dart';
 import 'tabs/client_discover_tab.dart';
+import 'tabs/client_home_tab.dart';
 import 'tabs/client_profile_tab.dart';
+import 'tabs/client_projects_tab.dart';
 
 class ClientHomeView extends GetView<ClientHomeController> {
   const ClientHomeView({super.key});
@@ -14,13 +16,17 @@ class ClientHomeView extends GetView<ClientHomeController> {
   static const _tabs = <Widget>[
     ClientDiscoverTab(),
     ClientChatTab(),
+    ClientHomeTab(),
+    ClientProjectsTab(),
     ClientProfileTab(),
   ];
 
   static const _navItems = <SetNavItem>[
     SetNavItem(icon: Icons.explore_outlined, label: AppStrings.tabDiscover),
+    SetNavItem(icon: Icons.chat_bubble_outline, label: AppStrings.tabChat),
+    SetNavItem(icon: Icons.home_outlined, label: AppStrings.tabHome),
     SetNavItem(
-        icon: Icons.chat_bubble_outline, label: AppStrings.tabChat),
+        icon: Icons.folder_outlined, label: AppStrings.tabMyProjects),
     SetNavItem(icon: Icons.person_outline, label: AppStrings.tabProfile),
   ];
 

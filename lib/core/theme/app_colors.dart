@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
-  // Brand — cinematic blue + cyan accent
+  // Brand — cinematic blue + cyan accent + warm gold
   static const Color primary = Color(0xFF6EA8FF);
   static const Color primaryDeep = Color(0xFF4F86E0);
   static const Color accentCyan = Color(0xFF6FE7DD);
+  static const Color accentGold = Color(0xFFD9B36A);
 
   // Dark theme — graphite / navy
   static const Color backgroundDark = Color(0xFF0B0F14);

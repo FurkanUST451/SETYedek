@@ -17,22 +17,19 @@ class AppStrings {
 
   // Roles
   static const String roleSelectionTitle = 'Nasıl başlamak istersin?';
-  static const String roleProjectClient = 'Projeni SET Yapsın';
-  static const String roleProjectClientDesc =
-      'Tam servis prodüksiyon için ekibimiz seninle ilgilensin.';
-  static const String roleClient = 'Freelancer Bul';
+  static const String roleClient = 'Hizmet Al';
   static const String roleClientDesc =
-      'Projen için doğru freelancer\'ı keşfet.';
-  static const String roleFreelancer = 'Freelancer Ol';
+      'Projen için doğru freelancer\'ı keşfet ve teklif gönder.';
+  static const String roleFreelancer = 'Hizmet Ver';
   static const String roleFreelancerDesc =
-      'Yeteneklerini gösterip iş almaya başla.';
+      'Yeteneklerini sergile, projeler al.';
 
   // Tabs
   static const String tabDiscover = 'Keşfet';
-  static const String tabChat = 'Mesajlar';
-  static const String tabProjects = 'Projeler';
+  static const String tabChat = 'Sohbet';
+  static const String tabHome = 'Ana Sayfa';
+  static const String tabMyProjects = 'Projelerim';
   static const String tabProfile = 'Profil';
-  static const String tabSettings = 'Ayarlar';
 
   // Common
   static const String continueLabel = 'Devam';

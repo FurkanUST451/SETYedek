@@ -15,6 +15,11 @@ class SplashController extends GetxController {
   Future<void> _decideInitialRoute() async {
     await Future.delayed(const Duration(seconds: 2));
 
+    // DEV: Onboarding tasarımı üzerinde çalışırken her açılışta gösteriyoruz.
+    // Tasarım netleşince aşağıdaki hasOnboarded kontrolüne geri dönülecek.
+    Get.offAllNamed(AppRoutes.onboarding);
+    return;
+    // ignore: dead_code
     final hasOnboarded =
         StorageService.read<bool>(StorageService.onboardingComplete) ?? false;
     final userId = StorageService.read<String>(StorageService.userId);
@@ -44,8 +49,6 @@ class SplashController extends GetxController {
         Get.offAllNamed(AppRoutes.clientHome);
       case UserRole.freelancer:
         Get.offAllNamed(AppRoutes.freelancerHome);
-      case UserRole.projectClient:
-        Get.offAllNamed(AppRoutes.projectClientHome);
     }
   }
 }
