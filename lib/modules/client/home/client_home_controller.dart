@@ -5,8 +5,14 @@ import '../../app/auth_controller.dart';
 class ClientHomeController extends GetxController {
   final AuthController _auth = Get.find<AuthController>();
 
-  // Default to Ana Sayfa (index 2) — center tab in the 5-item nav.
   final RxInt currentIndex = 2.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    final args = Get.arguments as Map<String, dynamic>?;
+    if (args?['tab'] != null) currentIndex.value = args!['tab'] as int;
+  }
 
   void changeTab(int index) => currentIndex.value = index;
 

@@ -49,6 +49,10 @@ class ChatDetailController extends GetxController {
     }
   }
 
+  void goBack() {
+    Get.offAllNamed(AppRoutes.clientHome, arguments: {'tab': 1});
+  }
+
   void send() {
     final text = messageController.text.trim();
     if (text.isEmpty) return;

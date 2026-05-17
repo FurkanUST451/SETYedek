@@ -38,6 +38,9 @@ dependencies:
   # Utilities
   intl: ^0.20.1
 
+  # Animation
+  rive: ^0.13.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -51,3 +54,4 @@ flutter:
   assets:
     - assets/images/role_selection/
     - assets/images/splash_screens/
+    - assets/animations/

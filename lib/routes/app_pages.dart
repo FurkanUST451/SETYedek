@@ -8,6 +8,7 @@ import '../modules/client/category_picker/category_picker_binding.dart';
 import '../modules/client/category_picker/category_picker_view.dart';
 import '../modules/client/chat_detail/chat_detail_binding.dart';
 import '../modules/client/chat_detail/chat_detail_view.dart';
+import '../modules/client/project_detail/project_detail_view.dart';
 import '../modules/client/freelancer_detail/freelancer_detail_binding.dart';
 import '../modules/client/freelancer_detail/freelancer_detail_view.dart';
 import '../modules/client/freelancers_by_category/freelancers_by_category_binding.dart';
@@ -93,6 +94,10 @@ class AppPages {
       name: AppRoutes.chatDetail,
       page: () => const ChatDetailView(),
       binding: ChatDetailBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.projectDetail,
+      page: () => const ProjectDetailView(),
     ),
 
     // Freelancer (Hizmet Ver) — implementation pending
