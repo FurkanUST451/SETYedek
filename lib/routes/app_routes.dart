@@ -18,6 +18,7 @@ class AppRoutes {
   static const String freelancersByCategory = '/client/freelancers-by-category';
   static const String freelancerDetail = '/client/freelancer-detail';
   static const String sendOffer = '/client/send-offer';
+  static const String projectMode = '/client/project-mode';
   static const String chatDetail = '/client/chat-detail';
 
   // Freelancer (Hizmet Ver) flow — implementation pending
