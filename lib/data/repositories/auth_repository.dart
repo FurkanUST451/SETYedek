@@ -1,21 +1,24 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import '../models/user_model.dart';
 
-/// Auth repository — Firebase Auth entegrasyonu için arayüz.
-/// Şimdilik mock; ileride [FirebaseAuth.instance] ile bağlanacak.
 class AuthRepository {
-  AuthRepository();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   Future<UserModel> login({
     required String email,
     required String password,
   }) async {
-    await Future.delayed(const Duration(milliseconds: 600));
-    return UserModel(
-      id: 'mock-${email.hashCode}',
-      name: email.split('@').first,
+    final credential = await _auth.signInWithEmailAndPassword(
       email: email,
+      password: password,
+    );
+    final user = credential.user!;
+    return UserModel(
+      id: user.uid,
+      name: user.displayName ?? email.split('@').first,
+      email: user.email!,
       role: UserRole.client,
-      createdAt: DateTime.now(),
+      createdAt: user.metadata.creationTime ?? DateTime.now(),
     );
   }
 
@@ -24,21 +27,28 @@ class AuthRepository {
     required String email,
     required String password,
   }) async {
-    await Future.delayed(const Duration(milliseconds: 700));
-    return UserModel(
-      id: 'mock-${email.hashCode}',
-      name: name,
+    final credential = await _auth.createUserWithEmailAndPassword(
       email: email,
+      password: password,
+    );
+    final user = credential.user!;
+    await user.updateDisplayName(name);
+    return UserModel(
+      id: user.uid,
+      name: name,
+      email: user.email!,
       role: UserRole.client,
-      createdAt: DateTime.now(),
+      createdAt: user.metadata.creationTime ?? DateTime.now(),
     );
   }
 
   Future<void> logout() async {
-    await Future.delayed(const Duration(milliseconds: 200));
+    await _auth.signOut();
   }
 
   Future<void> sendPasswordResetEmail(String email) async {
-    await Future.delayed(const Duration(milliseconds: 300));
+    await _auth.sendPasswordResetEmail(email: email);
   }
+
+  User? get currentFirebaseUser => _auth.currentUser;
 }

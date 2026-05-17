@@ -31,11 +31,22 @@ class ChatDetailController extends GetxController {
     ),
   ].obs;
 
+  late final bool fromProjectMode;
+
   @override
   void onInit() {
     super.onInit();
     final args = Get.arguments as Map<String, dynamic>?;
     chatName = args?['name'] as String? ?? 'Sohbet';
+    fromProjectMode = args?['mode'] != null;
+  }
+
+  void goBack() {
+    if (fromProjectMode) {
+      Get.offAllNamed(AppRoutes.clientHome);
+    } else {
+      Get.back();
+    }
   }
 
   void goBack() {
