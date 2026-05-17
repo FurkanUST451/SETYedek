@@ -1,12 +1,6 @@
-/// Firebase entry point — şimdilik sadece bağlantı kurulacak şekilde hazırdır.
-///
-/// Implementasyon için:
-/// 1. `flutterfire configure` ile `firebase_options.dart` üretin.
-/// 2. main.dart'ta [FirebaseService.initialize] çağrısını aktif edin.
-///
-/// `firebase_auth`, `cloud_firestore`, `firebase_storage` paketleri
-/// `pubspec.yaml`'a eklendi. Servis sınıfları implementasyon aşamasında
-/// instance'ları wrap edecek.
+import 'package:firebase_core/firebase_core.dart';
+import '../../firebase_options.dart';
+
 class FirebaseService {
   FirebaseService._();
 
@@ -15,7 +9,9 @@ class FirebaseService {
 
   static Future<void> initialize() async {
     if (_initialized) return;
-    // TODO: Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
     _initialized = true;
   }
 }
