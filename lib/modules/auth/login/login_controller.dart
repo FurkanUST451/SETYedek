@@ -8,8 +8,8 @@ class LoginController extends GetxController {
   final AuthController _auth = Get.find<AuthController>();
 
   final formKey = GlobalKey<FormState>();
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
+  final emailController = TextEditingController(text: 'ornek@set.app');
+  final passwordController = TextEditingController(text: '123456');
   final RxBool obscurePassword = true.obs;
 
   RxBool get isLoading => _auth.isLoading;

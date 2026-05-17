@@ -8,12 +8,14 @@ import '../modules/client/category_picker/category_picker_binding.dart';
 import '../modules/client/category_picker/category_picker_view.dart';
 import '../modules/client/chat_detail/chat_detail_binding.dart';
 import '../modules/client/chat_detail/chat_detail_view.dart';
+import '../modules/client/project_detail/project_detail_view.dart';
 import '../modules/client/freelancer_detail/freelancer_detail_binding.dart';
 import '../modules/client/freelancer_detail/freelancer_detail_view.dart';
 import '../modules/client/freelancers_by_category/freelancers_by_category_binding.dart';
 import '../modules/client/freelancers_by_category/freelancers_by_category_view.dart';
 import '../modules/client/home/client_home_binding.dart';
 import '../modules/client/home/client_home_view.dart';
+import '../modules/client/project_mode/project_mode_view.dart';
 import '../modules/client/send_offer/send_offer_binding.dart';
 import '../modules/client/send_offer/send_offer_view.dart';
 import '../modules/freelancer/home/freelancer_home_binding.dart';
@@ -85,9 +87,17 @@ class AppPages {
       binding: SendOfferBinding(),
     ),
     GetPage(
+      name: AppRoutes.projectMode,
+      page: () => const ProjectModeView(),
+    ),
+    GetPage(
       name: AppRoutes.chatDetail,
       page: () => const ChatDetailView(),
       binding: ChatDetailBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.projectDetail,
+      page: () => const ProjectDetailView(),
     ),
 
     // Freelancer (Hizmet Ver) — implementation pending

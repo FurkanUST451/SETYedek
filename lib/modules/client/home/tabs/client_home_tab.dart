@@ -1,163 +1,168 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:rive/rive.dart' hide RadialGradient, LinearGradient;
 
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_radius.dart';
-import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../routes/app_routes.dart';
-import '../../../app/user_controller.dart';
 
-class ClientHomeTab extends StatelessWidget {
+class ClientHomeTab extends StatefulWidget {
   const ClientHomeTab({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final secondaryColor =
-        isDark ? AppColors.textSecondary : AppColors.textSecondaryLight;
-    final user = Get.find<UserController>();
-
-    return SafeArea(
-      bottom: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.lg,
-          AppSpacing.xl,
-          AppSpacing.lg,
-          120,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Greeting
-            Obx(() {
-              final u = user.currentUser;
-              final firstName = (u?.name ?? '').split(' ').first;
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'HOŞ GELDİN',
-                    style: AppTextStyles.eyebrow.copyWith(
-                      color: AppColors.accentCyan,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    firstName.isEmpty ? 'Merhaba' : 'Merhaba, $firstName',
-                    style: AppTextStyles.displayXL.copyWith(fontSize: 36),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    'Bir sonraki projen için ekibini bulmaya hazır mısın?',
-                    style: AppTextStyles.body1.copyWith(
-                      color: secondaryColor,
-                      height: 1.45,
-                    ),
-                  ),
-                ],
-              );
-            }),
-            const Spacer(),
-            // Mega CTA — Projeni yaptır
-            _ProjectCta(
-              onTap: () => Get.toNamed(AppRoutes.categoryPicker),
-            ),
-            const Spacer(flex: 2),
-          ],
-        ),
-      ),
-    );
-  }
+  State<ClientHomeTab> createState() => _ClientHomeTabState();
 }
 
-class _ProjectCta extends StatelessWidget {
-  const _ProjectCta({required this.onTap});
+class _ClientHomeTabState extends State<ClientHomeTab> {
+  OneShotAnimation? _pulseCtrl;
+  bool _tapped = false;
 
-  final VoidCallback onTap;
+  void _onRiveInit(Artboard artboard) {
+    final ctrl = OneShotAnimation('Timeline 19', autoplay: false);
+    artboard.addController(ctrl);
+    _pulseCtrl = ctrl;
+  }
+
+  Future<void> _onButtonTap() async {
+    if (_tapped) return;
+    _tapped = true;
+    _pulseCtrl?.isActive = true;
+    await Future.delayed(const Duration(milliseconds: 550));
+    if (mounted) {
+      Get.toNamed(AppRoutes.categoryPicker);
+      _tapped = false;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final radius = BorderRadius.circular(AppRadius.xl);
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: radius,
-        child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.xl,
-            vertical: AppSpacing.xl,
-          ),
-          decoration: BoxDecoration(
-            borderRadius: radius,
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [AppColors.primary, AppColors.primaryDeep],
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.45),
-                blurRadius: 40,
-                offset: const Offset(0, 16),
-                spreadRadius: -8,
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'YENİ PROJE',
-                      style: AppTextStyles.eyebrow.copyWith(
-                        color: Colors.white.withValues(alpha: 0.85),
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    Text(
-                      'Projeni yaptır',
-                      style: AppTextStyles.heading1.copyWith(
-                        color: Colors.white,
-                        fontSize: 30,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      'Kategori seç, doğru freelancer\'a ulaş.',
-                      style: AppTextStyles.body2.copyWith(
-                        color: Colors.white.withValues(alpha: 0.85),
-                      ),
-                    ),
+    return Stack(
+      children: [
+        // Golden radial glow — centered on button area
+        Positioned.fill(
+          child: Center(
+            child: Container(
+              width: 380,
+              height: 380,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    Color(0x55D4A843),
+                    Color(0x22A07828),
+                    Colors.transparent,
                   ],
                 ),
               ),
-              const SizedBox(width: AppSpacing.md),
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white.withValues(alpha: 0.22),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.4),
-                    width: 0.8,
-                  ),
-                ),
-                child: const Icon(
-                  Icons.arrow_forward_rounded,
-                  color: Colors.white,
-                  size: 26,
+            ),
+          ),
+        ),
+        SafeArea(
+          child: Column(
+            children: [
+              const SizedBox(height: 20),
+              // Brand eyebrow
+              Text(
+                'SET',
+                style: AppTextStyles.eyebrow.copyWith(
+                  color: AppColors.accentGold,
+                  fontSize: 13,
+                  letterSpacing: 3,
                 ),
               ),
+              const Spacer(),
+              // Bold title
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32),
+                child: Text(
+                  'Projeni başlat,\nduygusallıkla,\nyaratıcılıkla',
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.displayXL.copyWith(
+                    fontSize: 36,
+                    height: 1.18,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 52),
+              // Circular button + Rive pulse
+              GestureDetector(
+                onTap: _onButtonTap,
+                child: SizedBox(
+                  width: 210,
+                  height: 210,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      // Rive pulse animation — fills the container
+                      RiveAnimation.asset(
+                        'assets/animations/pulse.riv',
+                        onInit: _onRiveInit,
+                        fit: BoxFit.contain,
+                      ),
+                      // Gold circle
+                      Container(
+                        width: 136,
+                        height: 136,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: const Color(0xFFD4A843),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFFD4A843)
+                                  .withValues(alpha: 0.45),
+                              blurRadius: 40,
+                              offset: const Offset(0, 14),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              Icons.rocket_launch_outlined,
+                              color: Color(0xFF1A1200),
+                              size: 28,
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              'Proje\nBaşlat',
+                              textAlign: TextAlign.center,
+                              style: AppTextStyles.button.copyWith(
+                                color: const Color(0xFF1A1200),
+                                fontWeight: FontWeight.w700,
+                                fontSize: 13,
+                                height: 1.3,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 44),
+              // Light description
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 48),
+                child: Text(
+                  'Danışmanlarınla iletişim kur,\nhız, güven ve yaratıcılıkla\nprojeni hayata geçir.',
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.body2.copyWith(
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w300,
+                    fontSize: 15,
+                    height: 1.65,
+                  ),
+                ),
+              ),
+              const Spacer(),
             ],
           ),
         ),
-      ),
+      ],
     );
   }
 }
