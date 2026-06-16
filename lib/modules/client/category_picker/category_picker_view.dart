@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_radius.dart';
-import '../../../core/theme/app_spacing.dart';
+import '../../../core/constants/app_assets.dart';
 import '../../../core/theme/app_text_styles.dart';
 import 'category_picker_controller.dart';
 
@@ -13,204 +11,155 @@ class CategoryPickerView extends GetView<CategoryPickerController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.lg,
-            AppSpacing.sm,
-            AppSpacing.lg,
-            AppSpacing.lg,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Service Category\nSelection',
-                style: AppTextStyles.heading1.copyWith(
-                  color: AppColors.textPrimary,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.asset(AppAssets.choosePageBg, fit: BoxFit.cover),
+          SafeArea(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const SizedBox(height: 12),
+                // Top row: back + logo
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: IconButton(
+                        icon: const Icon(Icons.arrow_back, color: Colors.black87),
+                        onPressed: () => Get.back(),
+                      ),
+                    ),
+                    Text(
+                      'SET',
+                      style: AppTextStyles.wordmark.copyWith(
+                        color: Colors.black87,
+                        letterSpacing: 2,
+                        fontSize: 22,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Avoid boring lists to elements.',
-                style: AppTextStyles.body2.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              Expanded(
-                child: GridView.builder(
-                  itemCount: controller.categories.length,
-                  gridDelegate:
-                      const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: AppSpacing.sm,
-                    crossAxisSpacing: AppSpacing.sm,
-                    childAspectRatio: 0.85,
+                const SizedBox(height: 20),
+                Text(
+                  'Hizmetini seç,',
+                  style: AppTextStyles.heading1.copyWith(
+                    color: Colors.black87,
+                    fontSize: 26,
                   ),
-                  itemBuilder: (_, i) {
-                    final cat = controller.categories[i];
-                    return _CinematicCard(
-                      label: cat,
-                      gradient: _gradientFor(cat),
-                      icon: _iconFor(cat),
-                      onTap: () => controller.selectCategory(cat),
-                    );
-                  },
                 ),
-              ),
-            ],
+                Text(
+                  'fikrni hayata geçirelim.',
+                  style: AppTextStyles.heading1.copyWith(
+                    color: Colors.black54,
+                    fontSize: 20,
+                    fontStyle: FontStyle.italic,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  color: Colors.black38,
+                  size: 28,
+                ),
+                const SizedBox(height: 12),
+                Expanded(
+                  child: ListView.separated(
+                    padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+                    itemCount: controller.categories.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    itemBuilder: (_, i) {
+                      final cat = controller.categories[i];
+                      return _CategoryCard(
+                        label: cat,
+                        gradient: _gradientFor(i),
+                        onTap: () => controller.selectCategory(cat),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
 
-  LinearGradient _gradientFor(String category) {
-    switch (category) {
-      case 'Videographer':
-        return const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF0D1B2A), Color(0xFF1B3A5C)],
-        );
-      case 'Sound Design':
-        return const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF1A0D2E), Color(0xFF3D1F6E)],
-        );
-      case 'Video Edit':
-        return const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF0E1C1A), Color(0xFF183B35)],
-        );
-      case 'AI/CGI':
-        return const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF1C1200), Color(0xFF3D2A00)],
-        );
-      case 'Drone':
-        return const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF081820), Color(0xFF0D3040)],
-        );
-      case 'Photographer':
-        return const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF1A1000), Color(0xFF2E1F00)],
-        );
-      default:
-        return const LinearGradient(
-          colors: [Color(0xFF151B23), Color(0xFF1B232C)],
-        );
-    }
-  }
-
-  IconData _iconFor(String category) {
-    switch (category) {
-      case 'Videographer':
-        return Icons.videocam_outlined;
-      case 'Sound Design':
-        return Icons.graphic_eq_rounded;
-      case 'Video Edit':
-        return Icons.movie_filter_outlined;
-      case 'AI/CGI':
-        return Icons.auto_awesome_outlined;
-      case 'Drone':
-        return Icons.flight_takeoff_rounded;
-      case 'Photographer':
-        return Icons.camera_alt_outlined;
-      default:
-        return Icons.work_outline;
-    }
+  LinearGradient _gradientFor(int index) {
+    const gradients = [
+      LinearGradient(
+        begin: Alignment.centerLeft,
+        end: Alignment.centerRight,
+        colors: [Color(0xFF5C4033), Color(0xFF8D6E63)],
+      ),
+      LinearGradient(
+        begin: Alignment.centerLeft,
+        end: Alignment.centerRight,
+        colors: [Color(0xFF6D4C41), Color(0xFFA1887F)],
+      ),
+      LinearGradient(
+        begin: Alignment.centerLeft,
+        end: Alignment.centerRight,
+        colors: [Color(0xFF795548), Color(0xFFBCAAA4)],
+      ),
+      LinearGradient(
+        begin: Alignment.centerLeft,
+        end: Alignment.centerRight,
+        colors: [Color(0xFF4E342E), Color(0xFF8D6E63)],
+      ),
+      LinearGradient(
+        begin: Alignment.centerLeft,
+        end: Alignment.centerRight,
+        colors: [Color(0xFF3E2723), Color(0xFF6D4C41)],
+      ),
+      LinearGradient(
+        begin: Alignment.centerLeft,
+        end: Alignment.centerRight,
+        colors: [Color(0xFF5D4037), Color(0xFF8D6E63)],
+      ),
+    ];
+    return gradients[index % gradients.length];
   }
 }
 
-class _CinematicCard extends StatelessWidget {
-  const _CinematicCard({
+class _CategoryCard extends StatelessWidget {
+  const _CategoryCard({
     required this.label,
     required this.gradient,
-    required this.icon,
     required this.onTap,
   });
 
   final String label;
   final LinearGradient gradient;
-  final IconData icon;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final radius = BorderRadius.circular(AppRadius.lg);
     return GestureDetector(
       onTap: onTap,
-      child: ClipRRect(
-        borderRadius: radius,
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: gradient,
-            borderRadius: radius,
-          ),
-          child: Stack(
-            children: [
-              // Large decorative icon fills upper portion
-              Positioned(
-                top: -10,
-                right: -10,
-                child: Icon(
-                  icon,
-                  size: 120,
-                  color: Colors.white.withValues(alpha: 0.08),
-                ),
-              ),
-              // Centered icon — clearer, medium size
-              Positioned(
-                top: 28,
-                left: 0,
-                right: 0,
-                child: Icon(
-                  icon,
-                  size: 52,
-                  color: Colors.white.withValues(alpha: 0.55),
-                ),
-              ),
-              // Bottom gradient overlay
-              Positioned.fill(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      stops: const [0.4, 1.0],
-                      colors: [
-                        Colors.transparent,
-                        Colors.black.withValues(alpha: 0.65),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              // Label at bottom left
-              Positioned(
-                left: 12,
-                right: 12,
-                bottom: 12,
-                child: Text(
-                  label,
-                  style: AppTextStyles.heading3.copyWith(
-                    color: Colors.white,
-                    fontSize: 15,
-                  ),
-                ),
-              ),
-            ],
+      child: Container(
+        height: 88,
+        decoration: BoxDecoration(
+          gradient: gradient,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.18),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        alignment: Alignment.centerLeft,
+        child: Text(
+          label,
+          style: AppTextStyles.heading2.copyWith(
+            color: Colors.white,
+            fontSize: 22,
           ),
         ),
       ),

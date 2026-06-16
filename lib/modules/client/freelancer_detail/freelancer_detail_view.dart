@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_radius.dart';
-import '../../../core/theme/app_spacing.dart';
+import '../../../core/constants/app_assets.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/models/freelancer_model.dart';
 import 'freelancer_detail_controller.dart';
@@ -17,384 +15,674 @@ class FreelancerDetailView extends GetView<FreelancerDetailController> {
     final u = controller.user;
     final name = u?.name ?? 'Freelancer';
 
-    return Scaffold(
-      backgroundColor: AppColors.backgroundDark,
-      extendBody: true,
-      bottomNavigationBar: _BottomBar(onInvite: controller.sendOffer),
-      body: Stack(
-        children: [
-          CustomScrollView(
-            slivers: [
-              SliverToBoxAdapter(
-                child: _HeroSection(
-                  name: name,
-                  role: f?.category ?? '',
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.lg,
-                    AppSpacing.lg,
-                    AppSpacing.lg,
-                    0,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (f != null) _StatsRow(freelancer: f),
-                      const SizedBox(height: AppSpacing.xl),
-                      if (f != null) ...[
-                        // Biography
-                        Text(
-                          'Biography',
-                          style: AppTextStyles.caption.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          f.bio,
-                          style: AppTextStyles.body1.copyWith(
-                            color: AppColors.textPrimary,
-                            height: 1.65,
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.xl),
-                        // Portfolio
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text('Portfolio',
-                                style: AppTextStyles.heading3
-                                    .copyWith(color: AppColors.textPrimary)),
-                            Text(
-                              'View All',
-                              style: AppTextStyles.caption.copyWith(
-                                color: AppColors.accentGold,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: AppSpacing.md),
-                        _PortfolioRow(freelancer: f),
-                      ],
-                      const SizedBox(height: 110),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-          // Overlay nav buttons on hero
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.md, vertical: AppSpacing.sm),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    final reviewCount = (f?.experience ?? 3) * 18;
+    final jobCount = (f?.experience ?? 3) * 12 + 15;
+    final trustScore = ((f?.rating ?? 4.9) * 19.5).round();
+
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        body: Stack(
+          children: [
+            Positioned.fill(
+              child: Image.asset(AppAssets.choosePageBg, fit: BoxFit.cover),
+            ),
+            SafeArea(
+              child: Column(
                 children: [
-                  _OverlayButton(
-                      icon: Icons.arrow_back, onTap: () => Get.back()),
-                  _OverlayButton(icon: Icons.more_horiz, onTap: () {}),
+                  // Top bar
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(8, 8, 12, 0),
+                    child: Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.chevron_left,
+                              color: Colors.black87, size: 28),
+                          onPressed: () => Get.back(),
+                        ),
+                        const Spacer(),
+                        Text(
+                          'SET',
+                          style: AppTextStyles.wordmark.copyWith(
+                            color: Colors.black87,
+                            fontSize: 20,
+                            letterSpacing: 2,
+                          ),
+                        ),
+                        const Spacer(),
+                        IconButton(
+                          icon: const Icon(Icons.upload_outlined,
+                              color: Colors.black87),
+                          onPressed: () {},
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.more_horiz,
+                              color: Colors.black87),
+                          onPressed: () {},
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: NestedScrollView(
+                      headerSliverBuilder: (_, __) => [
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding:
+                                const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                // Avatar
+                                Stack(
+                                  clipBehavior: Clip.none,
+                                  children: [
+                                    Container(
+                                      width: 96,
+                                      height: 96,
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFE8D5C0),
+                                        borderRadius:
+                                            BorderRadius.circular(48),
+                                      ),
+                                      child: const Icon(
+                                        Icons.person,
+                                        size: 52,
+                                        color: Color(0xFF8D6E63),
+                                      ),
+                                    ),
+                                    Positioned(
+                                      bottom: 4,
+                                      right: 4,
+                                      child: Container(
+                                        width: 14,
+                                        height: 14,
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF4CAF50),
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                              color: Colors.white, width: 2),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 14),
+                                // Name
+                                Text(
+                                  name,
+                                  style: AppTextStyles.heading1.copyWith(
+                                    color: Colors.black87,
+                                    fontSize: 28,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Direktör · ${f?.category ?? ''}',
+                                  style: AppTextStyles.body1.copyWith(
+                                    color: Colors.black54,
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                // Inline stats
+                                Text(
+                                  '★ ${f?.rating.toStringAsFixed(1) ?? '4.9'} ($reviewCount)  ·  ${(f?.experience ?? 3) * 8 + 20} yaş',
+                                  style: AppTextStyles.body2.copyWith(
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '${f?.location ?? 'İstanbul'}, Türkiye  ·  $jobCount İş',
+                                  style: AppTextStyles.body2.copyWith(
+                                    color: Colors.black54,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  '${f?.experience ?? 3} Yıl Deneyim',
+                                  style: AppTextStyles.body2.copyWith(
+                                    color: Colors.black54,
+                                  ),
+                                ),
+                                const SizedBox(height: 20),
+                                // Action buttons
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: GestureDetector(
+                                        onTap: controller.openChat,
+                                        child: Container(
+                                          height: 50,
+                                          decoration: BoxDecoration(
+                                            color: Colors.black87,
+                                            borderRadius:
+                                                BorderRadius.circular(14),
+                                          ),
+                                          alignment: Alignment.center,
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              const Icon(
+                                                Icons.circle_outlined,
+                                                color: Colors.white,
+                                                size: 16,
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Text(
+                                                'Mesaj Gönder',
+                                                style: AppTextStyles.button
+                                                    .copyWith(
+                                                        color: Colors.white,
+                                                        fontSize: 15),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: GestureDetector(
+                                        onTap: controller.sendOffer,
+                                        child: Container(
+                                          height: 50,
+                                          decoration: BoxDecoration(
+                                            color: Colors.white
+                                                .withValues(alpha: 0.7),
+                                            borderRadius:
+                                                BorderRadius.circular(14),
+                                            border: Border.all(
+                                              color: const Color(0xFFE8B84B),
+                                              width: 1.5,
+                                            ),
+                                          ),
+                                          alignment: Alignment.center,
+                                          child: Text(
+                                            'Teklif Gönder',
+                                            style: AppTextStyles.button
+                                                .copyWith(
+                                              color: const Color(0xFFB8860B),
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 20),
+                              ],
+                            ),
+                          ),
+                        ),
+                        // Tab bar
+                        SliverPersistentHeader(
+                          pinned: true,
+                          delegate: _TabHeaderDelegate(
+                            TabBar(
+                              tabs: const [
+                                Tab(text: 'İşler'),
+                                Tab(text: 'Hakkında'),
+                                Tab(text: 'Yorumlar'),
+                              ],
+                              labelStyle: AppTextStyles.button
+                                  .copyWith(fontSize: 15),
+                              unselectedLabelStyle: AppTextStyles.body1
+                                  .copyWith(fontSize: 15),
+                              labelColor: Colors.black87,
+                              unselectedLabelColor: Colors.black38,
+                              indicatorColor: Colors.black87,
+                              indicatorWeight: 2,
+                              dividerColor: Colors.black12,
+                            ),
+                          ),
+                        ),
+                      ],
+                      body: TabBarView(
+                        children: [
+                          // İşler tab
+                          _IslerTab(
+                            freelancer: f,
+                            reviewCount: reviewCount,
+                            trustScore: trustScore,
+                          ),
+                          // Hakkında tab
+                          _HakkindaTab(
+                            bio: f?.bio ?? '',
+                            trustScore: trustScore,
+                            freelancer: f,
+                          ),
+                          // Yorumlar tab
+                          _YorumlarTab(
+                            reviewCount: reviewCount,
+                            freelancer: f,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
 
-// ─── Hero ───────────────────────────────────────────────────────────────────
+// ─── Tab delegate ──────────────────────────────────────────────────────────────
 
-class _HeroSection extends StatelessWidget {
-  const _HeroSection({required this.name, required this.role});
-  final String name;
-  final String role;
+class _TabHeaderDelegate extends SliverPersistentHeaderDelegate {
+  _TabHeaderDelegate(this.tabBar);
+  final TabBar tabBar;
+
+  @override
+  double get minExtent => 48;
+  @override
+  double get maxExtent => 48;
+
+  @override
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Container(
+      color: const Color(0xFFF5EBD8).withValues(alpha: 0.95),
+      child: tabBar,
+    );
+  }
+
+  @override
+  bool shouldRebuild(_TabHeaderDelegate old) => false;
+}
+
+// ─── İşler Tab ────────────────────────────────────────────────────────────────
+
+class _IslerTab extends StatelessWidget {
+  const _IslerTab({
+    required this.freelancer,
+    required this.reviewCount,
+    required this.trustScore,
+  });
+
+  final FreelancerModel? freelancer;
+  final int reviewCount;
+  final int trustScore;
+
+  List<Map<String, String>> _projects() {
+    final seed =
+        (freelancer?.userId.codeUnits.fold(0, (a, b) => a + b) ?? 42);
+    final names = ['Beko', 'Migros', 'Ajet', 'Türk Telekom', 'Pepsi', 'Nike'];
+    final types = [
+      'Reklam Filmi',
+      'Marka Filmi',
+      'Tanıtım',
+      'Kurumsal',
+      'Viral',
+      'Belgesel'
+    ];
+    return List.generate(4, (i) {
+      return {
+        'brand': names[(seed + i) % names.length],
+        'type': types[(seed + i) % types.length],
+      };
+    });
+  }
+
+  final List<List<Color>> _warmPalettes = const [
+    [Color(0xFF5C4033), Color(0xFF8D6E63)],
+    [Color(0xFF4A3728), Color(0xFF795548)],
+    [Color(0xFF6D4C41), Color(0xFFA1887F)],
+    [Color(0xFF3E2723), Color(0xFF6D4C41)],
+  ];
 
   @override
   Widget build(BuildContext context) {
-    final initials = name
-        .split(' ')
-        .map((w) => w.isNotEmpty ? w[0] : '')
-        .take(2)
-        .join();
+    final projects = _projects();
 
-    return SizedBox(
-      height: 320,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          // Dark cinematic gradient background (photo placeholder)
-          Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Color(0xFF1C1C1E),
-                  Color(0xFF2C2416),
-                  Color(0xFF0B0F14),
-                ],
-                stops: [0.0, 0.55, 1.0],
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
+      children: [
+        // Öne Çıkan İşler
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Öne Çıkan İşler',
+              style: AppTextStyles.heading3.copyWith(color: Colors.black87),
+            ),
+            Text(
+              'Tümünü Gör →',
+              style: AppTextStyles.caption.copyWith(
+                color: const Color(0xFFB8860B),
+                fontWeight: FontWeight.w600,
+                fontSize: 12,
               ),
             ),
-          ),
-          // Large translucent initials as "photo" stand-in
-          Center(
-            child: Text(
-              initials,
-              style: TextStyle(
-                fontSize: 120,
-                fontWeight: FontWeight.w700,
-                color: Colors.white.withValues(alpha: 0.06),
-                height: 1,
-              ),
-            ),
-          ),
-          // Bottom fade to backgroundDark
-          Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  stops: const [0.35, 1.0],
-                  colors: [
-                    Colors.transparent,
-                    AppColors.backgroundDark,
+          ],
+        ),
+        const SizedBox(height: 14),
+        SizedBox(
+          height: 160,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: projects.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 10),
+            itemBuilder: (_, i) {
+              final p = projects[i];
+              final colors = _warmPalettes[i % _warmPalettes.length];
+              return Container(
+                width: 140,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: colors,
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Placeholder icon
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.25),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.play_circle_outline,
+                          color: Colors.white54, size: 22),
+                    ),
+                    const Spacer(),
+                    Text(
+                      p['brand']!,
+                      style: AppTextStyles.heading3.copyWith(
+                          color: Colors.white, fontSize: 13),
+                    ),
+                    Text(
+                      p['type']!,
+                      style: AppTextStyles.caption.copyWith(
+                          color: Colors.white60, fontSize: 11),
+                    ),
+                    const SizedBox(height: 6),
+                    Container(
+                      width: 28,
+                      height: 28,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.15),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.arrow_forward,
+                          color: Colors.white, size: 14),
+                    ),
                   ],
                 ),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 28),
+        // Yorumlar preview
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Yorumlar ($reviewCount)',
+              style: AppTextStyles.heading3.copyWith(color: Colors.black87),
+            ),
+            Text(
+              'Tümünü Gör',
+              style: AppTextStyles.caption.copyWith(
+                color: const Color(0xFFB8860B),
+                fontWeight: FontWeight.w600,
+                fontSize: 12,
               ),
             ),
-          ),
-          // Name + role overlay at bottom
-          Positioned(
-            left: AppSpacing.lg,
-            right: AppSpacing.lg,
-            bottom: AppSpacing.lg,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: AppTextStyles.heading1.copyWith(
-                    color: Colors.white,
-                    fontSize: 30,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  role,
-                  style: AppTextStyles.body2.copyWith(
-                    color: Colors.white.withValues(alpha: 0.65),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── Stats Row ───────────────────────────────────────────────────────────────
-
-class _StatsRow extends StatelessWidget {
-  const _StatsRow({required this.freelancer});
-  final FreelancerModel freelancer;
-
-  String get _priceRange {
-    final exp = freelancer.experience;
-    if (exp <= 2) return '\$1K–\$3K';
-    if (exp <= 4) return '\$2K–\$5K';
-    if (exp <= 6) return '\$3K–\$8K';
-    if (exp <= 8) return '\$5K–\$15K';
-    return '\$8K–\$20K';
-  }
-
-  int get _trustPercent =>
-      ((freelancer.rating / 5.0) * 100).round();
-
-  int get _reviewCount => freelancer.experience * 18;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        // Trust badge
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-          decoration: BoxDecoration(
-            border: Border.all(color: AppColors.accentGold.withValues(alpha: 0.6)),
-            borderRadius: BorderRadius.circular(AppRadius.full),
-          ),
-          child: Text(
-            'TRUST $_trustPercent%',
-            style: AppTextStyles.caption.copyWith(
-              color: AppColors.accentGold,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.8,
-            ),
-          ),
+          ],
         ),
-        const SizedBox(width: AppSpacing.md),
-        // Star rating + review count
-        const Icon(Icons.star_rounded, size: 16, color: AppColors.accentGold),
-        const SizedBox(width: 4),
-        Text(
-          '${freelancer.rating.toStringAsFixed(1)} ($_reviewCount)',
-          style: AppTextStyles.body2.copyWith(color: AppColors.textPrimary),
+        const SizedBox(height: 12),
+        _ReviewItem(
+          brand: 'Migros',
+          projectType: 'Marka Filmi',
+          rating: 5.0,
+          comment: 'Harika bir iş çıkardı.',
+          initials: 'M',
         ),
-        const SizedBox(width: AppSpacing.md),
-        // Divider
-        Container(width: 1, height: 14, color: AppColors.border),
-        const SizedBox(width: AppSpacing.md),
-        // Price
-        Text(
-          _priceRange,
-          style: AppTextStyles.body2.copyWith(color: AppColors.textPrimary),
+        const SizedBox(height: 8),
+        _ReviewItem(
+          brand: 'Beko',
+          projectType: 'Reklam Filmi',
+          rating: 4.9,
+          comment: 'Çok profesyonel çalışma.',
+          initials: 'B',
         ),
       ],
     );
   }
 }
 
-// ─── Portfolio Row ────────────────────────────────────────────────────────────
+// ─── Hakkında Tab ─────────────────────────────────────────────────────────────
 
-class _PortfolioRow extends StatelessWidget {
-  const _PortfolioRow({required this.freelancer});
-  final FreelancerModel freelancer;
+class _HakkindaTab extends StatelessWidget {
+  const _HakkindaTab({
+    required this.bio,
+    required this.trustScore,
+    required this.freelancer,
+  });
 
-  List<List<Color>> get _thumbColors {
-    final seed = freelancer.userId.codeUnits.fold(0, (a, b) => a + b);
-    final palettes = [
-      [const Color(0xFF0D1B2A), const Color(0xFF1B3A5C)],
-      [const Color(0xFF1A1000), const Color(0xFF3D2A00)],
-      [const Color(0xFF1A0D2E), const Color(0xFF3D1F6E)],
-      [const Color(0xFF081820), const Color(0xFF0D3040)],
-      [const Color(0xFF1B3A2D), const Color(0xFF2D6A4E)],
-      [const Color(0xFF2D1B4E), const Color(0xFF5C3A8A)],
-    ];
-    return [
-      palettes[seed % palettes.length],
-      palettes[(seed + 2) % palettes.length],
-      palettes[(seed + 4) % palettes.length],
-    ];
-  }
+  final String bio;
+  final int trustScore;
+  final FreelancerModel? freelancer;
 
   @override
   Widget build(BuildContext context) {
-    final colors = _thumbColors;
-    return Row(
-      children: List.generate(3, (i) {
-        return Expanded(
-          child: Container(
-            margin: EdgeInsets.only(right: i < 2 ? 8 : 0),
-            height: 90,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(AppRadius.md),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: colors[i],
-              ),
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
+      children: [
+        // Trust badge
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+            border: Border.all(color: const Color(0xFFE8B84B)),
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Text(
+            'TRUST $trustScore%',
+            style: AppTextStyles.caption.copyWith(
+              color: const Color(0xFFB8860B),
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1,
             ),
           ),
-        );
-      }),
+        ),
+        const SizedBox(height: 20),
+        Text(
+          'Biyografi',
+          style: AppTextStyles.caption.copyWith(color: Colors.black45),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          bio.isNotEmpty ? bio : 'Henüz biyografi eklenmemiş.',
+          style:
+              AppTextStyles.body1.copyWith(color: Colors.black87, height: 1.65),
+        ),
+        const SizedBox(height: 24),
+        Text(
+          'Uzmanlık',
+          style: AppTextStyles.caption.copyWith(color: Colors.black45),
+        ),
+        const SizedBox(height: 10),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            freelancer?.category ?? '',
+            'Kurgu',
+            'Color Grading',
+            'Drone',
+          ]
+              .where((s) => s.isNotEmpty)
+              .map((s) => Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 7),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.75),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.black12),
+                    ),
+                    child: Text(
+                      s,
+                      style: AppTextStyles.caption
+                          .copyWith(color: Colors.black87),
+                    ),
+                  ))
+              .toList(),
+        ),
+      ],
     );
   }
 }
 
-// ─── Bottom Bar ──────────────────────────────────────────────────────────────
+// ─── Yorumlar Tab ─────────────────────────────────────────────────────────────
 
-class _BottomBar extends StatelessWidget {
-  const _BottomBar({required this.onInvite});
-  final VoidCallback onInvite;
+class _YorumlarTab extends StatelessWidget {
+  const _YorumlarTab({
+    required this.reviewCount,
+    required this.freelancer,
+  });
+
+  final int reviewCount;
+  final FreelancerModel? freelancer;
+
+  @override
+  Widget build(BuildContext context) {
+    final dummyReviews = [
+      ('M', 'Migros', 'Marka Filmi', 5.0, 'Harika bir iş çıkardı.'),
+      ('B', 'Beko', 'Reklam Filmi', 4.9, 'Çok profesyonel çalışma.'),
+      ('A', 'Ajet', 'Tanıtım Filmi', 5.0, 'Kesinlikle tavsiye ederim.'),
+      ('T', 'Türk Telekom', 'Kurumsal', 4.8, 'Zamanında ve kaliteli teslimat.'),
+    ];
+
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+      children: [
+        Text(
+          'Yorumlar ($reviewCount)',
+          style:
+              AppTextStyles.heading3.copyWith(color: Colors.black87),
+        ),
+        const SizedBox(height: 14),
+        ...dummyReviews.map((r) => Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: _ReviewItem(
+                initials: r.$1,
+                brand: r.$2,
+                projectType: r.$3,
+                rating: r.$4,
+                comment: r.$5,
+              ),
+            )),
+      ],
+    );
+  }
+}
+
+// ─── Review Item ──────────────────────────────────────────────────────────────
+
+class _ReviewItem extends StatelessWidget {
+  const _ReviewItem({
+    required this.initials,
+    required this.brand,
+    required this.projectType,
+    required this.rating,
+    required this.comment,
+  });
+
+  final String initials;
+  final String brand;
+  final String projectType;
+  final double rating;
+  final String comment;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.fromLTRB(
-        AppSpacing.lg,
-        AppSpacing.md,
-        AppSpacing.lg,
-        AppSpacing.lg + MediaQuery.of(context).padding.bottom,
-      ),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.backgroundDark,
-        border: Border(top: BorderSide(color: AppColors.border)),
+        color: Colors.white.withValues(alpha: 0.8),
+        borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Bookmark
+          // Avatar
           Container(
-            width: 52,
-            height: 52,
+            width: 40,
+            height: 40,
             decoration: BoxDecoration(
-              color: AppColors.surfaceDarkElevated,
-              borderRadius: BorderRadius.circular(AppRadius.md),
-              border: Border.all(color: AppColors.border),
+              color: const Color(0xFFE8D5C0),
+              shape: BoxShape.circle,
             ),
-            child: const Icon(
-              Icons.bookmark_border_rounded,
-              color: AppColors.textPrimary,
+            alignment: Alignment.center,
+            child: Text(
+              initials,
+              style: AppTextStyles.heading3.copyWith(
+                  color: const Color(0xFF8D6E63), fontSize: 16),
             ),
           ),
-          const SizedBox(width: AppSpacing.md),
-          // Invite button
+          const SizedBox(width: 12),
           Expanded(
-            child: GestureDetector(
-              onTap: onInvite,
-              child: Container(
-                height: 52,
-                decoration: BoxDecoration(
-                  color: AppColors.accentGold,
-                  borderRadius: BorderRadius.circular(AppRadius.full),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      '$brand ',
+                      style: AppTextStyles.body2.copyWith(
+                          fontWeight: FontWeight.w700, color: Colors.black87),
+                    ),
+                    Text(
+                      projectType,
+                      style:
+                          AppTextStyles.body2.copyWith(color: Colors.black54),
+                    ),
+                    const Spacer(),
+                    Row(
+                      children: List.generate(
+                        5,
+                        (i) => Icon(
+                          Icons.star_rounded,
+                          size: 13,
+                          color: i < rating.round()
+                              ? const Color(0xFFE8B84B)
+                              : Colors.black12,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      rating.toStringAsFixed(1),
+                      style: AppTextStyles.caption.copyWith(
+                          color: Colors.black87, fontWeight: FontWeight.w700),
+                    ),
+                  ],
                 ),
-                alignment: Alignment.center,
-                child: Text(
-                  'Invite to Project',
-                  style: AppTextStyles.button.copyWith(
-                    color: Colors.black,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
+                const SizedBox(height: 4),
+                Text(
+                  comment,
+                  style:
+                      AppTextStyles.body2.copyWith(color: Colors.black54),
                 ),
-              ),
+              ],
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-// ─── Overlay Button ──────────────────────────────────────────────────────────
-
-class _OverlayButton extends StatelessWidget {
-  const _OverlayButton({required this.icon, required this.onTap});
-  final IconData icon;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 38,
-        height: 38,
-        decoration: BoxDecoration(
-          color: Colors.black.withValues(alpha: 0.35),
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
-        ),
-        child: Icon(icon, color: Colors.white, size: 20),
       ),
     );
   }

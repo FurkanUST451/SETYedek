@@ -6,12 +6,12 @@ class DummyData {
   DummyData._();
 
   static const List<String> categories = [
-    'Videographer',
-    'Sound Design',
-    'Video Edit',
-    'AI/CGI',
+    'Video Çekim',
+    'Kurgu',
+    'CGI & AI',
+    'Fotoğraf',
+    'Ses',
     'Drone',
-    'Photographer',
   ];
 
   static const List<WorkModel> works = [
@@ -119,7 +119,7 @@ class DummyData {
   static final List<FreelancerModel> freelancers = [
     FreelancerModel(
       userId: 'u1',
-      category: 'Videographer',
+      category: 'Video Çekim',
       bio: 'Reklam ve müzik videosu odaklı, set'
           ' deneyimi yüksek videograf.',
       experience: 7,
@@ -129,7 +129,7 @@ class DummyData {
     ),
     FreelancerModel(
       userId: 'u2',
-      category: 'Sound Design',
+      category: 'Ses',
       bio: 'Reklam, dizi ve kısa film için ses tasarımı ve mix.',
       experience: 5,
       location: 'Ankara',
@@ -138,7 +138,7 @@ class DummyData {
     ),
     FreelancerModel(
       userId: 'u3',
-      category: 'Video Edit',
+      category: 'Kurgu',
       bio: 'Sosyal medya ve reklam kurguları, hızlı teslim.',
       experience: 4,
       location: 'İzmir',
@@ -147,7 +147,7 @@ class DummyData {
     ),
     FreelancerModel(
       userId: 'u4',
-      category: 'AI/CGI',
+      category: 'CGI & AI',
       bio: 'CGI ürün görselleri ve AI tabanlı VFX iş akışları.',
       experience: 6,
       location: 'İstanbul',
@@ -165,7 +165,7 @@ class DummyData {
     ),
     FreelancerModel(
       userId: 'u6',
-      category: 'Photographer',
+      category: 'Fotoğraf',
       bio: 'Marka kampanyaları ve editorial fotoğraf.',
       experience: 8,
       location: 'İstanbul',

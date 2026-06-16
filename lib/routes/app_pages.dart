@@ -1,9 +1,12 @@
 import 'package:get/get.dart';
 
+import '../modules/auth/choose_auth/choose_auth_view.dart';
 import '../modules/auth/login/login_binding.dart';
 import '../modules/auth/login/login_view.dart';
 import '../modules/auth/register/register_binding.dart';
 import '../modules/auth/register/register_view.dart';
+import '../modules/client/brief_share/brief_share_binding.dart';
+import '../modules/client/brief_share/brief_share_view.dart';
 import '../modules/client/category_picker/category_picker_binding.dart';
 import '../modules/client/category_picker/category_picker_view.dart';
 import '../modules/client/chat_detail/chat_detail_binding.dart';
@@ -43,6 +46,10 @@ class AppPages {
       name: AppRoutes.onboarding,
       page: () => const OnboardingView(),
       binding: OnboardingBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.chooseAuth,
+      page: () => const ChooseAuthView(),
     ),
     GetPage(
       name: AppRoutes.login,
@@ -85,6 +92,11 @@ class AppPages {
       name: AppRoutes.sendOffer,
       page: () => const SendOfferView(),
       binding: SendOfferBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.briefShare,
+      page: () => const BriefShareView(),
+      binding: BriefShareBinding(),
     ),
     GetPage(
       name: AppRoutes.projectMode,

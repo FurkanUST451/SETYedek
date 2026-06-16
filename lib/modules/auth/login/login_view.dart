@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/constants/app_assets.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -25,23 +26,9 @@ class LoginView extends GetView<LoginController> {
       appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0),
       body: Stack(
         children: [
-          // Background blue glow
-          Positioned(
-            top: -120,
-            left: -80,
-            child: Container(
-              width: 320,
-              height: 320,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    AppColors.primary.withValues(alpha: isDark ? 0.28 : 0.16),
-                    Colors.transparent,
-                  ],
-                ),
-              ),
-            ),
+          // Background image
+          Positioned.fill(
+            child: Image.asset(AppAssets.loginBg, fit: BoxFit.cover),
           ),
           SafeArea(
             child: SingleChildScrollView(

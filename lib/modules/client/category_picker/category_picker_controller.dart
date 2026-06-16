@@ -8,7 +8,7 @@ class CategoryPickerController extends GetxController {
 
   void selectCategory(String category) {
     Get.toNamed(
-      AppRoutes.freelancersByCategory,
+      AppRoutes.sendOffer,
       arguments: {'category': category},
     );
   }

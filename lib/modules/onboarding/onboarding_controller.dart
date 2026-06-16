@@ -11,12 +11,14 @@ class OnboardingPageData {
     required this.subtitle,
     this.icon,
     this.backgroundImage,
+    this.mascotImage,
   });
 
   final String title;
   final String subtitle;
   final IconData? icon;
   final String? backgroundImage;
+  final String? mascotImage;
 }
 
 class OnboardingController extends GetxController {
@@ -25,19 +27,22 @@ class OnboardingController extends GetxController {
 
   static const List<OnboardingPageData> pages = [
     OnboardingPageData(
-      title: 'Yaratıcılık,\nuygulamayla\nbuluşur.',
-      subtitle: 'Vizyonunu hayata geçirmenin akıllı yolu.',
-      backgroundImage: AppAssets.splashScreen1,
+      title: '',
+      subtitle: '',
+      backgroundImage: AppAssets.welcomeBg1,
+      mascotImage: AppAssets.welcomeMascot1,
     ),
     OnboardingPageData(
-      title: 'Güvenilir yetenek.\nSinematik sonuçlar.',
-      subtitle: 'Projeniz için özenle seçilmiş, üst düzey kreatifler.',
-      backgroundImage: AppAssets.splashScreen2,
+      title: '',
+      subtitle: '',
+      backgroundImage: AppAssets.welcomeBg2,
+      mascotImage: AppAssets.welcomeMascot2,
     ),
     OnboardingPageData(
-      title: 'Siz hayal edin.\nBiz hayata geçirelim.',
-      subtitle: 'Konseptten kurguya kadar her şeyi biz hallediyoruz.',
-      backgroundImage: AppAssets.splashScreen3,
+      title: '',
+      subtitle: '',
+      backgroundImage: AppAssets.welcomeBg3,
+      mascotImage: AppAssets.welcomeMascot3,
     ),
   ];
 
@@ -60,7 +65,7 @@ class OnboardingController extends GetxController {
 
   Future<void> finish() async {
     await StorageService.write(StorageService.onboardingComplete, true);
-    Get.offAllNamed(AppRoutes.login);
+    Get.offAllNamed(AppRoutes.chooseAuth);
   }
 
   @override

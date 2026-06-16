@@ -8,6 +8,9 @@ import '../../../routes/app_routes.dart';
 class FreelancersByCategoryController extends GetxController {
   late final String category;
 
+  final RxList<String> selectedIds = <String>[].obs;
+  static const int maxSelections = 5;
+
   @override
   void onInit() {
     super.onInit();
@@ -15,9 +18,8 @@ class FreelancersByCategoryController extends GetxController {
     category = (args?['category'] as String?) ?? '';
   }
 
-  List<FreelancerModel> get freelancers => DummyData.freelancers
-      .where((f) => f.category == category)
-      .toList();
+  List<FreelancerModel> get freelancers =>
+      DummyData.freelancers.where((f) => f.category == category).toList();
 
   UserModel userFor(FreelancerModel f) {
     return DummyData.users.firstWhere(
@@ -32,10 +34,31 @@ class FreelancersByCategoryController extends GetxController {
     );
   }
 
+  bool isSelected(FreelancerModel f) => selectedIds.contains(f.userId);
+
+  void toggleSelect(FreelancerModel f) {
+    if (isSelected(f)) {
+      selectedIds.remove(f.userId);
+    } else if (selectedIds.length < maxSelections) {
+      selectedIds.add(f.userId);
+    }
+  }
+
   void openDetail(FreelancerModel f) {
     Get.toNamed(
       AppRoutes.freelancerDetail,
       arguments: {'freelancer': f, 'user': userFor(f)},
+    );
+  }
+
+  void sendOffers() {
+    if (selectedIds.isEmpty) return;
+    Get.toNamed(
+      AppRoutes.chatDetail,
+      arguments: {
+        'name': 'Proje Teklifi',
+        'selectedIds': selectedIds.toList(),
+      },
     );
   }
 }

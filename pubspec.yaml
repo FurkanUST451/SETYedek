@@ -54,4 +54,6 @@ flutter:
   assets:
     - assets/images/role_selection/
     - assets/images/splash_screens/
+    - assets/images/welcome_pages/
+    - assets/images/login_pages/
     - assets/animations/
