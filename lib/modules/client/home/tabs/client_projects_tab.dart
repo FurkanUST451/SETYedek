@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../routes/app_routes.dart';
 
 // ---------------------------------------------------------------------------
-// Shared model & data
+// Data model — kept for project_detail_view.dart
 // ---------------------------------------------------------------------------
 
 enum ProjectStatus { inProgress, inReview, inRevision, completed }
@@ -36,7 +35,7 @@ class ProjectData {
   final String budget;
   final int daysLeft;
   final List<Color> gradientColors;
-  final int stage; // 0=Preparing,1=In Review,2=Revision,3=Completed
+  final int stage;
   final String overview;
   final String deadline;
   final String startDate;
@@ -44,6 +43,22 @@ class ProjectData {
 }
 
 const allProjects = [
+  ProjectData(
+    title: 'Cafe Tanıtım Filmi',
+    subtitle: 'SET Halletsin · Ekip kuruluyor',
+    status: ProjectStatus.inProgress,
+    progress: 0.42,
+    workers: 3,
+    budget: r'₺42.000',
+    daysLeft: 7,
+    gradientColors: [Color(0xFF2A1A08), Color(0xFF1A0D04)],
+    stage: 0,
+    overview:
+        'Butik kafe için ürün ve atmosfer odaklı tanıtım filmi. SET ekibi çekim ve kurgu sürecini yönetiyor.',
+    deadline: 'Haz 14',
+    startDate: 'May 28',
+    deliverables: '3 versiyon',
+  ),
   ProjectData(
     title: 'Aria Editoryal Kampanya',
     subtitle: 'Moda editoryal · Kış \'26 lookbook',
@@ -55,7 +70,7 @@ const allProjects = [
     gradientColors: [Color(0xFF3B2510), Color(0xFF1A0D04)],
     stage: 1,
     overview:
-        'İpek ve kaşmir parçaların düşük anahtar tungsten aydınlatmasıyla çekildiği altı görünümlük kış editoryal. Teslimat 12 rötuşlanmış hero görsel ve 4 motion clip içerir.',
+        'İpek ve kaşmir parçaların düşük anahtar tungsten aydınlatmasıyla çekildiği altı görünümlük kış editoryal.',
     deadline: 'Ara 14',
     startDate: 'Kas 22',
     deliverables: '12 varlık',
@@ -87,369 +102,617 @@ const allProjects = [
     gradientColors: [Color(0xFF1A1208), Color(0xFF0E0A04)],
     stage: 2,
     overview:
-        'Lüks otomobil markası için 30 saniyelik sinematik ses tasarımı. Orkestrasyonlu arka plan müziği ve efektler dahil.',
+        'Lüks otomobil markası için 30 saniyelik sinematik ses tasarımı.',
     deadline: 'Oca 5',
     startDate: 'Kas 18',
-    deliverables: '3 versiyon',
-  ),
-  ProjectData(
-    title: 'Noctis Ses Spotu II',
-    subtitle: 'Ses tasarımı · 30s ticari',
-    status: ProjectStatus.inRevision,
-    progress: 0.40,
-    workers: 4,
-    budget: r'$6.750',
-    daysLeft: 18,
-    gradientColors: [Color(0xFF121820), Color(0xFF080C10)],
-    stage: 2,
-    overview:
-        'Teknoloji ürünü lansmanı için 30 saniyelik ses tasarımı. Modern elektronik arka plan ve voiceover miksajı.',
-    deadline: 'Oca 8',
-    startDate: 'Kas 25',
     deliverables: '3 versiyon',
   ),
 ];
 
 // ---------------------------------------------------------------------------
-// Tab
+// Tab widget
 // ---------------------------------------------------------------------------
 
-class ClientProjectsTab extends StatelessWidget {
+class ClientProjectsTab extends StatefulWidget {
   const ClientProjectsTab({super.key});
 
   @override
+  State<ClientProjectsTab> createState() => _ClientProjectsTabState();
+}
+
+class _ClientProjectsTabState extends State<ClientProjectsTab>
+    with SingleTickerProviderStateMixin {
+  late final TabController _tab;
+
+  @override
+  void initState() {
+    super.initState();
+    _tab = TabController(length: 3, vsync: this);
+    _tab.addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _tab.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      bottom: false,
-      child: CustomScrollView(
-        slivers: [
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
-            sliver: SliverToBoxAdapter(child: _Header()),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
-            sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (_, i) => Padding(
-                  padding: const EdgeInsets.only(bottom: 14),
-                  child: _ProjectCard(
-                    project: allProjects[i],
-                    index: i,
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5EBD8),
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Header ──────────────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Projeler',
+                    style: AppTextStyles.displayXL.copyWith(
+                      color: Colors.black87,
+                      fontSize: 36,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
-                ),
-                childCount: allProjects.length,
+                  const SizedBox(height: 4),
+                  Text(
+                    'SET işleri, teklifler ve biten üretimler.',
+                    style: AppTextStyles.body2.copyWith(color: Colors.black45),
+                  ),
+                ],
               ),
             ),
+            const SizedBox(height: 20),
+
+            // ── Custom tab bar ───────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: [
+                  _TabBtn(label: 'Devam Eden', selected: _tab.index == 0, onTap: () => _tab.animateTo(0)),
+                  const SizedBox(width: 8),
+                  _TabBtn(label: 'Teklifler', selected: _tab.index == 1, onTap: () => _tab.animateTo(1)),
+                  const SizedBox(width: 8),
+                  _TabBtn(label: 'Tamamlanan', selected: _tab.index == 2, onTap: () => _tab.animateTo(2)),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // ── Tab content ──────────────────────────────────────────────────
+            Expanded(
+              child: TabBarView(
+                controller: _tab,
+                children: const [
+                  _DevamEdenTab(),
+                  _TekliflerTab(),
+                  _TamamlananTab(),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TabBtn extends StatelessWidget {
+  const _TabBtn({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+        decoration: BoxDecoration(
+          color: selected ? Colors.black87 : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: selected ? Colors.transparent : Colors.black12,
           ),
-        ],
+        ),
+        child: Text(
+          label,
+          style: AppTextStyles.button.copyWith(
+            color: selected ? Colors.white : Colors.black54,
+            fontSize: 13,
+            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+          ),
+        ),
       ),
     );
   }
 }
 
 // ---------------------------------------------------------------------------
-// Header
+// Devam Eden tab
 // ---------------------------------------------------------------------------
 
-class _Header extends StatelessWidget {
+class _DevamEdenTab extends StatelessWidget {
+  const _DevamEdenTab();
+
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
       children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Projects',
-                style: AppTextStyles.displayXL.copyWith(
-                  fontSize: 32,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '${allProjects.length} aktif proje',
-                style: AppTextStyles.body2
-                    .copyWith(color: AppColors.textSecondary),
-              ),
-            ],
+        // Active project card
+        _ActiveProjectCard(project: allProjects[0]),
+        const SizedBox(height: 20),
+        // Timeline
+        ...const [
+          _TimelineItem(
+            status: _TimelineStatus.done,
+            title: 'Brief onayı',
+            date: 'Bugün',
+            project: 'Cafe Tanıtım Filmi',
           ),
-        ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-          decoration: BoxDecoration(
-            border: Border.all(color: AppColors.border, width: 0.8),
-            borderRadius: BorderRadius.circular(20),
+          _TimelineItem(
+            status: _TimelineStatus.current,
+            title: 'Ekip kesinleşir',
+            date: '18:00',
+            project: 'Cafe Tanıtım Filmi',
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Geçmiş',
-                style: AppTextStyles.caption.copyWith(
-                  color: AppColors.textSecondary,
-                  fontSize: 12,
-                ),
-              ),
-              const SizedBox(width: 4),
-              const Icon(Icons.arrow_forward_ios_rounded,
-                  size: 10, color: AppColors.textSecondary),
-            ],
+          _TimelineItem(
+            status: _TimelineStatus.pending,
+            title: 'Çekim planlama',
+            date: '29 Mayıs',
+            project: 'Cafe Tanıtım Filmi',
           ),
-        ),
+          _TimelineItem(
+            status: _TimelineStatus.pending,
+            title: 'Kurgu teslim',
+            date: '4 Haziran',
+            project: 'Cafe Tanıtım Filmi',
+          ),
+        ],
       ],
     );
   }
 }
 
-// ---------------------------------------------------------------------------
-// Project Card (full width)
-// ---------------------------------------------------------------------------
-
-class _ProjectCard extends StatelessWidget {
-  const _ProjectCard({required this.project, required this.index});
-
+class _ActiveProjectCard extends StatelessWidget {
+  const _ActiveProjectCard({required this.project});
   final ProjectData project;
-  final int index;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Get.toNamed(
-        AppRoutes.projectDetail,
-        arguments: {'index': index},
-      ),
+      onTap: () => Get.toNamed(AppRoutes.projectDetail, arguments: {'index': 0}),
       child: Container(
-        height: 180,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: project.gradientColors,
           ),
-          border: Border.all(
-            color: Colors.white.withValues(alpha: 0.07),
-            width: 0.5,
-          ),
+          borderRadius: BorderRadius.circular(20),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Top row: badge + avatars
-              Row(
+        padding: const EdgeInsets.all(20),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _StatusBadge(status: project.status),
-                  const Spacer(),
-                  _AvatarStack(count: project.workers),
-                ],
-              ),
-              const Spacer(),
-              // Title + subtitle
-              Text(
-                project.title,
-                style: AppTextStyles.heading2.copyWith(
-                  color: Colors.white,
-                  fontSize: 18,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                project.subtitle,
-                style: AppTextStyles.caption.copyWith(
-                  color: Colors.white.withValues(alpha: 0.5),
-                  fontSize: 12,
-                ),
-              ),
-              const SizedBox(height: 12),
-              // Stats
-              Row(
-                children: [
-                  _Stat(
-                      icon: Icons.people_outline_rounded,
-                      label: '${project.workers}'),
-                  const SizedBox(width: 14),
-                  _Stat(
-                      icon: Icons.attach_money_rounded,
-                      label: project.budget),
-                  const SizedBox(width: 14),
-                  _Stat(
-                      icon: Icons.calendar_today_outlined,
-                      label: '${project.daysLeft} gün'),
-                  const Spacer(),
                   Text(
-                    '${(project.progress * 100).toInt()}%',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.5),
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
+                    project.title,
+                    style: AppTextStyles.heading2.copyWith(
+                      color: Colors.white,
+                      fontSize: 18,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    project.subtitle,
+                    style: AppTextStyles.caption.copyWith(
+                      color: Colors.white54,
+                      fontSize: 12,
                     ),
                   ),
                 ],
               ),
+            ),
+            const SizedBox(width: 16),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  'Teslim',
+                  style: AppTextStyles.caption.copyWith(
+                    color: Colors.white38,
+                    fontSize: 10,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${project.daysLeft} Gün',
+                  style: AppTextStyles.heading3.copyWith(
+                    color: Colors.white,
+                    fontSize: 15,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  '%${(project.progress * 100).toInt()}',
+                  style: AppTextStyles.heading3.copyWith(
+                    color: const Color(0xFFE8B84B),
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+enum _TimelineStatus { done, current, pending }
+
+class _TimelineItem extends StatelessWidget {
+  const _TimelineItem({
+    required this.status,
+    required this.title,
+    required this.date,
+    required this.project,
+  });
+
+  final _TimelineStatus status;
+  final String title;
+  final String date;
+  final String project;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isDone = status == _TimelineStatus.done;
+    final bool isCurrent = status == _TimelineStatus.current;
+
+    Widget indicator;
+    if (isDone) {
+      indicator = Container(
+        width: 24,
+        height: 24,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.black26, width: 1.5),
+        ),
+        child: const Icon(Icons.check_rounded, size: 14, color: Colors.black54),
+      );
+    } else if (isCurrent) {
+      indicator = Container(
+        width: 24,
+        height: 24,
+        decoration: const BoxDecoration(
+          shape: BoxShape.circle,
+          color: Color(0xFFE8B84B),
+        ),
+        child: const Icon(Icons.circle, size: 8, color: Colors.white),
+      );
+    } else {
+      indicator = Container(
+        width: 24,
+        height: 24,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.black12, width: 1.5),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.7),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Row(
+          children: [
+            indicator,
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        title,
+                        style: AppTextStyles.body2.copyWith(
+                          color: Colors.black87,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Text(
+                        ' · $date',
+                        style: AppTextStyles.body2.copyWith(color: Colors.black45),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    project,
+                    style: AppTextStyles.caption.copyWith(
+                      color: const Color(0xFFB8860B),
+                      fontWeight: FontWeight.w500,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Teklifler tab
+// ---------------------------------------------------------------------------
+
+const _offers = [
+  ('A', 'Alperen İ.', 'Teklifi gördü · Director'),
+  ('M', 'Mert Kaya', 'Teklifi gördü · Director of Photography'),
+  ('E', 'Ece K.', 'Beklemede'),
+  ('D', 'Deniz S.', 'Teklifi gördü · Colorist'),
+  ('B', 'Baran T.', 'Beklemede'),
+];
+
+class _TekliflerTab extends StatelessWidget {
+  const _TekliflerTab();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
+      children: [
+        // Summary banner
+        Container(
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.85),
+            borderRadius: BorderRadius.circular(18),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.06),
+                blurRadius: 10,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '5 davetinden 3\'ü görüntülendi',
+                style: AppTextStyles.heading2.copyWith(
+                  color: Colors.black87,
+                  fontSize: 17,
+                ),
+              ),
               const SizedBox(height: 8),
-              // Progress bar
-              ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: LinearProgressIndicator(
-                  value: project.progress,
-                  minHeight: 3,
-                  backgroundColor: Colors.white.withValues(alpha: 0.1),
-                  valueColor: const AlwaysStoppedAnimation<Color>(
-                    Color(0xFFD4A843),
+              Text(
+                'Mert Kaya ve Ece K. işi inceledi. Buradan mesajlaşabilir veya işi projeye çevirebilirsin.',
+                style: AppTextStyles.body2.copyWith(
+                  color: Colors.black54,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 16),
+              GestureDetector(
+                onTap: () {},
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.black87,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    'Mesajlara git  →',
+                    style: AppTextStyles.button.copyWith(
+                      color: Colors.white,
+                      fontSize: 14,
+                    ),
                   ),
                 ),
               ),
             ],
           ),
         ),
-      ),
+        const SizedBox(height: 24),
+
+        // Gelen Cevaplar
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Gelen Cevaplar',
+              style: AppTextStyles.heading3.copyWith(
+                color: Colors.black87,
+                fontSize: 16,
+              ),
+            ),
+            Text(
+              'Tümünü Gör  →',
+              style: AppTextStyles.caption.copyWith(
+                color: const Color(0xFFB8860B),
+                fontWeight: FontWeight.w600,
+                fontSize: 12,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+
+        ..._offers.map((o) => _OfferItem(
+              initials: o.$1,
+              name: o.$2,
+              subtitle: o.$3,
+            )),
+      ],
     );
   }
 }
 
-// ---------------------------------------------------------------------------
-// Reusable sub-widgets
-// ---------------------------------------------------------------------------
+class _OfferItem extends StatelessWidget {
+  const _OfferItem({
+    required this.initials,
+    required this.name,
+    required this.subtitle,
+  });
 
-class _StatusBadge extends StatelessWidget {
-  const _StatusBadge({required this.status});
-
-  final ProjectStatus status;
-
-  @override
-  Widget build(BuildContext context) {
-    final (label, bg, fg) = switch (status) {
-      ProjectStatus.inProgress => (
-          'IN PROGRESS',
-          const Color(0xFFD4A843).withValues(alpha: 0.18),
-          const Color(0xFFD4A843),
-        ),
-      ProjectStatus.inReview => (
-          'IN REVIEW',
-          const Color(0xFF6EA8FF).withValues(alpha: 0.18),
-          const Color(0xFF6EA8FF),
-        ),
-      ProjectStatus.inRevision => (
-          'IN REVISION',
-          const Color(0xFFE0A536).withValues(alpha: 0.18),
-          const Color(0xFFE0A536),
-        ),
-      ProjectStatus.completed => (
-          'COMPLETED',
-          const Color(0xFF34C77B).withValues(alpha: 0.18),
-          const Color(0xFF34C77B),
-        ),
-    };
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: fg,
-          fontSize: 9,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 0.5,
-        ),
-      ),
-    );
-  }
-}
-
-class _AvatarStack extends StatelessWidget {
-  const _AvatarStack({required this.count});
-
-  final int count;
+  final String initials;
+  final String name;
+  final String subtitle;
 
   @override
   Widget build(BuildContext context) {
-    final shown = count.clamp(0, 3);
-    final extra = count - shown;
-    final colors = [
-      const Color(0xFF6EA8FF),
-      const Color(0xFFD4A843),
-      const Color(0xFF6FE7DD),
-    ];
-
-    return SizedBox(
-      width: shown * 16.0 + (extra > 0 ? 22 : 0),
-      height: 24,
-      child: Stack(
-        children: [
-          for (int i = 0; i < shown; i++)
-            Positioned(
-              left: i * 14.0,
-              child: Container(
-                width: 24,
-                height: 24,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: colors[i % colors.length].withValues(alpha: 0.8),
-                  border: Border.all(color: const Color(0xFF141210), width: 1.5),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.85),
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 42,
+              height: 42,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: Color(0xFFE8D5C0),
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                initials,
+                style: AppTextStyles.heading3.copyWith(
+                  color: const Color(0xFF8D6E63),
+                  fontSize: 16,
                 ),
               ),
             ),
-          if (extra > 0)
-            Positioned(
-              left: shown * 14.0,
-              child: Container(
-                width: 24,
-                height: 24,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white.withValues(alpha: 0.12),
-                  border: Border.all(color: const Color(0xFF141210), width: 1.5),
-                ),
-                child: Center(
-                  child: Text(
-                    '+$extra',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 8,
-                      fontWeight: FontWeight.w700,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    style: AppTextStyles.body1.copyWith(
+                      color: Colors.black87,
+                      fontWeight: FontWeight.w600,
                     ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: AppTextStyles.caption.copyWith(
+                      color: Colors.black45,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            GestureDetector(
+              onTap: () => Get.toNamed(
+                AppRoutes.chatDetail,
+                arguments: {'name': name},
+              ),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF0E8DC),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  'Mesaj  →',
+                  style: AppTextStyles.caption.copyWith(
+                    color: Colors.black87,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
                   ),
                 ),
               ),
             ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
 
-class _Stat extends StatelessWidget {
-  const _Stat({required this.icon, required this.label});
+// ---------------------------------------------------------------------------
+// Tamamlanan tab
+// ---------------------------------------------------------------------------
 
-  final IconData icon;
-  final String label;
+class _TamamlananTab extends StatelessWidget {
+  const _TamamlananTab();
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 12, color: Colors.white.withValues(alpha: 0.45)),
-        const SizedBox(width: 3),
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.6),
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.7),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.check_circle_outline_rounded,
+              size: 32,
+              color: Colors.black26,
+            ),
           ),
-        ),
-      ],
+          const SizedBox(height: 16),
+          Text(
+            'Tamamlanan proje yok',
+            style: AppTextStyles.heading3.copyWith(color: Colors.black45),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Biten projeler burada görünür.',
+            style: AppTextStyles.body2.copyWith(color: Colors.black26),
+          ),
+        ],
+      ),
     );
   }
 }

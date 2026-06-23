@@ -10,7 +10,6 @@ import '../../../../widgets/set_button.dart';
 import '../../../../widgets/set_card.dart';
 import '../../../../widgets/set_section_header.dart';
 import '../../../app/auth_controller.dart';
-import '../../../app/theme_controller.dart';
 import '../../../app/user_controller.dart';
 
 class FreelancerProfileTab extends StatelessWidget {
@@ -22,7 +21,6 @@ class FreelancerProfileTab extends StatelessWidget {
     final secondaryColor =
         isDark ? AppColors.textSecondary : AppColors.textSecondaryLight;
     final userC = Get.find<UserController>();
-    final themeC = Get.find<ThemeController>();
     final authC = Get.find<AuthController>();
 
     return SafeArea(
@@ -89,25 +87,6 @@ class FreelancerProfileTab extends StatelessWidget {
               const SizedBox(width: AppSpacing.md),
               Expanded(child: _StatCard(value: '3y', label: 'Deneyim')),
             ],
-          ),
-          const SizedBox(height: AppSpacing.xl),
-          SetCard(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.md,
-              vertical: 4,
-            ),
-            child: Obx(() => SwitchListTile(
-                  value: themeC.isDark,
-                  onChanged: (_) => themeC.toggle(),
-                  title: Text(
-                    'Karanlık tema',
-                    style: AppTextStyles.body1.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  activeThumbColor: AppColors.primary,
-                  contentPadding: EdgeInsets.zero,
-                )),
           ),
           const SizedBox(height: AppSpacing.xl),
           SetButton(

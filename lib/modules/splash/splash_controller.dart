@@ -43,6 +43,10 @@ class SplashController extends GetxController {
 
     // Giriş yapılmamışsa auth seçim ekranına
     if (userId == null) {
+      await Future.wait([
+        precacheImage(const AssetImage(AppAssets.loginBg), Get.context!),
+        precacheImage(const AssetImage(AppAssets.choosePageBg), Get.context!),
+      ]);
       Get.offAllNamed(AppRoutes.chooseAuth);
       return;
     }

@@ -88,31 +88,33 @@ class _ProjectModeViewState extends State<ProjectModeView> {
                         const SizedBox(height: 24),
 
                         // Two cards
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Left — Freelancer Bul
-                            Expanded(
-                              child: _ModeCard(
-                                selected: _selected == 'freelancer',
-                                onTap: () =>
-                                    setState(() => _selected = 'freelancer'),
-                                dark: false,
-                                child: _FreelancerCard(),
+                        IntrinsicHeight(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              // Left — Freelancer Bul
+                              Expanded(
+                                child: _ModeCard(
+                                  selected: _selected == 'freelancer',
+                                  onTap: () =>
+                                      setState(() => _selected = 'freelancer'),
+                                  dark: false,
+                                  child: _FreelancerCard(),
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 12),
-                            // Right — SET Halletsin
-                            Expanded(
-                              child: _ModeCard(
-                                selected: _selected == 'set',
-                                onTap: () =>
-                                    setState(() => _selected = 'set'),
-                                dark: true,
-                                child: _SetCard(),
+                              const SizedBox(width: 12),
+                              // Right — SET Halletsin
+                              Expanded(
+                                child: _ModeCard(
+                                  selected: _selected == 'set',
+                                  onTap: () =>
+                                      setState(() => _selected = 'set'),
+                                  dark: true,
+                                  child: _SetCard(),
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
 
                         const SizedBox(height: 28),

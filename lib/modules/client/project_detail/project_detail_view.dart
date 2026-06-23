@@ -1,19 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../core/theme/app_colors.dart';
+import '../../../core/constants/app_assets.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../home/tabs/client_projects_tab.dart';
 
-const _stageLabels = ['Hazırlık', 'İnceleme', 'Revizyon', 'Tamamlandı'];
+// ---------------------------------------------------------------------------
+// Static data
+// ---------------------------------------------------------------------------
 
-const _teamMembers = [
-  ('A', 'Aaron', 'Lead Creator', Color(0xFF6EA8FF)),
-  ('M', 'Mira', 'Photographer', Color(0xFFD4A843)),
-  ('J', 'Jules', 'Stylist', Color(0xFF6FE7DD)),
-  ('R', 'Remi', 'Retoucher', Color(0xFFE0A536)),
-  ('S', 'Sam', 'Editor', Color(0xFF9B8AFF)),
+const _steps = [
+  (Icons.description_outlined, 'Brief', '23 May'),
+  (Icons.event_note_outlined, 'Planlama', '24 May'),
+  (Icons.people_outline_rounded, 'Ekip Kuruluyor', 'Şu An'),
+  (Icons.videocam_outlined, 'Çekim', '–'),
+  (Icons.content_cut_rounded, 'Kurgu', '–'),
+  (Icons.flag_outlined, 'Teslim', '–'),
 ];
+
+const _teamStatus = [
+  ('Videographer', true),
+  ('Editor', true),
+  ('Colorist', false),
+  ('Drone Operator', false),
+];
+
+const _files = [
+  (Icons.picture_as_pdf_outlined, 'Moodboard.pdf', '5.1 MB', Color(0xFFB8860B)),
+  (Icons.picture_as_pdf_outlined, 'Brief.pdf', '2.4 MB', Color(0xFFD4A843)),
+  (Icons.mic_none_rounded, 'Voice Note', '03:21 · MP3', Color(0xFF8D6E63)),
+  (Icons.folder_outlined, 'Referanslar', '12 Dosya', Color(0xFF6D4C41)),
+];
+
+// ---------------------------------------------------------------------------
+// View
+// ---------------------------------------------------------------------------
 
 class ProjectDetailView extends StatelessWidget {
   const ProjectDetailView({super.key});
@@ -23,70 +44,411 @@ class ProjectDetailView extends StatelessWidget {
     final args = Get.arguments as Map<String, dynamic>?;
     final index = (args?['index'] as int?) ?? 0;
     final project = allProjects[index.clamp(0, allProjects.length - 1)];
+    const currentStep = 2;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0E0C0A),
-      body: Column(
+      backgroundColor: const Color(0xFFF5EBD8),
+      body: Stack(
         children: [
-          Expanded(
+          // ── Hero background image ──────────────────────────────────────────
+          Positioned(
+            top: 0, left: 0, right: 0,
+            height: 300,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.asset(AppAssets.choosePageBg, fit: BoxFit.cover),
+                DecoratedBox(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Colors.transparent, Color(0xFFF5EBD8)],
+                      stops: [0.35, 1.0],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // ── Scrollable content ────────────────────────────────────────────
+          SafeArea(
+            bottom: false,
             child: CustomScrollView(
               slivers: [
-                // Hero image area
-                SliverToBoxAdapter(
-                  child: _HeroSection(project: project),
-                ),
-                // Content
+                // Top bar
+                SliverToBoxAdapter(child: _TopBar()),
+
                 SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+                  padding: const EdgeInsets.fromLTRB(20, 80, 20, 0),
                   sliver: SliverToBoxAdapter(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Status badge
-                        _StatusBadge(status: project.status),
-                        const SizedBox(height: 12),
+                        // SET Halletsin
+                        Text(
+                          'SET Halletsin',
+                          style: AppTextStyles.caption.copyWith(
+                            color: const Color(0xFFB8860B),
+                            fontWeight: FontWeight.w700,
+                            fontSize: 13,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
                         // Title
                         Text(
                           project.title,
                           style: AppTextStyles.displayXL.copyWith(
-                            fontSize: 26,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
+                            color: Colors.black87,
+                            fontSize: 34,
+                            fontWeight: FontWeight.w800,
+                            height: 1.1,
                           ),
                         ),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: 14),
+                        // Status row
+                        Row(
+                          children: [
+                            Container(
+                              width: 11,
+                              height: 11,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: const Color(0xFFE8B84B),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: const Color(0xFFE8B84B)
+                                        .withValues(alpha: 0.45),
+                                    blurRadius: 6,
+                                    spreadRadius: 1,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Ekip Kuruluyor',
+                              style: AppTextStyles.heading3.copyWith(
+                                color: const Color(0xFFB8860B),
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
                         Text(
-                          project.subtitle,
-                          style: AppTextStyles.body2.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
+                          'Projeniz SET ekibi tarafından yönetiliyor.',
+                          style: AppTextStyles.body2
+                              .copyWith(color: Colors.black45),
                         ),
-                        const SizedBox(height: 28),
-                        // Stage
-                        _SectionTitle('Proje Aşaması'),
-                        const SizedBox(height: 16),
-                        _StageStepper(currentStage: project.stage),
-                        const SizedBox(height: 28),
-                        // Team
-                        _SectionTitle('Ekip'),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${project.workers} kişi',
-                          style: AppTextStyles.caption.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
+                        const SizedBox(height: 20),
+
+                        // ── Steps card ───────────────────────────────────────
+                        _Card(
+                          child: _StepProgress(currentStep: currentStep),
                         ),
-                        const SizedBox(height: 16),
-                        _TeamRow(count: project.workers),
-                        const SizedBox(height: 28),
-                        // Overview
-                        _SectionTitle('Genel Bakış'),
                         const SizedBox(height: 12),
-                        _OverviewCard(text: project.overview),
-                        const SizedBox(height: 16),
-                        // Detail grid
-                        _DetailGrid(project: project),
-                        const SizedBox(height: 32),
+
+                        // ── Son Güncelleme card ──────────────────────────────
+                        _Card(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF0E8DC),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: const Icon(
+                                  Icons.insert_drive_file_outlined,
+                                  color: Color(0xFF8D6E63),
+                                  size: 20,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Son Güncelleme',
+                                      style: AppTextStyles.caption.copyWith(
+                                        color: Colors.black45,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Videographer shortlist tamamlandı. Bugün saat 18:00\'e kadar ekip kesinleşecek.',
+                                      style: AppTextStyles.body2.copyWith(
+                                        color: Colors.black87,
+                                        height: 1.5,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    '2 saat önce',
+                                    style: AppTextStyles.caption.copyWith(
+                                      color: Colors.black38,
+                                      fontSize: 10,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  const Icon(
+                                    Icons.arrow_forward_ios_rounded,
+                                    size: 10,
+                                    color: Colors.black38,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+
+                        // ── Project Manager card ─────────────────────────────
+                        _Card(
+                          child: Row(
+                            children: [
+                              Stack(
+                                clipBehavior: Clip.none,
+                                children: [
+                                  Container(
+                                    width: 52,
+                                    height: 52,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: const Color(0xFFE8D5C0),
+                                    ),
+                                    child: const Icon(
+                                      Icons.person,
+                                      size: 30,
+                                      color: Color(0xFF8D6E63),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    bottom: 2,
+                                    right: 2,
+                                    child: Container(
+                                      width: 10,
+                                      height: 10,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: const Color(0xFF4CAF50),
+                                        border: Border.all(
+                                            color: Colors.white, width: 1.5),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Selin A.',
+                                      style: AppTextStyles.heading3.copyWith(
+                                        color: Colors.black87,
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                    Text(
+                                      'SET Project Manager',
+                                      style: AppTextStyles.caption.copyWith(
+                                        color: Colors.black45,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      'Online',
+                                      style: AppTextStyles.caption.copyWith(
+                                        color: const Color(0xFF4CAF50),
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: () => Get.toNamed(
+                                  '/client/chat-detail',
+                                  arguments: {'name': 'Selin A.'},
+                                ),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 14, vertical: 10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black87,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.chat_bubble_outline_rounded,
+                                        size: 14,
+                                        color: Colors.white,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        'Mesaj Gönder',
+                                        style: AppTextStyles.button.copyWith(
+                                          color: Colors.white,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+
+                        // ── Ekip Durumu card ─────────────────────────────────
+                        _Card(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Ekip Durumu',
+                                    style: AppTextStyles.heading3.copyWith(
+                                      color: Colors.black87,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                  Text(
+                                    'Tümünü Gör  →',
+                                    style: AppTextStyles.caption.copyWith(
+                                      color: const Color(0xFFB8860B),
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 14),
+                              SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Row(
+                                  children: _teamStatus
+                                      .map((t) => Padding(
+                                            padding: const EdgeInsets.only(
+                                                right: 16),
+                                            child: _TeamStatusItem(
+                                              role: t.$1,
+                                              found: t.$2,
+                                            ),
+                                          ))
+                                      .toList(),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+
+                        // ── Stats row card ────────────────────────────────────
+                        _Card(
+                          child: Row(
+                            children: [
+                              _StatItem(
+                                icon: Icons.account_balance_wallet_outlined,
+                                label: 'Bütçe',
+                                value: '120.000 TL',
+                              ),
+                              _Divider(),
+                              _StatItem(
+                                icon: Icons.calendar_today_outlined,
+                                label: 'Teslim',
+                                value: '7 Gün',
+                              ),
+                              _Divider(),
+                              _StatItem(
+                                icon: Icons.location_on_outlined,
+                                label: 'Lokasyon',
+                                value: 'Beşiktaş',
+                              ),
+                              _Divider(),
+                              _StatItem(
+                                icon: Icons.shield_outlined,
+                                label: 'Escrow',
+                                value: 'Aktif',
+                                valueColor: const Color(0xFF4CAF50),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+
+                        // ── Proje Dosyaları card ──────────────────────────────
+                        _Card(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Proje Dosyaları',
+                                    style: AppTextStyles.heading3.copyWith(
+                                      color: Colors.black87,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                  Text(
+                                    'Tümünü Gör  →',
+                                    style: AppTextStyles.caption.copyWith(
+                                      color: const Color(0xFFB8860B),
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 14),
+                              SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Row(
+                                  children: _files
+                                      .map((f) => Padding(
+                                            padding: const EdgeInsets.only(
+                                                right: 10),
+                                            child: _FileThumb(
+                                              icon: f.$1,
+                                              name: f.$2,
+                                              meta: f.$3,
+                                              color: f.$4,
+                                            ),
+                                          ))
+                                      .toList(),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 120),
                       ],
                     ),
                   ),
@@ -94,8 +456,94 @@ class ProjectDetailView extends StatelessWidget {
               ],
             ),
           ),
-          // Bottom action bar
-          _BottomBar(project: project),
+
+          // ── Bottom sticky card ────────────────────────────────────────────
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 18, vertical: 14),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1A1200),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.2),
+                        blurRadius: 20,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(
+                          Icons.movie_creation_outlined,
+                          color: Color(0xFFE8B84B),
+                          size: 22,
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Yaklaşan Adım',
+                              style: AppTextStyles.caption.copyWith(
+                                color: Colors.white38,
+                                fontSize: 11,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Çekim Planlaması',
+                              style: AppTextStyles.heading3.copyWith(
+                                color: Colors.white,
+                                fontSize: 15,
+                              ),
+                            ),
+                            Text(
+                              '29 Mayıs 2024',
+                              style: AppTextStyles.caption.copyWith(
+                                color: Colors.white38,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE8B84B),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(
+                          Icons.arrow_forward_rounded,
+                          color: Colors.black,
+                          size: 20,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -103,326 +551,116 @@ class ProjectDetailView extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Hero Section
+// Top Bar
 // ---------------------------------------------------------------------------
 
-class _HeroSection extends StatelessWidget {
-  const _HeroSection({required this.project});
-
-  final ProjectData project;
-
+class _TopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        // Gradient background as hero
-        Container(
-          height: 260,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                project.gradientColors[0].withValues(alpha: 1.0),
-                project.gradientColors[1],
-              ],
-            ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 8, 12, 0),
+      child: Row(
+        children: [
+          IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.black87),
+            onPressed: Get.back,
           ),
-          child: Center(
-            child: Icon(
-              Icons.image_outlined,
-              size: 64,
-              color: Colors.white.withValues(alpha: 0.1),
-            ),
-          ),
-        ),
-        // Top nav bar
-        SafeArea(
-          bottom: false,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            child: Row(
+          const Spacer(),
+          RichText(
+            text: const TextSpan(
               children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back_ios_new,
-                      size: 18, color: Colors.white),
-                  onPressed: Get.back,
-                ),
-                const Expanded(
-                  child: Text(
-                    'Proje',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
+                TextSpan(
+                  text: 'SE',
+                  style: TextStyle(
+                    fontFamily: 'SpaceGrotesk',
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.black87,
+                    letterSpacing: 1,
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.more_horiz,
-                      size: 22, color: Colors.white),
-                  onPressed: () {},
+                TextSpan(
+                  text: 'T',
+                  style: TextStyle(
+                    fontFamily: 'SpaceGrotesk',
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFFE8B84B),
+                    letterSpacing: 1,
+                  ),
                 ),
               ],
             ),
           ),
-        ),
-        // Bottom fade
-        Positioned(
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: 80,
-          child: DecoratedBox(
+          const Spacer(),
+          _IconCircleBtn(icon: Icons.ios_share_outlined, onTap: () {}),
+          const SizedBox(width: 8),
+          _IconCircleBtn(
+              icon: Icons.notifications_none_rounded,
+              onTap: () {},
+              dot: true),
+        ],
+      ),
+    );
+  }
+}
+
+class _IconCircleBtn extends StatelessWidget {
+  const _IconCircleBtn(
+      {required this.icon, required this.onTap, this.dot = false});
+  final IconData icon;
+  final VoidCallback onTap;
+  final bool dot;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Container(
+            width: 40,
+            height: 40,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.transparent,
-                  const Color(0xFF0E0C0A).withValues(alpha: 0.9),
-                ],
+              shape: BoxShape.circle,
+              color: Colors.white.withValues(alpha: 0.75),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.07),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Icon(icon, size: 18, color: Colors.black54),
+          ),
+          if (dot)
+            Positioned(
+              top: 4,
+              right: 4,
+              child: Container(
+                width: 8,
+                height: 8,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Color(0xFFE8B84B),
+                ),
               ),
             ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Section title
-// ---------------------------------------------------------------------------
-
-class _SectionTitle extends StatelessWidget {
-  const _SectionTitle(this.text);
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: AppTextStyles.heading2.copyWith(
-        fontSize: 18,
-        color: Colors.white,
+        ],
       ),
     );
   }
 }
 
 // ---------------------------------------------------------------------------
-// Stage Stepper
+// Card wrapper
 // ---------------------------------------------------------------------------
 
-class _StageStepper extends StatelessWidget {
-  const _StageStepper({required this.currentStage});
-
-  final int currentStage;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: List.generate(_stageLabels.length * 2 - 1, (i) {
-        if (i.isOdd) {
-          // connector line
-          final stageIndex = i ~/ 2;
-          final passed = stageIndex < currentStage;
-          return Expanded(
-            child: Container(
-              height: 2,
-              color: passed
-                  ? const Color(0xFFD4A843)
-                  : Colors.white.withValues(alpha: 0.15),
-            ),
-          );
-        }
-        final stageIndex = i ~/ 2;
-        final isActive = stageIndex == currentStage;
-        final isPassed = stageIndex < currentStage;
-
-        return Column(
-          children: [
-            Container(
-              width: 12,
-              height: 12,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: isActive
-                    ? const Color(0xFFD4A843)
-                    : isPassed
-                        ? const Color(0xFFD4A843).withValues(alpha: 0.6)
-                        : Colors.white.withValues(alpha: 0.15),
-                border: isActive
-                    ? Border.all(
-                        color: const Color(0xFFD4A843).withValues(alpha: 0.4),
-                        width: 3,
-                      )
-                    : null,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              _stageLabels[stageIndex],
-              style: TextStyle(
-                color: isActive
-                    ? const Color(0xFFD4A843)
-                    : Colors.white.withValues(alpha: 0.4),
-                fontSize: 10,
-                fontWeight:
-                    isActive ? FontWeight.w700 : FontWeight.w400,
-              ),
-            ),
-          ],
-        );
-      }),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Team Row
-// ---------------------------------------------------------------------------
-
-class _TeamRow extends StatelessWidget {
-  const _TeamRow({required this.count});
-
-  final int count;
-
-  @override
-  Widget build(BuildContext context) {
-    final shown = _teamMembers.take(count.clamp(0, _teamMembers.length)).toList();
-
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: shown
-            .map(
-              (m) => Padding(
-                padding: const EdgeInsets.only(right: 16),
-                child: _TeamMember(member: m),
-              ),
-            )
-            .toList(),
-      ),
-    );
-  }
-}
-
-class _TeamMember extends StatelessWidget {
-  const _TeamMember({required this.member});
-
-  final (String, String, String, Color) member;
-
-  @override
-  Widget build(BuildContext context) {
-    final (initial, name, role, color) = member;
-    return Column(
-      children: [
-        Container(
-          width: 56,
-          height: 56,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: color.withValues(alpha: 0.2),
-            border: Border.all(color: color.withValues(alpha: 0.5), width: 1.5),
-          ),
-          child: Center(
-            child: Text(
-              initial,
-              style: TextStyle(
-                color: color,
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          name,
-          style: AppTextStyles.caption.copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-            fontSize: 12,
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          role,
-          style: AppTextStyles.caption.copyWith(
-            color: AppColors.textSecondary,
-            fontSize: 10,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Status Badge (same as list)
-// ---------------------------------------------------------------------------
-
-class _StatusBadge extends StatelessWidget {
-  const _StatusBadge({required this.status});
-
-  final ProjectStatus status;
-
-  @override
-  Widget build(BuildContext context) {
-    final (label, bg, fg) = switch (status) {
-      ProjectStatus.inProgress => (
-          'IN PROGRESS',
-          const Color(0xFFD4A843).withValues(alpha: 0.18),
-          const Color(0xFFD4A843),
-        ),
-      ProjectStatus.inReview => (
-          'IN REVIEW',
-          const Color(0xFF6EA8FF).withValues(alpha: 0.18),
-          const Color(0xFF6EA8FF),
-        ),
-      ProjectStatus.inRevision => (
-          'IN REVISION',
-          const Color(0xFFE0A536).withValues(alpha: 0.18),
-          const Color(0xFFE0A536),
-        ),
-      ProjectStatus.completed => (
-          'COMPLETED',
-          const Color(0xFF34C77B).withValues(alpha: 0.18),
-          const Color(0xFF34C77B),
-        ),
-    };
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: fg,
-          fontSize: 10,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 0.6,
-        ),
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Overview Card
-// ---------------------------------------------------------------------------
-
-class _OverviewCard extends StatelessWidget {
-  const _OverviewCard({required this.text});
-
-  final String text;
+class _Card extends StatelessWidget {
+  const _Card({required this.child});
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
@@ -430,103 +668,241 @@ class _OverviewCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1714),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.07),
-          width: 0.5,
-        ),
+        color: Colors.white.withValues(alpha: 0.85),
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
-      child: Text(
-        text,
-        style: AppTextStyles.body2.copyWith(
-          color: Colors.white.withValues(alpha: 0.75),
-          height: 1.6,
-        ),
-      ),
+      child: child,
     );
   }
 }
 
 // ---------------------------------------------------------------------------
-// Detail Grid (Budget / Deadline / Started / Deliverables)
+// Step Progress
 // ---------------------------------------------------------------------------
 
-class _DetailGrid extends StatelessWidget {
-  const _DetailGrid({required this.project});
-
-  final ProjectData project;
+class _StepProgress extends StatelessWidget {
+  const _StepProgress({required this.currentStep});
+  final int currentStep;
 
   @override
   Widget build(BuildContext context) {
-    final items = [
-      (Icons.account_balance_wallet_outlined, 'Bütçe', project.budget),
-      (Icons.calendar_month_outlined, 'Son Tarih', project.deadline),
-      (Icons.play_circle_outline_rounded, 'Başlangıç', project.startDate),
-      (Icons.layers_outlined, 'Teslimatlar', project.deliverables),
-    ];
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: List.generate(_steps.length, (i) {
+          final isDone = i < currentStep;
+          final isCurrent = i == currentStep;
 
-    return GridView.count(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 2,
-      mainAxisSpacing: 10,
-      crossAxisSpacing: 10,
-      childAspectRatio: 2.2,
-      children: items
-          .map((item) => _DetailCard(icon: item.$1, label: item.$2, value: item.$3))
-          .toList(),
+          Widget circle;
+          if (isDone) {
+            circle = Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: const Color(0xFFF0E8DC),
+                border: Border.all(color: Colors.black12),
+              ),
+              child: const Icon(Icons.check_rounded,
+                  size: 18, color: Colors.black54),
+            );
+          } else if (isCurrent) {
+            circle = Container(
+              width: 36,
+              height: 36,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: Color(0xFFE8B84B),
+              ),
+              child: Icon(_steps[i].$1, size: 18, color: Colors.white),
+            );
+          } else {
+            circle = Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: const Color(0xFFF5F0EC),
+                border: Border.all(color: Colors.black12),
+              ),
+              child:
+                  Icon(_steps[i].$1, size: 18, color: Colors.black26),
+            );
+          }
+
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: 64,
+                child: Column(
+                  children: [
+                    circle,
+                    const SizedBox(height: 6),
+                    Text(
+                      _steps[i].$2,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: isCurrent
+                            ? const Color(0xFFB8860B)
+                            : Colors.black45,
+                        fontSize: 10,
+                        fontWeight: isCurrent
+                            ? FontWeight.w700
+                            : FontWeight.w500,
+                        height: 1.2,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      _steps[i].$3,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: isCurrent
+                            ? const Color(0xFFB8860B)
+                            : Colors.black26,
+                        fontSize: 9,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (i < _steps.length - 1)
+                Padding(
+                  padding: const EdgeInsets.only(top: 17),
+                  child: Container(
+                    width: 16,
+                    height: 2,
+                    color: i < currentStep
+                        ? const Color(0xFFE8B84B)
+                        : Colors.black12,
+                  ),
+                ),
+            ],
+          );
+        }),
+      ),
     );
   }
 }
 
-class _DetailCard extends StatelessWidget {
-  const _DetailCard({
+// ---------------------------------------------------------------------------
+// Team Status Item
+// ---------------------------------------------------------------------------
+
+class _TeamStatusItem extends StatelessWidget {
+  const _TeamStatusItem({required this.role, required this.found});
+  final String role;
+  final bool found;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Container(
+              width: 54,
+              height: 54,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: const Color(0xFFE8D5C0),
+              ),
+              child: const Icon(Icons.person, size: 28, color: Color(0xFF8D6E63)),
+            ),
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: Container(
+                width: 16,
+                height: 16,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: found ? const Color(0xFF4CAF50) : const Color(0xFFE8B84B),
+                  border: Border.all(color: Colors.white, width: 1.5),
+                ),
+                child: Icon(
+                  found ? Icons.check_rounded : Icons.search_rounded,
+                  size: 9,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        Text(
+          role,
+          style: AppTextStyles.caption.copyWith(
+            color: Colors.black54,
+            fontSize: 10,
+            fontWeight: FontWeight.w500,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 2),
+        Text(
+          found ? 'Bulundu' : 'Aranıyor',
+          style: AppTextStyles.caption.copyWith(
+            color: found ? const Color(0xFF4CAF50) : const Color(0xFFB8860B),
+            fontSize: 10,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Stat item
+// ---------------------------------------------------------------------------
+
+class _StatItem extends StatelessWidget {
+  const _StatItem({
     required this.icon,
     required this.label,
     required this.value,
+    this.valueColor,
   });
-
   final IconData icon;
   final String label;
   final String value;
+  final Color? valueColor;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1A1714),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.07),
-          width: 0.5,
-        ),
-      ),
+    return Expanded(
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Row(
-            children: [
-              Icon(icon, size: 14, color: AppColors.textSecondary),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: AppTextStyles.caption.copyWith(
-                  color: AppColors.textSecondary,
-                  fontSize: 11,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
+          Icon(icon, size: 18, color: const Color(0xFF8D6E63)),
+          const SizedBox(height: 6),
           Text(
             value,
-            style: AppTextStyles.heading2.copyWith(
-              fontSize: 16,
-              color: Colors.white,
+            style: AppTextStyles.caption.copyWith(
+              color: valueColor ?? Colors.black87,
               fontWeight: FontWeight.w700,
+              fontSize: 11,
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: AppTextStyles.caption.copyWith(
+              color: Colors.black38,
+              fontSize: 10,
             ),
           ),
         ],
@@ -535,99 +911,71 @@ class _DetailCard extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Bottom Action Bar
-// ---------------------------------------------------------------------------
-
-class _BottomBar extends StatelessWidget {
-  const _BottomBar({required this.project});
-
-  final ProjectData project;
-
+class _Divider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
-        child: Row(
-          children: [
-            Expanded(
-              child: _ActionButton(
-                icon: Icons.chat_bubble_outline_rounded,
-                label: 'Sohbet Aç',
-                outlined: true,
-                onTap: () => Get.toNamed(
-                  '/client/chat-detail',
-                  arguments: {'name': project.title},
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _ActionButton(
-                icon: Icons.folder_outlined,
-                label: 'Dosyalar',
-                outlined: false,
-                onTap: () {},
-              ),
-            ),
-          ],
-        ),
-      ),
+    return Container(
+      width: 1,
+      height: 36,
+      color: Colors.black.withValues(alpha: 0.07),
     );
   }
 }
 
-class _ActionButton extends StatelessWidget {
-  const _ActionButton({
-    required this.icon,
-    required this.label,
-    required this.outlined,
-    required this.onTap,
-  });
+// ---------------------------------------------------------------------------
+// File Thumbnail
+// ---------------------------------------------------------------------------
 
+class _FileThumb extends StatelessWidget {
+  const _FileThumb({
+    required this.icon,
+    required this.name,
+    required this.meta,
+    required this.color,
+  });
   final IconData icon;
-  final String label;
-  final bool outlined;
-  final VoidCallback onTap;
+  final String name;
+  final String meta;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 52,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(14),
-          color: outlined ? Colors.transparent : const Color(0xFFD4A843),
-          border: outlined
-              ? Border.all(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  width: 1,
-                )
-              : null,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 80,
+          height: 72,
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.15),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+                color: color.withValues(alpha: 0.25), width: 1),
+          ),
+          child: Icon(icon, color: color, size: 28),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 18,
-              color: outlined ? Colors.white : const Color(0xFF1A1200),
+        const SizedBox(height: 6),
+        SizedBox(
+          width: 80,
+          child: Text(
+            name,
+            style: AppTextStyles.caption.copyWith(
+              color: Colors.black87,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
             ),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: AppTextStyles.button.copyWith(
-                color: outlined ? Colors.white : const Color(0xFF1A1200),
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ],
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
-      ),
+        Text(
+          meta,
+          style: AppTextStyles.caption.copyWith(
+            color: Colors.black38,
+            fontSize: 10,
+          ),
+        ),
+      ],
     );
   }
 }

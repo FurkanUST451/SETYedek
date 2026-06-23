@@ -10,7 +10,9 @@ class BriefShareView extends GetView<BriefShareController> {
 
   @override
   Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       body: Stack(
         children: [
           Positioned.fill(
@@ -25,8 +27,7 @@ class BriefShareView extends GetView<BriefShareController> {
                   child: Row(
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.arrow_back,
-                            color: Colors.black87),
+                        icon: const Icon(Icons.arrow_back, color: Colors.black87),
                         onPressed: () => Get.back(),
                       ),
                       const Spacer(),
@@ -60,13 +61,13 @@ class BriefShareView extends GetView<BriefShareController> {
                   ),
                 ),
 
+                // Scrollable content
                 Expanded(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+                    padding: EdgeInsets.fromLTRB(20, 16, 20, bottomInset + 16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Category + headline
                         Text(
                           controller.category.isNotEmpty
                               ? controller.category
@@ -90,7 +91,7 @@ class BriefShareView extends GetView<BriefShareController> {
                         ),
                         const SizedBox(height: 24),
 
-                        // ── Kendi Brief'ini Yaz ──────────────────────────
+                        // Brief card
                         _SectionCard(
                           icon: Icons.edit_outlined,
                           title: 'Kendi Brief\'ini Yaz',
@@ -100,16 +101,21 @@ class BriefShareView extends GetView<BriefShareController> {
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               const SizedBox(height: 12),
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.white
-                                      .withValues(alpha: 0.6),
-                                  borderRadius: BorderRadius.circular(12),
+                              Theme(
+                                data: ThemeData(
+                                  brightness: Brightness.light,
+                                  inputDecorationTheme:
+                                      const InputDecorationTheme(
+                                    filled: true,
+                                    fillColor: Color(0xFFF5ECD7),
+                                    border: InputBorder.none,
+                                    enabledBorder: InputBorder.none,
+                                    focusedBorder: InputBorder.none,
+                                  ),
                                 ),
-                                padding: const EdgeInsets.all(12),
                                 child: TextField(
                                   controller: controller.briefText,
-                                  maxLines: 6,
+                                  maxLines: 7,
                                   maxLength: 2000,
                                   style: AppTextStyles.body2
                                       .copyWith(color: Colors.black87),
@@ -117,14 +123,27 @@ class BriefShareView extends GetView<BriefShareController> {
                                     hintText: "Brief'ini buraya yaz...",
                                     hintStyle: AppTextStyles.body2.copyWith(
                                         color: Colors.black26),
-                                    border: InputBorder.none,
+                                    filled: true,
+                                    fillColor: const Color(0xFFF5ECD7),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide.none,
+                                    ),
                                     counterText: '',
                                     isDense: true,
-                                    contentPadding: EdgeInsets.zero,
+                                    contentPadding: const EdgeInsets.all(12),
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: 4),
+                              const SizedBox(height: 6),
                               Obx(() => Text(
                                     '${controller.charCount.value} / 2000',
                                     style: AppTextStyles.caption.copyWith(
@@ -133,70 +152,59 @@ class BriefShareView extends GetView<BriefShareController> {
                             ],
                           ),
                         ),
-                        const SizedBox(height: 12),
-
-                        // ── Sesli Not Bırak ──────────────────────────────
-                        _SectionCard(
-                          icon: Icons.mic_none_rounded,
-                          title: 'Sesli Not Bırak',
-                          subtitle:
-                              'Fikrini sesli anlat, notlarını kolayca paylaş.',
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 16),
-                            child: Obx(() => _VoiceRecorder(
-                                  isRecording: controller.isRecording.value,
-                                  time: controller.formattedTime,
-                                  onToggle: controller.toggleRecording,
-                                )),
-                          ),
-                        ),
-                        const SizedBox(height: 28),
-
-                        // Brief'i Gönder button
-                        GestureDetector(
-                          onTap: controller.submit,
-                          child: Container(
-                            width: double.infinity,
-                            height: 56,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFE8B84B),
-                              borderRadius: BorderRadius.circular(32),
-                              boxShadow: [
-                                BoxShadow(
-                                  color:
-                                      Colors.black.withValues(alpha: 0.15),
-                                  blurRadius: 16,
-                                  offset: const Offset(0, 6),
-                                ),
-                              ],
-                            ),
-                            alignment: Alignment.center,
-                            child: Text(
-                              "Brief'i Gönder  →",
-                              style: AppTextStyles.button.copyWith(
-                                color: Colors.black,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.lock_outline,
-                                size: 12, color: Colors.black38),
-                            const SizedBox(width: 5),
-                            Text(
-                              'Tüm dosyalar gizlidir ve sadece seçilen ekiplerle paylaşılır.',
-                              style: AppTextStyles.caption.copyWith(
-                                  color: Colors.black38, fontSize: 10),
-                            ),
-                          ],
-                        ),
                       ],
                     ),
+                  ),
+                ),
+
+                // Pinned bottom section
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+                  child: Column(
+                    children: [
+                      GestureDetector(
+                        onTap: controller.submit,
+                        child: Container(
+                          width: double.infinity,
+                          height: 56,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE8B84B),
+                            borderRadius: BorderRadius.circular(32),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.15),
+                                blurRadius: 16,
+                                offset: const Offset(0, 6),
+                              ),
+                            ],
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            "Brief'i Gönder  →",
+                            style: AppTextStyles.button.copyWith(
+                              color: Colors.black,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.lock_outline,
+                              size: 12, color: Colors.black38),
+                          const SizedBox(width: 5),
+                          Text(
+                            'Tüm dosyalar gizlidir ve sadece seçilen ekiplerle paylaşılır.',
+                            style: AppTextStyles.caption.copyWith(
+                                color: Colors.black38, fontSize: 10),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                    ],
                   ),
                 ),
               ],
@@ -261,8 +269,8 @@ class _SectionCard extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: AppTextStyles.heading3.copyWith(
-                          color: Colors.black87, fontSize: 15),
+                      style: AppTextStyles.heading3
+                          .copyWith(color: Colors.black87, fontSize: 15),
                     ),
                     const SizedBox(height: 3),
                     Text(
@@ -278,96 +286,6 @@ class _SectionCard extends StatelessWidget {
           child,
         ],
       ),
-    );
-  }
-}
-
-// ─── Voice Recorder ───────────────────────────────────────────────────────────
-
-class _VoiceRecorder extends StatelessWidget {
-  const _VoiceRecorder({
-    required this.isRecording,
-    required this.time,
-    required this.onToggle,
-  });
-
-  final bool isRecording;
-  final String time;
-  final VoidCallback onToggle;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        // Timer
-        Text(
-          time,
-          style: AppTextStyles.heading3.copyWith(
-            color: Colors.black54,
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(width: 12),
-        // Waveform placeholder
-        Expanded(
-          child: SizedBox(
-            height: 28,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: List.generate(22, (i) {
-                final heights = [
-                  4.0, 10.0, 6.0, 14.0, 8.0, 18.0, 10.0, 14.0,
-                  6.0, 10.0, 4.0, 8.0, 14.0, 6.0, 18.0, 10.0,
-                  6.0, 14.0, 8.0, 10.0, 4.0, 6.0,
-                ];
-                return AnimatedContainer(
-                  duration: Duration(milliseconds: 200 + i * 20),
-                  width: 2.5,
-                  height: isRecording
-                      ? heights[i % heights.length]
-                      : heights[i % heights.length] * 0.5,
-                  decoration: BoxDecoration(
-                    color: isRecording
-                        ? const Color(0xFFE8B84B)
-                        : Colors.black.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                );
-              }),
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        // Record button
-        GestureDetector(
-          onTap: onToggle,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: isRecording
-                  ? const Color(0xFFE53935)
-                  : const Color(0xFFE53935).withValues(alpha: 0.85),
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFFE53935)
-                      .withValues(alpha: isRecording ? 0.4 : 0.2),
-                  blurRadius: isRecording ? 20 : 8,
-                  spreadRadius: isRecording ? 3 : 0,
-                ),
-              ],
-            ),
-            child: Icon(
-              isRecording ? Icons.stop_rounded : Icons.fiber_manual_record,
-              color: Colors.white,
-              size: isRecording ? 22 : 20,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

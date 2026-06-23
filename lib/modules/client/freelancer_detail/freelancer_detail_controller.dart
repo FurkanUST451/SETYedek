@@ -17,9 +17,8 @@ class FreelancerDetailController extends GetxController {
   }
 
   void sendOffer() {
-    Get.toNamed(AppRoutes.sendOffer, arguments: {
-      'freelancer': freelancer,
-      'user': user,
+    Get.toNamed(AppRoutes.chatDetail, arguments: {
+      'name': user?.name ?? 'Freelancer',
     });
   }
 
