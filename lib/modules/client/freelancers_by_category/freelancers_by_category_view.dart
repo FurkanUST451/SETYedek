@@ -213,6 +213,13 @@ class _FreelancerCard extends StatelessWidget {
     ];
   }
 
+  // Freelancer ve user dokümanlarından en eksiksiz ad+soyadı oluşturur
+  String _buildDisplayName(FreelancerModel f, UserModel u) {
+    final name = f.name.isNotEmpty ? f.name : u.name;
+    final surname = (f.surname?.isNotEmpty == true) ? f.surname! : (u.surname ?? '');
+    return surname.isNotEmpty ? '$name $surname' : name;
+  }
+
   // YouTube video ID'sini URL'den çıkar
   String? _youtubeId(String url) {
     final uri = Uri.tryParse(url);
@@ -264,19 +271,19 @@ class _FreelancerCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Avatar placeholder
-              Container(
-                width: 72,
-                height: 72,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE8D5C0),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: const Icon(
-                  Icons.person,
-                  size: 40,
-                  color: Color(0xFF8D6E63),
-                ),
+              // Avatar
+              ClipRRect(
+                borderRadius: BorderRadius.circular(14),
+                child: freelancer.profileImageUrl != null
+                    ? CachedNetworkImage(
+                        imageUrl: freelancer.profileImageUrl!,
+                        width: 72,
+                        height: 72,
+                        fit: BoxFit.cover,
+                        placeholder: (_, __) => _AvatarPlaceholder(size: 72),
+                        errorWidget: (_, __, ___) => _AvatarPlaceholder(size: 72),
+                      )
+                    : _AvatarPlaceholder(size: 72),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -284,7 +291,7 @@ class _FreelancerCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      user.name,
+                      _buildDisplayName(freelancer, user),
                       style: AppTextStyles.heading3.copyWith(
                         color: Colors.black87,
                         fontSize: 16,
@@ -434,6 +441,21 @@ class _FreelancerCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _AvatarPlaceholder extends StatelessWidget {
+  const _AvatarPlaceholder({required this.size});
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      color: const Color(0xFFE8D5C0),
+      child: Icon(Icons.person, size: size * 0.56, color: const Color(0xFF8D6E63)),
     );
   }
 }

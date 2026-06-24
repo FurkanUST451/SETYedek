@@ -123,11 +123,76 @@ class _PersonalInfoStep extends StatelessWidget {
           Text('Kişisel Bilgiler', style: AppTextStyles.heading2),
           const SizedBox(height: AppSpacing.lg),
 
-          // İsim Soyisim
-          SetTextField(
-            label: 'İsim Soyisim',
-            hint: 'Adın ve soyadın',
-            controller: c.fullNameController,
+          // Profil Fotoğrafı
+          Center(
+            child: Obx(() {
+              final file = c.profileImageFile.value;
+              return GestureDetector(
+                onTap: c.pickProfileImage,
+                child: Stack(
+                  children: [
+                    CircleAvatar(
+                      radius: 52,
+                      backgroundColor: AppColors.surfaceDark,
+                      backgroundImage:
+                          file != null ? FileImage(file) : null,
+                      child: file == null
+                          ? const Icon(
+                              Icons.person_outline,
+                              size: 48,
+                              color: AppColors.textTertiary,
+                            )
+                          : null,
+                    ),
+                    Positioned(
+                      right: 0,
+                      bottom: 0,
+                      child: Container(
+                        width: 30,
+                        height: 30,
+                        decoration: BoxDecoration(
+                          color: AppColors.primary,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Theme.of(context).scaffoldBackgroundColor,
+                            width: 2,
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.edit,
+                          size: 15,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+
+          // Ad + Soyad
+          Row(
+            children: [
+              Expanded(
+                child: SetTextField(
+                  label: 'Ad',
+                  hint: 'Adın',
+                  controller: c.nameController,
+                  textInputAction: TextInputAction.next,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: SetTextField(
+                  label: 'Soyad',
+                  hint: 'Soyadın',
+                  controller: c.surnameController,
+                  textInputAction: TextInputAction.next,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: AppSpacing.md),
 

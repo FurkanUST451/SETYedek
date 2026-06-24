@@ -1,5 +1,10 @@
+import 'dart:io';
+
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../data/dummy/dummy_data.dart';
 import '../../../data/models/freelancer_model.dart';
@@ -36,10 +41,13 @@ class FreelancerOnboardingController extends GetxController {
   ];
 
   // Step 0 — Personal Info
-  final TextEditingController fullNameController = TextEditingController();
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController surnameController = TextEditingController();
   final RxnString selectedCity = RxnString();
   final Rxn<DateTime> birthDate = Rxn<DateTime>();
   final RxInt selectedExperience = 0.obs;
+  final Rxn<File> profileImageFile = Rxn<File>();
+  final RxBool isUploadingImage = false.obs;
 
   // Step 1 — Category (multi-select)
   final RxList<String> selectedCategories = <String>[].obs;
@@ -58,8 +66,37 @@ class FreelancerOnboardingController extends GetxController {
     super.onInit();
     try {
       final user = Get.find<UserController>().currentUser;
-      if (user != null) fullNameController.text = user.fullName;
+      if (user != null) {
+        nameController.text = user.name;
+        surnameController.text = user.surname ?? '';
+      }
     } catch (_) {}
+  }
+
+  Future<void> pickProfileImage() async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 800,
+      maxHeight: 800,
+      imageQuality: 85,
+    );
+    if (picked != null) {
+      profileImageFile.value = File(picked.path);
+    }
+  }
+
+  Future<String?> _uploadProfileImage(String userId) async {
+    final file = profileImageFile.value;
+    if (file == null) return null;
+    final currentUser = FirebaseAuth.instance.currentUser;
+    debugPrint('Upload - currentUser: ${currentUser?.uid}, userId: $userId');
+    final ref = FirebaseStorage.instance
+        .ref()
+        .child('profile_images')
+        .child('$userId.jpg');
+    await ref.putFile(file);
+    return await ref.getDownloadURL();
   }
 
   void onPageChanged(int i) => currentStep.value = i;
@@ -111,19 +148,24 @@ class FreelancerOnboardingController extends GetxController {
 
     isLoading.value = true;
     try {
-      // İsim-soyisim Firestore'daki kullanıcı kaydına yansıt
-      final fullName = fullNameController.text.trim();
-      if (fullName.isNotEmpty) {
-        final parts = fullName.split(' ');
-        final firstName = parts.first;
-        final surname = parts.length > 1 ? parts.sublist(1).join(' ') : null;
-        final updatedUser = user.copyWith(name: firstName, surname: surname);
+      // Ad ve soyad Firestore'daki kullanıcı kaydına yansıt
+      final firstName = nameController.text.trim();
+      final surname = surnameController.text.trim();
+      if (firstName.isNotEmpty) {
+        final updatedUser = user.copyWith(
+          name: firstName,
+          surname: surname.isEmpty ? null : surname,
+        );
         await _userRepo.upsertUser(updatedUser);
         Get.find<UserController>().setUser(updatedUser);
       }
 
+      final profileImageUrl = await _uploadProfileImage(user.id);
+
       final freelancer = FreelancerModel(
         userId: user.id,
+        name: firstName.isNotEmpty ? firstName : user.name,
+        surname: surname.isNotEmpty ? surname : user.surname,
         categories: List<String>.from(selectedCategories),
         bio: bioController.text.trim(),
         experience: selectedExperience.value,
@@ -131,6 +173,7 @@ class FreelancerOnboardingController extends GetxController {
         rating: 0,
         birthDate: birthDate.value,
         projects: List<PortfolioProject>.from(addedProjects),
+        profileImageUrl: profileImageUrl,
       );
 
       await _freelancerRepo.upsertFreelancer(freelancer);
@@ -151,7 +194,8 @@ class FreelancerOnboardingController extends GetxController {
   @override
   void onClose() {
     pageController.dispose();
-    fullNameController.dispose();
+    nameController.dispose();
+    surnameController.dispose();
     bioController.dispose();
     super.onClose();
   }

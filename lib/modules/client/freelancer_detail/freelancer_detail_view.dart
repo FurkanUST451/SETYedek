@@ -15,7 +15,13 @@ class FreelancerDetailView extends GetView<FreelancerDetailController> {
   Widget build(BuildContext context) {
     final f = controller.freelancer;
     final u = controller.user;
-    final name = u?.name ?? 'Freelancer';
+    final fName = f?.name.isNotEmpty == true ? f!.name : (u?.name ?? '');
+    final fSurname = (f?.surname?.isNotEmpty == true)
+        ? f!.surname!
+        : (u?.surname ?? '');
+    final name = fSurname.isNotEmpty
+        ? '$fName $fSurname'
+        : (fName.isNotEmpty ? fName : 'Freelancer');
 
     final reviewCount = (f?.experience ?? 3) * 18;
     final jobCount = (f?.experience ?? 3) * 12 + 15;
@@ -79,19 +85,19 @@ class FreelancerDetailView extends GetView<FreelancerDetailController> {
                                 Stack(
                                   clipBehavior: Clip.none,
                                   children: [
-                                    Container(
-                                      width: 96,
-                                      height: 96,
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFFE8D5C0),
-                                        borderRadius:
-                                            BorderRadius.circular(48),
-                                      ),
-                                      child: const Icon(
-                                        Icons.person,
-                                        size: 52,
-                                        color: Color(0xFF8D6E63),
-                                      ),
+                                    ClipOval(
+                                      child: f?.profileImageUrl != null
+                                          ? CachedNetworkImage(
+                                              imageUrl: f!.profileImageUrl!,
+                                              width: 96,
+                                              height: 96,
+                                              fit: BoxFit.cover,
+                                              placeholder: (_, __) =>
+                                                  _detailAvatarPlaceholder(),
+                                              errorWidget: (_, __, ___) =>
+                                                  _detailAvatarPlaceholder(),
+                                            )
+                                          : _detailAvatarPlaceholder(),
                                     ),
                                     Positioned(
                                       bottom: 4,
@@ -275,6 +281,13 @@ class FreelancerDetailView extends GetView<FreelancerDetailController> {
     );
   }
 }
+
+Widget _detailAvatarPlaceholder() => Container(
+      width: 96,
+      height: 96,
+      color: const Color(0xFFE8D5C0),
+      child: const Icon(Icons.person, size: 52, color: Color(0xFF8D6E63)),
+    );
 
 // ─── Tab delegate ──────────────────────────────────────────────────────────────
 
