@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 
 import '../../data/repositories/auth_repository.dart';
+import '../../data/repositories/brief_repository.dart';
 import '../../data/repositories/freelancer_repository.dart';
 import '../../data/repositories/user_repository.dart';
 import 'auth_controller.dart';
@@ -16,6 +17,7 @@ class InitialBinding extends Bindings {
     Get.put<AuthRepository>(AuthRepository(), permanent: true);
     Get.put<UserRepository>(UserRepository(), permanent: true);
     Get.put<FreelancerRepository>(FreelancerRepository(), permanent: true);
+    Get.put<BriefRepository>(BriefRepository(), permanent: true);
 
     // Controllers
     Get.put<ThemeController>(ThemeController(), permanent: true);

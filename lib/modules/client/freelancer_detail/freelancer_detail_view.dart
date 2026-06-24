@@ -1,9 +1,11 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/constants/app_assets.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/models/freelancer_model.dart';
+import '../../../widgets/video_viewer_page.dart';
 import 'freelancer_detail_controller.dart';
 
 class FreelancerDetailView extends GetView<FreelancerDetailController> {
@@ -65,7 +67,7 @@ class FreelancerDetailView extends GetView<FreelancerDetailController> {
                   ),
                   Expanded(
                     child: NestedScrollView(
-                      headerSliverBuilder: (_, __) => [
+                      headerSliverBuilder: (context, _) => [
                         SliverToBoxAdapter(
                           child: Padding(
                             padding:
@@ -118,7 +120,7 @@ class FreelancerDetailView extends GetView<FreelancerDetailController> {
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  'Direktör · ${f?.category ?? ''}',
+                                  'Direktör · ${f?.categories.join(', ') ?? ''}',
                                   style: AppTextStyles.body1.copyWith(
                                     color: Colors.black54,
                                   ),
@@ -311,121 +313,168 @@ class _IslerTab extends StatelessWidget {
   final int reviewCount;
   final int trustScore;
 
-  List<Map<String, String>> _projects() {
-    final seed =
-        (freelancer?.userId.codeUnits.fold(0, (a, b) => a + b) ?? 42);
-    final names = ['Beko', 'Migros', 'Ajet', 'Türk Telekom', 'Pepsi', 'Nike'];
-    final types = [
-      'Reklam Filmi',
-      'Marka Filmi',
-      'Tanıtım',
-      'Kurumsal',
-      'Viral',
-      'Belgesel'
-    ];
-    return List.generate(4, (i) {
-      return {
-        'brand': names[(seed + i) % names.length],
-        'type': types[(seed + i) % types.length],
-      };
-    });
-  }
-
-  final List<List<Color>> _warmPalettes = const [
+  static const List<List<Color>> _warmPalettes = [
     [Color(0xFF5C4033), Color(0xFF8D6E63)],
     [Color(0xFF4A3728), Color(0xFF795548)],
     [Color(0xFF6D4C41), Color(0xFFA1887F)],
     [Color(0xFF3E2723), Color(0xFF6D4C41)],
   ];
 
+  String? _youtubeId(String url) {
+    final uri = Uri.tryParse(url);
+    if (uri == null) return null;
+    if (uri.host.contains('youtu.be')) return uri.pathSegments.firstOrNull;
+    if (uri.host.contains('youtube.com')) {
+      if (uri.pathSegments.contains('shorts') && uri.pathSegments.length > 1) {
+        return uri.pathSegments[uri.pathSegments.indexOf('shorts') + 1];
+      }
+      return uri.queryParameters['v'];
+    }
+    return null;
+  }
+
+  String? _youtubeThumbnail(String url) {
+    final id = _youtubeId(url);
+    return id != null ? 'https://img.youtube.com/vi/$id/mqdefault.jpg' : null;
+  }
+
+  void _openVideo(String url, String title) {
+    Navigator.of(Get.context!).push(
+      MaterialPageRoute(
+        builder: (_) => VideoViewerPage(videoUrl: url, title: title),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final projects = _projects();
+    final projects = freelancer?.projects ?? [];
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
       children: [
-        // Öne Çıkan İşler
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Öne Çıkan İşler',
-              style: AppTextStyles.heading3.copyWith(color: Colors.black87),
-            ),
-            Text(
-              'Tümünü Gör →',
-              style: AppTextStyles.caption.copyWith(
-                color: const Color(0xFFB8860B),
-                fontWeight: FontWeight.w600,
-                fontSize: 12,
-              ),
-            ),
-          ],
+        Text(
+          'Projeler',
+          style: AppTextStyles.heading3.copyWith(color: Colors.black87),
         ),
         const SizedBox(height: 14),
-        SizedBox(
-          height: 160,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: projects.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 10),
-            itemBuilder: (_, i) {
-              final p = projects[i];
-              final colors = _warmPalettes[i % _warmPalettes.length];
-              return Container(
-                width: 140,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: colors,
+        if (projects.isEmpty)
+          Container(
+            height: 120,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.5),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Text(
+              'Henüz proje eklenmemiş',
+              style: AppTextStyles.body2.copyWith(color: Colors.black38),
+            ),
+          )
+        else
+          SizedBox(
+            height: 180,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: projects.length,
+              separatorBuilder: (context, i) => const SizedBox(width: 10),
+              itemBuilder: (context, i) {
+                final p = projects[i];
+                final videoUrl = p.videoUrl;
+                final thumbnail = videoUrl != null ? _youtubeThumbnail(videoUrl) : null;
+                final colors = _warmPalettes[i % _warmPalettes.length];
+
+                return GestureDetector(
+                  onTap: videoUrl != null ? () => _openVideo(videoUrl, p.title) : null,
+                  child: Container(
+                    width: 150,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: colors,
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    clipBehavior: Clip.hardEdge,
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        // YouTube thumbnail (varsa)
+                        if (thumbnail != null)
+                          CachedNetworkImage(
+                            imageUrl: thumbnail,
+                            fit: BoxFit.cover,
+                            errorWidget: (context, url, error) => const SizedBox.shrink(),
+                          )
+                        else if (videoUrl != null)
+                          Container(
+                            color: Colors.black.withValues(alpha: 0.2),
+                            alignment: Alignment.center,
+                            child: const Icon(Icons.videocam_outlined,
+                                color: Colors.white54, size: 36),
+                          ),
+                        // Alt metin için karartma
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Colors.transparent,
+                                  Colors.black.withValues(alpha: 0.7),
+                                ],
+                              ),
+                            ),
+                            padding: const EdgeInsets.fromLTRB(10, 20, 10, 10),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (p.title.isNotEmpty)
+                                  Text(
+                                    p.title,
+                                    style: AppTextStyles.heading3.copyWith(
+                                        color: Colors.white, fontSize: 13),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                if (p.jobType.isNotEmpty)
+                                  Text(
+                                    p.jobType,
+                                    style: AppTextStyles.caption.copyWith(
+                                        color: Colors.white60, fontSize: 11),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        // Oynat butonu (video varsa)
+                        if (videoUrl != null)
+                          Positioned(
+                            top: 10,
+                            left: 10,
+                            child: Container(
+                              width: 34,
+                              height: 34,
+                              decoration: BoxDecoration(
+                                color: Colors.black.withValues(alpha: 0.45),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.play_arrow_rounded,
+                                  color: Colors.white, size: 20),
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Placeholder icon
-                    Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.25),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(Icons.play_circle_outline,
-                          color: Colors.white54, size: 22),
-                    ),
-                    const Spacer(),
-                    Text(
-                      p['brand']!,
-                      style: AppTextStyles.heading3.copyWith(
-                          color: Colors.white, fontSize: 13),
-                    ),
-                    Text(
-                      p['type']!,
-                      style: AppTextStyles.caption.copyWith(
-                          color: Colors.white60, fontSize: 11),
-                    ),
-                    const SizedBox(height: 6),
-                    Container(
-                      width: 28,
-                      height: 28,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.15),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(Icons.arrow_forward,
-                          color: Colors.white, size: 14),
-                    ),
-                  ],
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
-        ),
         const SizedBox(height: 28),
         // Yorumlar preview
         Row(
@@ -521,10 +570,8 @@ class _HakkindaTab extends StatelessWidget {
           spacing: 8,
           runSpacing: 8,
           children: [
-            freelancer?.category ?? '',
-            'Kurgu',
+            ...(freelancer?.categories ?? []),
             'Color Grading',
-            'Drone',
           ]
               .where((s) => s.isNotEmpty)
               .map((s) => Container(

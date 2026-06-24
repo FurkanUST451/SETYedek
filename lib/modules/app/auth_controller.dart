@@ -1,11 +1,13 @@
 import 'package:get/get.dart';
 
 import '../../data/repositories/auth_repository.dart';
+import '../../data/repositories/user_repository.dart';
 import '../../data/services/storage_service.dart';
 import 'user_controller.dart';
 
 class AuthController extends GetxController {
   final AuthRepository _repo = Get.find<AuthRepository>();
+  final UserRepository _userRepo = Get.find<UserRepository>();
   final UserController _user = Get.find<UserController>();
 
   final RxBool isLoading = false.obs;
@@ -18,8 +20,10 @@ class AuthController extends GetxController {
     isLoading.value = true;
     errorMessage.value = null;
     try {
-      final user = await _repo.login(email: email, password: password);
-      _user.setUser(user);
+      final authUser = await _repo.login(email: email, password: password);
+      // Firestore'dan tam profili çek
+      final stored = await _userRepo.fetchUser(authUser.id);
+      _user.setUser(stored ?? authUser);
       return true;
     } catch (e) {
       errorMessage.value = e.toString();
@@ -31,18 +35,28 @@ class AuthController extends GetxController {
 
   Future<bool> register({
     required String name,
+    String? surname,
+    int? age,
+    String? gender,
     required String email,
     required String password,
   }) async {
     isLoading.value = true;
     errorMessage.value = null;
     try {
-      final user = await _repo.register(
+      final authUser = await _repo.register(
         name: name,
         email: email,
         password: password,
       );
-      _user.setUser(user);
+      final fullUser = authUser.copyWith(
+        surname: surname,
+        age: age,
+        gender: gender,
+      );
+      // Firestore'a kullanıcı profilini kaydet
+      await _userRepo.upsertUser(fullUser);
+      _user.setUser(fullUser);
       return true;
     } catch (e) {
       errorMessage.value = e.toString();

@@ -1,28 +1,41 @@
-import '../dummy/dummy_data.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../models/freelancer_model.dart';
 
-/// Freelancer repository — şimdilik dummy data döner.
 class FreelancerRepository {
   FreelancerRepository();
 
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
+
+  CollectionReference<Map<String, dynamic>> get _col =>
+      _db.collection('freelancers');
+
+  Future<void> upsertFreelancer(FreelancerModel freelancer) async {
+    await _col.doc(freelancer.userId).set(
+          freelancer.toJson(),
+          SetOptions(merge: true),
+        );
+  }
+
   Future<List<FreelancerModel>> fetchAll() async {
-    await Future.delayed(const Duration(milliseconds: 250));
-    return DummyData.freelancers;
+    final snapshot = await _col.get();
+    return snapshot.docs
+        .map((doc) => FreelancerModel.fromJson(doc.data()))
+        .toList();
   }
 
   Future<FreelancerModel?> fetchByUserId(String userId) async {
-    await Future.delayed(const Duration(milliseconds: 200));
-    try {
-      return DummyData.freelancers.firstWhere((f) => f.userId == userId);
-    } catch (_) {
-      return null;
-    }
+    final doc = await _col.doc(userId).get();
+    if (!doc.exists || doc.data() == null) return null;
+    return FreelancerModel.fromJson(doc.data()!);
   }
 
   Future<List<FreelancerModel>> filterByCategory(String category) async {
-    await Future.delayed(const Duration(milliseconds: 200));
-    return DummyData.freelancers
-        .where((f) => f.category == category)
+    final snapshot = await _col
+        .where('categories', arrayContains: category)
+        .get();
+    return snapshot.docs
+        .map((doc) => FreelancerModel.fromJson(doc.data()))
         .toList();
   }
 }

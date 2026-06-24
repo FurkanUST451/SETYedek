@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -5,6 +6,7 @@ import '../../../core/constants/app_assets.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/models/freelancer_model.dart';
 import '../../../data/models/user_model.dart';
+import '../../../widgets/video_viewer_page.dart';
 import 'freelancers_by_category_controller.dart';
 
 class FreelancersByCategoryView
@@ -13,8 +15,6 @@ class FreelancersByCategoryView
 
   @override
   Widget build(BuildContext context) {
-    final list = controller.freelancers;
-
     return Scaffold(
       body: Stack(
         children: [
@@ -40,13 +40,13 @@ class FreelancersByCategoryView
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'uygun ${list.isEmpty ? 0 : list.length * 10} kreatif.',
-                        style: AppTextStyles.displayXL.copyWith(
-                          color: Colors.black87,
-                          fontSize: 38,
-                        ),
-                      ),
+                      Obx(() => Text(
+                            'uygun ${controller.freelancers.isEmpty ? 0 : controller.freelancers.length * 10} kreatif.',
+                            style: AppTextStyles.displayXL.copyWith(
+                              color: Colors.black87,
+                              fontSize: 38,
+                            ),
+                          )),
                       const SizedBox(height: 6),
                       Text(
                         '5 kişiye ücretsiz teklif gönder.\nFazlası için kredi gerekir.',
@@ -92,24 +92,43 @@ class FreelancersByCategoryView
                 ),
                 // List
                 Expanded(
-                  child: list.isEmpty
-                      ? _EmptyState(category: controller.category)
-                      : ListView.separated(
-                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
-                          itemCount: list.length,
-                          separatorBuilder: (_, __) =>
-                              const SizedBox(height: 12),
-                          itemBuilder: (_, i) {
-                            final f = list[i];
-                            return Obx(() => _FreelancerCard(
-                                  freelancer: f,
-                                  user: controller.userFor(f),
-                                  selected: controller.isSelected(f),
-                                  onProfile: () => controller.openDetail(f),
-                                  onInvite: () => controller.toggleSelect(f),
-                                ));
-                          },
+                  child: Obx(() {
+                    if (controller.isLoading.value) {
+                      return const Center(
+                        child: CircularProgressIndicator(
+                          color: Color(0xFFE8B84B),
                         ),
+                      );
+                    }
+                    if (controller.errorMsg.isNotEmpty) {
+                      return Center(
+                        child: Text(
+                          controller.errorMsg.value,
+                          style: AppTextStyles.body2.copyWith(
+                            color: Colors.black54,
+                          ),
+                        ),
+                      );
+                    }
+                    if (controller.freelancers.isEmpty) {
+                      return _EmptyState(category: controller.category);
+                    }
+                    return ListView.separated(
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
+                      itemCount: controller.freelancers.length,
+                      separatorBuilder: (context, i) => const SizedBox(height: 12),
+                      itemBuilder: (_, i) {
+                        final f = controller.freelancers[i];
+                        return Obx(() => _FreelancerCard(
+                              freelancer: f,
+                              user: controller.userFor(f),
+                              selected: controller.isSelected(f),
+                              onProfile: () => controller.openDetail(f),
+                              onInvite: () => controller.toggleSelect(f),
+                            ));
+                      },
+                    );
+                  }),
                 ),
               ],
             ),
@@ -194,6 +213,34 @@ class _FreelancerCard extends StatelessWidget {
     ];
   }
 
+  // YouTube video ID'sini URL'den çıkar
+  String? _youtubeId(String url) {
+    final uri = Uri.tryParse(url);
+    if (uri == null) return null;
+    if (uri.host.contains('youtu.be')) return uri.pathSegments.firstOrNull;
+    if (uri.host.contains('youtube.com')) {
+      if (uri.pathSegments.contains('shorts') && uri.pathSegments.length > 1) {
+        return uri.pathSegments[uri.pathSegments.indexOf('shorts') + 1];
+      }
+      return uri.queryParameters['v'];
+    }
+    return null;
+  }
+
+  String? _youtubeThumbnail(String url) {
+    final id = _youtubeId(url);
+    if (id == null) return null;
+    return 'https://img.youtube.com/vi/$id/mqdefault.jpg';
+  }
+
+  void _openVideo(String url) {
+    Navigator.of(Get.context!).push(
+      MaterialPageRoute(
+        builder: (_) => VideoViewerPage(videoUrl: url),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final thumbColors = _thumbColors();
@@ -245,7 +292,7 @@ class _FreelancerCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Direktör · ${freelancer.category}',
+                      'Direktör · ${freelancer.categories.join(', ')}',
                       style: AppTextStyles.body2.copyWith(
                         color: Colors.black54,
                         fontSize: 13,
@@ -278,16 +325,57 @@ class _FreelancerCard extends StatelessWidget {
           // Portfolio thumbnails
           Row(
             children: List.generate(3, (i) {
+              final videoUrl = i < freelancer.projects.length
+                  ? freelancer.projects[i].videoUrl
+                  : null;
+              final thumbnail = videoUrl != null ? _youtubeThumbnail(videoUrl) : null;
+
               return Expanded(
-                child: Container(
-                  margin: EdgeInsets.only(right: i < 2 ? 6 : 0),
-                  height: 56,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: thumbColors[i],
+                child: GestureDetector(
+                  onTap: videoUrl != null ? () => _openVideo(videoUrl) : null,
+                  child: Container(
+                    margin: EdgeInsets.only(right: i < 2 ? 6 : 0),
+                    height: 72,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: thumbColors[i],
+                      ),
+                    ),
+                    clipBehavior: Clip.hardEdge,
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        if (thumbnail != null)
+                          CachedNetworkImage(
+                            imageUrl: thumbnail,
+                            fit: BoxFit.cover,
+                            errorWidget: (context, url, error) => const SizedBox.shrink(),
+                          )
+                        else if (videoUrl != null)
+                          Container(
+                            color: Colors.black.withValues(alpha: 0.35),
+                            alignment: Alignment.center,
+                            child: const Icon(Icons.videocam_outlined,
+                                color: Colors.white70, size: 24),
+                          ),
+                        if (videoUrl != null)
+                          Positioned(
+                            bottom: 4,
+                            right: 4,
+                            child: Container(
+                              padding: const EdgeInsets.all(3),
+                              decoration: BoxDecoration(
+                                color: Colors.black54,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: const Icon(Icons.play_arrow,
+                                  color: Colors.white, size: 14),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ),

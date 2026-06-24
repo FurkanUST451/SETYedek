@@ -8,10 +8,15 @@ class DummyData {
   static const List<String> categories = [
     'Video Çekim',
     'Kurgu',
-    'CGI & AI',
+    'Ses Tasarımı',
+    'CGI & VFX',
     'Fotoğraf',
-    'Ses',
-    'Drone',
+    'Grafik Tasarım',
+    'Sahne Sanatları',
+    'Sosyal Medya Yönetimi',
+    'Prodüksüyon Ekibi',
+    'Talent & Influencer',
+    'Set & Dekor',
   ];
 
   static const List<WorkModel> works = [
@@ -151,7 +156,7 @@ class DummyData {
   static final List<FreelancerModel> freelancers = [
     FreelancerModel(
       userId: 'u1',
-      category: 'Video Çekim',
+      categories: const ['Video Çekim'],
       bio: 'Reklam ve müzik videosu odaklı, set'
           ' deneyimi yüksek videograf.',
       experience: 7,
@@ -161,7 +166,7 @@ class DummyData {
     ),
     FreelancerModel(
       userId: 'u2',
-      category: 'Ses',
+      categories: const ['Ses Tasarımı'],
       bio: 'Reklam, dizi ve kısa film için ses tasarımı ve mix.',
       experience: 5,
       location: 'Ankara',
@@ -170,7 +175,7 @@ class DummyData {
     ),
     FreelancerModel(
       userId: 'u3',
-      category: 'Kurgu',
+      categories: const ['Kurgu'],
       bio: 'Sosyal medya ve reklam kurguları, hızlı teslim.',
       experience: 4,
       location: 'İzmir',
@@ -179,7 +184,7 @@ class DummyData {
     ),
     FreelancerModel(
       userId: 'u4',
-      category: 'CGI & AI',
+      categories: const ['CGI & VFX'],
       bio: 'CGI ürün görselleri ve AI tabanlı VFX iş akışları.',
       experience: 6,
       location: 'İstanbul',
@@ -188,7 +193,7 @@ class DummyData {
     ),
     FreelancerModel(
       userId: 'u5',
-      category: 'Drone',
+      categories: const ['Video Çekim'],
       bio: 'Lisanslı drone pilotu — sinematik hava çekimleri.',
       experience: 3,
       location: 'Antalya',
@@ -197,7 +202,7 @@ class DummyData {
     ),
     FreelancerModel(
       userId: 'u6',
-      category: 'Fotoğraf',
+      categories: const ['Fotoğraf'],
       bio: 'Marka kampanyaları ve editorial fotoğraf.',
       experience: 8,
       location: 'İstanbul',
@@ -206,7 +211,7 @@ class DummyData {
     ),
     FreelancerModel(
       userId: 'u7',
-      category: 'Video Çekim',
+      categories: const ['Video Çekim'],
       bio: 'Kurumsal ve ürün videolarında uzman, 4K cinema kamera deneyimi.',
       experience: 5,
       location: 'İstanbul',
@@ -215,7 +220,7 @@ class DummyData {
     ),
     FreelancerModel(
       userId: 'u8',
-      category: 'Video Çekim',
+      categories: const ['Video Çekim'],
       bio: 'Belgesel ve marka hikayeciliği odaklı yönetmen ve kameraman.',
       experience: 9,
       location: 'İstanbul',
@@ -224,7 +229,7 @@ class DummyData {
     ),
     FreelancerModel(
       userId: 'u9',
-      category: 'Video Çekim',
+      categories: const ['Video Çekim'],
       bio: 'Sosyal medya içerikleri ve kısa format video üretimi.',
       experience: 3,
       location: 'İzmir',
@@ -233,7 +238,7 @@ class DummyData {
     ),
     FreelancerModel(
       userId: 'u10',
-      category: 'Kurgu',
+      categories: const ['Kurgu'],
       bio: 'Film ve reklam kurguları, renk düzeltme ve motion grafik.',
       experience: 6,
       location: 'İstanbul',

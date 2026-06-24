@@ -90,8 +90,19 @@ class SendOfferController extends GetxController {
 
   Future<void> submit() async {
     isSubmitting.value = true;
-    await Future.delayed(const Duration(milliseconds: 600));
+    await Future.delayed(const Duration(milliseconds: 300));
     isSubmitting.value = false;
-    Get.toNamed(AppRoutes.briefShare, arguments: {'category': category});
+    Get.toNamed(
+      AppRoutes.briefShare,
+      arguments: {
+        'category': category,
+        'shootingType': selectedShootingType.value,
+        'vibes': selectedVibes.toList(),
+        'dateRange': selectedDateRange.value,
+        'deliveryTime': selectedDelivery.value,
+        'budget': selectedBudget.value,
+        'location': selectedLocation.value,
+      },
+    );
   }
 }
