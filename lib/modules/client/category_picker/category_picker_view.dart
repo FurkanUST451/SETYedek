@@ -14,7 +14,7 @@ class CategoryPickerView extends GetView<CategoryPickerController> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          Image.asset(AppAssets.choosePageBg, fit: BoxFit.cover),
+          Image.asset(AppAssets.choosePageBg, fit: BoxFit.cover, cacheWidth: 1080),
           SafeArea(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,

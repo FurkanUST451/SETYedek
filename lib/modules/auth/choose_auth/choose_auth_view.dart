@@ -13,7 +13,11 @@ class ChooseAuthView extends StatelessWidget {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          Image.asset(AppAssets.choosePageBg, fit: BoxFit.cover),
+          Image.asset(
+            AppAssets.choosePageBg,
+            fit: BoxFit.cover,
+            cacheWidth: MediaQuery.of(context).size.width.toInt().clamp(1, 1080),
+          ),
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32),

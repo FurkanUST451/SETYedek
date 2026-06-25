@@ -16,7 +16,7 @@ class BriefShareView extends GetView<BriefShareController> {
       body: Stack(
         children: [
           Positioned.fill(
-            child: Image.asset(AppAssets.choosePageBg, fit: BoxFit.cover),
+            child: Image.asset(AppAssets.choosePageBg, fit: BoxFit.cover, cacheWidth: 1080),
           ),
           SafeArea(
             child: Column(

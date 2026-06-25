@@ -35,13 +35,17 @@ class FreelancersByCategoryController extends GetxController {
       isLoading.value = true;
       errorMsg.value = '';
       final list = await _freelancerRepo.filterByCategory(category);
-      final users = await Future.wait(list.map((f) => _userRepo.fetchUser(f.userId)));
-      for (int i = 0; i < list.length; i++) {
-        if (users[i] != null) _userCache[list[i].userId] = users[i]!;
+      for (final f in list) {
+        try {
+          final user = await _userRepo.fetchUser(f.userId);
+          if (user != null) _userCache[f.userId] = user;
+        } catch (_) {
+          // users koleksiyonu erişim kısıtlı olabilir; FreelancerModel'deki isim kullanılır
+        }
       }
       freelancers.assignAll(list);
-    } catch (_) {
-      errorMsg.value = 'Freelancerlar yüklenemedi.';
+    } catch (e) {
+      errorMsg.value = e.toString();
     } finally {
       isLoading.value = false;
     }

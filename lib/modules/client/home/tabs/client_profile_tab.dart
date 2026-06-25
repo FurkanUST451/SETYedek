@@ -174,7 +174,7 @@ class _ClientProfileTabState extends State<ClientProfileTab> {
         children: [
           // Background image
           Positioned.fill(
-            child: Image.asset(AppAssets.choosePageBg, fit: BoxFit.cover),
+            child: Image.asset(AppAssets.choosePageBg, fit: BoxFit.cover, cacheWidth: 1080),
           ),
           // Gradient fade to cream
           Positioned.fill(

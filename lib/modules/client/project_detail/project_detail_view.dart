@@ -57,7 +57,7 @@ class ProjectDetailView extends StatelessWidget {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                Image.asset(AppAssets.choosePageBg, fit: BoxFit.cover),
+                Image.asset(AppAssets.choosePageBg, fit: BoxFit.cover, cacheWidth: 1080),
                 DecoratedBox(
                   decoration: const BoxDecoration(
                     gradient: LinearGradient(
