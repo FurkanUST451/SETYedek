@@ -20,12 +20,13 @@ class _ProjectModeViewState extends State<ProjectModeView> {
     if (_selected == null) return;
     final args = Get.arguments as Map<String, dynamic>?;
     final category = (args?['category'] as String?) ?? '';
+    final briefId = (args?['briefId'] as String?) ?? '';
     if (_selected == 'set') {
       Get.toNamed(AppRoutes.chatDetail,
           arguments: {'name': 'SET Destek', 'mode': 'set'});
     } else {
       Get.toNamed(AppRoutes.freelancersByCategory,
-          arguments: {'category': category});
+          arguments: {'category': category, 'briefId': briefId});
     }
   }
 

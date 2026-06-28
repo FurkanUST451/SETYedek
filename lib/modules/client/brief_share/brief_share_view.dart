@@ -162,8 +162,8 @@ class BriefShareView extends GetView<BriefShareController> {
                   padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
                   child: Column(
                     children: [
-                      GestureDetector(
-                        onTap: controller.submit,
+                      Obx(() => GestureDetector(
+                        onTap: controller.isLoading.value ? null : controller.submit,
                         child: Container(
                           width: double.infinity,
                           height: 56,
@@ -179,16 +179,25 @@ class BriefShareView extends GetView<BriefShareController> {
                             ],
                           ),
                           alignment: Alignment.center,
-                          child: Text(
-                            "Brief'i Gönder  →",
-                            style: AppTextStyles.button.copyWith(
-                              color: Colors.black,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
+                          child: controller.isLoading.value
+                              ? const SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.5,
+                                    color: Colors.black54,
+                                  ),
+                                )
+                              : Text(
+                                  "Brief'i Gönder  →",
+                                  style: AppTextStyles.button.copyWith(
+                                    color: Colors.black,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
                         ),
-                      ),
+                      )),
                       const SizedBox(height: 10),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,

@@ -140,8 +140,9 @@ class FreelancersByCategoryView
             bottom: 24,
             child: Obx(() {
               final count = controller.selectedIds.length;
+              final sending = controller.isSending.value;
               return GestureDetector(
-                onTap: controller.sendOffers,
+                onTap: sending ? null : controller.sendOffers,
                 child: AnimatedOpacity(
                   opacity: count > 0 ? 1.0 : 0.45,
                   duration: const Duration(milliseconds: 200),
@@ -159,14 +160,23 @@ class FreelancersByCategoryView
                       ],
                     ),
                     alignment: Alignment.center,
-                    child: Text(
-                      'Seçilenlere Teklif Gönder  →',
-                      style: AppTextStyles.button.copyWith(
-                        color: Colors.black,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
+                    child: sending
+                        ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                              color: Colors.black54,
+                            ),
+                          )
+                        : Text(
+                            'Seçilenlere Teklif Gönder  →',
+                            style: AppTextStyles.button.copyWith(
+                              color: Colors.black,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
                   ),
                 ),
               );
