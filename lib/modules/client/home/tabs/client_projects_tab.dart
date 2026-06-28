@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../data/models/brief_model.dart';
+import '../../../../routes/app_routes.dart';
 import '../client_projects_controller.dart';
 
 // ---------------------------------------------------------------------------
@@ -24,26 +24,28 @@ class ClientProjectsTab extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(
-                    'Projelerim',
-                    style: AppTextStyles.displayXL.copyWith(
-                      color: Colors.black87,
-                      fontSize: 36,
-                      fontWeight: FontWeight.w700,
+                  Expanded(
+                    child: Text(
+                      'Projelerim',
+                      style: AppTextStyles.displayXL.copyWith(
+                        color: Colors.black87,
+                        fontSize: 30,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Gönderdiğin briefler ve teklifler.',
-                    style: AppTextStyles.body2.copyWith(color: Colors.black45),
-                  ),
+                  _IconBtn(icon: Icons.search, onTap: () {}),
+                  const SizedBox(width: 4),
+                  _IconBtn(icon: Icons.notifications_none_outlined, onTap: () {}),
                 ],
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
+            _FilterChips(),
+            const SizedBox(height: 16),
             Expanded(
               child: Obx(() {
                 if (controller.isLoading.value) {
@@ -96,7 +98,7 @@ class ClientProjectsTab extends StatelessWidget {
                   child: ListView.separated(
                     padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
                     itemCount: controller.briefs.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    separatorBuilder: (_, _) => const SizedBox(height: 12),
                     itemBuilder: (_, i) => _BriefCard(
                       brief: controller.briefs[i],
                       controller: controller,
@@ -125,123 +127,311 @@ class _BriefCard extends StatelessWidget {
   String get _statusLabel {
     switch (brief.status) {
       case 'offer_sent':
-        return 'Teklif Gönderildi';
+        return 'TEKLİF AŞAMASINDA';
       case 'submitted':
-        return 'Brief Gönderildi';
+        return 'ANLAŞMA BEKLİYOR';
       default:
-        return 'Taslak';
+        return 'TASLAK';
     }
   }
 
   Color get _statusColor {
     switch (brief.status) {
       case 'offer_sent':
-        return const Color(0xFFE8B84B);
+        return const Color(0xFFE8882A);
       case 'submitted':
-        return const Color(0xFF6EA8FF);
+        return const Color(0xFF2A7AE8);
       default:
         return Colors.black38;
+    }
+  }
+
+  String get _offerCountLabel {
+    if (brief.sentToIds.isEmpty) return '';
+    switch (brief.status) {
+      case 'offer_sent':
+        return '${brief.sentToIds.length} teklif gönderildi';
+      case 'submitted':
+        return '${brief.sentToIds.length} teklif alındı';
+      default:
+        return '';
     }
   }
 
   String get _displayTitle =>
       brief.title.isNotEmpty ? brief.title : brief.category;
 
+  IconData get _categoryIcon {
+    final cat = brief.category.toLowerCase();
+    if (cat.contains('video') || cat.contains('film')) {
+      return Icons.videocam_outlined;
+    } else if (cat.contains('fotoğraf') || cat.contains('photo')) {
+      return Icons.camera_alt_outlined;
+    } else if (cat.contains('ses') || cat.contains('müzik') || cat.contains('audio')) {
+      return Icons.music_note_outlined;
+    } else if (cat.contains('illüstrasyon') || cat.contains('çizim')) {
+      return Icons.brush_outlined;
+    } else if (cat.contains('yazı') || cat.contains('metin') || cat.contains('içerik')) {
+      return Icons.edit_note_outlined;
+    }
+    return Icons.work_outline;
+  }
+
+  Color get _categoryIconBg {
+    final cat = brief.category.toLowerCase();
+    if (cat.contains('video') || cat.contains('film')) {
+      return const Color(0xFFFFF3E0);
+    } else if (cat.contains('fotoğraf') || cat.contains('photo')) {
+      return const Color(0xFFE8F5E9);
+    } else if (cat.contains('ses') || cat.contains('müzik') || cat.contains('audio')) {
+      return const Color(0xFFE3F2FD);
+    } else if (cat.contains('illüstrasyon') || cat.contains('çizim')) {
+      return const Color(0xFFF3E5F5);
+    }
+    return const Color(0xFFF0E8DC);
+  }
+
+  Color get _categoryIconColor {
+    final cat = brief.category.toLowerCase();
+    if (cat.contains('video') || cat.contains('film')) {
+      return const Color(0xFFE8882A);
+    } else if (cat.contains('fotoğraf') || cat.contains('photo')) {
+      return const Color(0xFF388E3C);
+    } else if (cat.contains('ses') || cat.contains('müzik') || cat.contains('audio')) {
+      return const Color(0xFF1976D2);
+    } else if (cat.contains('illüstrasyon') || cat.contains('çizim')) {
+      return const Color(0xFF7B1FA2);
+    }
+    return Colors.black54;
+  }
+
+  static const _months = [
+    '', 'Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz',
+    'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara',
+  ];
+
+  String _formatDate(DateTime date) {
+    return '${date.day} ${_months[date.month]} ${date.year}';
+  }
+
   @override
   Widget build(BuildContext context) {
+    final offerLabel = _offerCountLabel;
+
     return GestureDetector(
       onTap: () => _showDetail(context),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.9),
+          color: Colors.white,
           borderRadius: BorderRadius.circular(18),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.06),
-              blurRadius: 12,
+              blurRadius: 14,
               offset: const Offset(0, 4),
             ),
           ],
         ),
-        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _displayTitle,
-                        style: AppTextStyles.heading3.copyWith(
-                          color: Colors.black87,
-                          fontSize: 16,
-                        ),
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        brief.category,
-                        style: AppTextStyles.caption.copyWith(
-                          color: Colors.black45,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
+            // ── Status row ──────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 14, 12, 0),
+              child: Row(
+                children: [
+                  Text(
+                    _statusLabel,
+                    style: AppTextStyles.caption.copyWith(
+                      color: _statusColor,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 11,
+                      letterSpacing: 0.4,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                GestureDetector(
-                  onTap: () => _showEdit(context),
-                  behavior: HitTestBehavior.opaque,
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  const Spacer(),
+                  GestureDetector(
+                    onTap: () => _openEditFlow(context),
+                    behavior: HitTestBehavior.opaque,
+                    child: Container(
+                      padding: const EdgeInsets.all(7),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF0E8DC),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(
+                        Icons.edit_outlined,
+                        size: 17,
+                        color: Colors.black54,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // ── Title + icon row ─────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Category icon
+                  Container(
+                    width: 48,
+                    height: 48,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF0E8DC),
-                      borderRadius: BorderRadius.circular(10),
+                      color: _categoryIconBg,
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Text(
-                      'Düzenle',
-                      style: AppTextStyles.caption.copyWith(
-                        color: Colors.black87,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 12,
-                      ),
+                    child: Icon(_categoryIcon, size: 24, color: _categoryIconColor),
+                  ),
+                  const SizedBox(width: 12),
+                  // Title + subtitle
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _displayTitle,
+                          style: AppTextStyles.heading3.copyWith(
+                            color: Colors.black87,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          brief.category,
+                          style: AppTextStyles.caption.copyWith(
+                            color: Colors.black45,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              decoration: BoxDecoration(
-                color: _statusColor.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                _statusLabel,
-                style: AppTextStyles.caption.copyWith(
-                  color: _statusColor,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 12,
-                ),
+                  // Offer count
+                  if (offerLabel.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8, top: 2),
+                      child: Text(
+                        offerLabel,
+                        style: AppTextStyles.caption.copyWith(
+                          color: Colors.black38,
+                          fontSize: 11,
+                        ),
+                        textAlign: TextAlign.right,
+                      ),
+                    ),
+                ],
               ),
             ),
-            if (brief.sentToIds.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Text(
-                '${brief.sentToIds.length} freelancer\'a teklif gönderildi',
-                style: AppTextStyles.caption.copyWith(
-                  color: Colors.black45,
-                  fontSize: 12,
+
+            // ── Stats row (delivery / budget / date) ─────────────────────
+            if (brief.answers.deliveryTime != null ||
+                brief.answers.budget != null ||
+                brief.answers.dateRange != null) ...[
+              const SizedBox(height: 14),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    if (brief.answers.deliveryTime != null)
+                      Expanded(
+                        child: _StatCell(
+                          icon: Icons.access_time_outlined,
+                          label: 'Teslim Süresi',
+                          value: brief.answers.deliveryTime!,
+                        ),
+                      ),
+                    if (brief.answers.budget != null)
+                      Expanded(
+                        child: _StatCell(
+                          icon: Icons.attach_money_outlined,
+                          label: 'Bütçe',
+                          value: brief.answers.budget!,
+                        ),
+                      ),
+                    if (brief.answers.dateRange != null)
+                      Expanded(
+                        child: _StatCell(
+                          icon: Icons.calendar_today_outlined,
+                          label: 'Çekim Tarihi',
+                          value: brief.answers.dateRange!,
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ],
+
+            // ── Location ──────────────────────────────────────────────────
+            if (brief.answers.location != null &&
+                brief.answers.location!.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    const Icon(Icons.location_on_outlined,
+                        size: 15, color: Colors.black38),
+                    const SizedBox(width: 4),
+                    Text(
+                      brief.answers.location!,
+                      style: AppTextStyles.caption.copyWith(
+                        color: Colors.black54,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+
+            // ── Brief notes preview ───────────────────────────────────────
+            if (brief.answers.notes != null &&
+                brief.answers.notes!.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  brief.answers.notes!,
+                  style: AppTextStyles.body2.copyWith(
+                    color: Colors.black54,
+                    fontSize: 13,
+                    height: 1.45,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+
+            // ── Footer ────────────────────────────────────────────────────
+            const SizedBox(height: 14),
+            Container(
+              decoration: BoxDecoration(
+                border: Border(
+                  top: BorderSide(color: Colors.black.withValues(alpha: 0.06)),
+                ),
+              ),
+              padding: const EdgeInsets.fromLTRB(16, 10, 14, 12),
+              child: Row(
+                children: [
+                  Text(
+                    'Son güncelleme: ${_formatDate(brief.updatedAt)}',
+                    style: AppTextStyles.caption.copyWith(
+                      color: Colors.black38,
+                      fontSize: 11,
+                    ),
+                  ),
+                  const Spacer(),
+                  const Icon(Icons.chevron_right,
+                      size: 18, color: Colors.black26),
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -249,272 +439,163 @@ class _BriefCard extends StatelessWidget {
   }
 
   void _showDetail(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (_) => _BriefDetailSheet(brief: brief),
+    Get.toNamed(
+      AppRoutes.briefDetail,
+      arguments: {'brief': brief},
     );
   }
 
-  void _showEdit(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (_) => _BriefEditSheet(brief: brief, controller: controller),
+  void _openEditFlow(BuildContext context) {
+    Get.toNamed(
+      AppRoutes.sendOffer,
+      arguments: {
+        'category': brief.category,
+        'brief': brief,
+      },
     );
   }
 }
 
 // ---------------------------------------------------------------------------
-// Brief detail bottom sheet
+// Stat cell helper
 // ---------------------------------------------------------------------------
 
-class _BriefDetailSheet extends StatelessWidget {
-  const _BriefDetailSheet({required this.brief});
+class _StatCell extends StatelessWidget {
+  const _StatCell({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
 
-  final BriefModel brief;
-
-  String get _displayTitle =>
-      brief.title.isNotEmpty ? brief.title : brief.category;
+  final IconData icon;
+  final String label;
+  final String value;
 
   @override
   Widget build(BuildContext context) {
-    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
-    return Container(
-      padding: EdgeInsets.fromLTRB(20, 12, 20, 32 + bottomInset),
-      decoration: const BoxDecoration(
-        color: Color(0xFFF5EBD8),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 15, color: Colors.black38),
+        const SizedBox(width: 5),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: AppTextStyles.caption.copyWith(
+                  color: Colors.black38,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: AppTextStyles.caption.copyWith(
+                  color: Colors.black87,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+
+// ---------------------------------------------------------------------------
+// Icon button helper
+// ---------------------------------------------------------------------------
+
+class _IconBtn extends StatelessWidget {
+  const _IconBtn({required this.icon, required this.onTap});
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 38,
+        height: 38,
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.7),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(icon, size: 20, color: Colors.black54),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Filter chips
+// ---------------------------------------------------------------------------
+
+class _FilterChips extends StatefulWidget {
+  @override
+  State<_FilterChips> createState() => _FilterChipsState();
+}
+
+class _FilterChipsState extends State<_FilterChips> {
+  int _selected = 0;
+
+  static const _labels = [
+    'Tümü',
+    'Teklif Aşamasında',
+    'Anlaşma Bekliyor',
+    'Aktif',
+    'Tamamlandı',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 34,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        itemCount: _labels.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
+        itemBuilder: (_, i) {
+          final active = i == _selected;
+          return GestureDetector(
+            onTap: () => setState(() => _selected = i),
             child: Container(
-              width: 40,
-              height: 4,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
               decoration: BoxDecoration(
-                color: Colors.black12,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
-          Text(
-            _displayTitle,
-            style: AppTextStyles.heading2.copyWith(
-              color: Colors.black87,
-              fontSize: 22,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            brief.category,
-            style: AppTextStyles.caption.copyWith(color: Colors.black45),
-          ),
-          const SizedBox(height: 20),
-          if (brief.answers.notes != null &&
-              brief.answers.notes!.isNotEmpty) ...[
-            Text(
-              'BRIEF',
-              style: AppTextStyles.caption.copyWith(
-                color: Colors.black45,
-                letterSpacing: 1.2,
-                fontSize: 11,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.85),
-                borderRadius: BorderRadius.circular(14),
+                color: active ? Colors.black87 : Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: active
+                    ? []
+                    : [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.06),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
               ),
               child: Text(
-                brief.answers.notes!,
-                style: AppTextStyles.body2.copyWith(
-                  color: Colors.black87,
-                  height: 1.6,
+                _labels[i],
+                style: AppTextStyles.caption.copyWith(
+                  color: active ? Colors.white : Colors.black54,
+                  fontWeight:
+                      active ? FontWeight.w700 : FontWeight.w500,
+                  fontSize: 12,
                 ),
               ),
             ),
-            const SizedBox(height: 16),
-          ],
-          if (brief.answers.budget != null) ...[
-            Row(
-              children: [
-                const Icon(Icons.monetization_on_outlined,
-                    size: 16, color: Colors.black45),
-                const SizedBox(width: 6),
-                Text(
-                  brief.answers.budget!,
-                  style: AppTextStyles.body2.copyWith(color: Colors.black54),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-          ],
-          if (brief.sentToIds.isNotEmpty)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              decoration: BoxDecoration(
-                color: const Color(0xFFE8B84B).withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.people_outline,
-                      size: 18, color: Color(0xFFB8860B)),
-                  const SizedBox(width: 8),
-                  Text(
-                    '${brief.sentToIds.length} freelancer\'a teklif gönderildi',
-                    style: AppTextStyles.body2.copyWith(
-                      color: const Color(0xFFB8860B),
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Brief edit bottom sheet
-// ---------------------------------------------------------------------------
-
-class _BriefEditSheet extends StatefulWidget {
-  const _BriefEditSheet({required this.brief, required this.controller});
-
-  final BriefModel brief;
-  final ClientProjectsController controller;
-
-  @override
-  State<_BriefEditSheet> createState() => _BriefEditSheetState();
-}
-
-class _BriefEditSheetState extends State<_BriefEditSheet> {
-  late final TextEditingController _text;
-  bool _saving = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _text = TextEditingController(text: widget.brief.answers.notes ?? '');
-  }
-
-  @override
-  void dispose() {
-    _text.dispose();
-    super.dispose();
-  }
-
-  Future<void> _save() async {
-    final trimmed = _text.text.trim();
-    if (trimmed.isEmpty) return;
-    setState(() => _saving = true);
-    await widget.controller.updateBriefNotes(widget.brief.id, trimmed);
-    setState(() => _saving = false);
-    if (mounted) Navigator.of(context).pop();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
-    return Container(
-      padding: EdgeInsets.fromLTRB(20, 12, 20, 24 + bottomInset),
-      decoration: const BoxDecoration(
-        color: Color(0xFFF5EBD8),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.black12,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
-          Text(
-            'Brief\'i Düzenle',
-            style: AppTextStyles.heading2.copyWith(
-              color: Colors.black87,
-              fontSize: 20,
-            ),
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _text,
-            maxLines: 7,
-            maxLength: 2000,
-            style: AppTextStyles.body2.copyWith(color: Colors.black87),
-            decoration: InputDecoration(
-              hintText: "Brief'ini buraya yaz...",
-              hintStyle: AppTextStyles.body2.copyWith(color: Colors.black26),
-              filled: true,
-              fillColor: Colors.white.withValues(alpha: 0.9),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide.none,
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide.none,
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide.none,
-              ),
-              counterText: '',
-              isDense: true,
-              contentPadding: const EdgeInsets.all(14),
-            ),
-          ),
-          const SizedBox(height: 16),
-          GestureDetector(
-            onTap: _saving ? null : _save,
-            child: Container(
-              width: double.infinity,
-              height: 52,
-              decoration: BoxDecoration(
-                color: const Color(0xFFE8B84B),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              alignment: Alignment.center,
-              child: _saving
-                  ? const SizedBox(
-                      width: 22,
-                      height: 22,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.5,
-                        color: Colors.black54,
-                      ),
-                    )
-                  : Text(
-                      'Kaydet',
-                      style: AppTextStyles.button.copyWith(
-                        color: Colors.black,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-            ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }

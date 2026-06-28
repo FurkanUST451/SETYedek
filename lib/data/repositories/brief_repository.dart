@@ -49,4 +49,11 @@ class BriefRepository {
       'updatedAt': DateTime.now().toIso8601String(),
     });
   }
+
+  Future<void> updateBrief(BriefModel brief) async {
+    await _briefs.doc(brief.id).update({
+      'answers': brief.answers.toJson(),
+      'updatedAt': DateTime.now().toIso8601String(),
+    });
+  }
 }

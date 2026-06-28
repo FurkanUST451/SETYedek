@@ -77,7 +77,9 @@ class BriefShareView extends GetView<BriefShareController> {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          "Brief'ini paylaş.",
+                          controller.isEditMode
+                              ? "Brief'ini güncelle."
+                              : "Brief'ini paylaş.",
                           style: AppTextStyles.displayXL.copyWith(
                             color: Colors.black87,
                             fontSize: 36,
@@ -85,7 +87,9 @@ class BriefShareView extends GetView<BriefShareController> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Fikrini, referanslarını ve tüm detayları bizimle\npaylaş ki en doğru ekibi bulalım.',
+                          controller.isEditMode
+                              ? 'Projenin güncel detaylarını düzenleyebilirsin.'
+                              : 'Fikrini, referanslarını ve tüm detayları bizimle\npaylaş ki en doğru ekibi bulalım.',
                           style: AppTextStyles.body2
                               .copyWith(color: Colors.black45, height: 1.5),
                         ),
@@ -189,7 +193,9 @@ class BriefShareView extends GetView<BriefShareController> {
                                   ),
                                 )
                               : Text(
-                                  "Brief'i Gönder  →",
+                                  controller.isEditMode
+                                      ? "Brief'i Güncelle  →"
+                                      : "Brief'i Gönder  →",
                                   style: AppTextStyles.button.copyWith(
                                     color: Colors.black,
                                     fontSize: 16,

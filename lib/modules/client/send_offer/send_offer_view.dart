@@ -80,7 +80,9 @@ class SendOfferView extends GetView<SendOfferController> {
                         const SizedBox(height: 6),
                         // Headline
                         Text(
-                          "Doğru brief'i\noluşturalım.",
+                          controller.isEditMode
+                              ? "Brief'ini\ngüncelle."
+                              : "Doğru brief'i\noluşturalım.",
                           style: AppTextStyles.displayXL.copyWith(
                             color: Colors.black87,
                             fontSize: 36,

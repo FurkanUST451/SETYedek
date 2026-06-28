@@ -1,10 +1,14 @@
 import 'package:get/get.dart';
 
+import '../../../data/models/brief_model.dart';
 import '../../../routes/app_routes.dart';
 
 class SendOfferController extends GetxController {
-  // Category passed from previous screen
   late final String category;
+  String? _briefId;
+  String? _existingNotes;
+
+  bool get isEditMode => _briefId != null;
 
   final RxString selectedShootingType = ''.obs;
   final RxList<String> selectedVibes = <String>[].obs;
@@ -71,13 +75,35 @@ class SendOfferController extends GetxController {
     super.onInit();
     final args = Get.arguments as Map<String, dynamic>?;
     category = (args?['category'] as String?) ?? '';
-    // Defaults
-    selectedShootingType.value = 'Reklam Filmi Yatay';
-    selectedVibes.assignAll(['Enerjik']);
-    selectedDateRange.value = '12 - 16 Haziran';
-    selectedDelivery.value = '7 Gün';
-    selectedBudget.value = '50.000₺ - 120.000₺';
-    selectedLocation.value = 'İstanbul / Beşiktaş';
+
+    final existing = args?['brief'] as BriefModel?;
+    if (existing != null) {
+      // Edit mode — pre-populate from existing brief
+      _briefId = existing.id;
+      _existingNotes = existing.answers.notes;
+      selectedShootingType.value =
+          existing.answers.shootingType ?? 'Reklam Filmi Yatay';
+      selectedVibes.assignAll(
+          existing.answers.vibes?.isNotEmpty == true
+              ? existing.answers.vibes!
+              : ['Enerjik']);
+      selectedDateRange.value =
+          existing.answers.dateRange ?? '12 - 16 Haziran';
+      selectedDelivery.value =
+          existing.answers.deliveryTime ?? '7 Gün';
+      selectedBudget.value =
+          existing.answers.budget ?? '50.000₺ - 120.000₺';
+      selectedLocation.value =
+          existing.answers.location ?? 'İstanbul / Beşiktaş';
+    } else {
+      // New brief — defaults
+      selectedShootingType.value = 'Reklam Filmi Yatay';
+      selectedVibes.assignAll(['Enerjik']);
+      selectedDateRange.value = '12 - 16 Haziran';
+      selectedDelivery.value = '7 Gün';
+      selectedBudget.value = '50.000₺ - 120.000₺';
+      selectedLocation.value = 'İstanbul / Beşiktaş';
+    }
   }
 
   void toggleVibe(String vibe) {
@@ -96,6 +122,8 @@ class SendOfferController extends GetxController {
       AppRoutes.briefShare,
       arguments: {
         'category': category,
+        'briefId': _briefId,
+        'existingNotes': _existingNotes,
         'shootingType': selectedShootingType.value,
         'vibes': selectedVibes.toList(),
         'dateRange': selectedDateRange.value,
