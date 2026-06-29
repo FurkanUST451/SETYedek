@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../data/models/brief_model.dart';
+import '../../../../routes/app_routes.dart';
 import '../freelancer_job_offers_controller.dart';
 
 class FreelancerJobOffersTab extends GetView<FreelancerJobOffersController> {
@@ -58,8 +59,10 @@ class FreelancerJobOffersTab extends GetView<FreelancerJobOffersController> {
                     padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
                     itemCount: controller.offers.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 12),
-                    itemBuilder: (_, i) =>
-                        _OfferCard(brief: controller.offers[i]),
+                    itemBuilder: (_, i) => _OfferCard(
+                      brief: controller.offers[i],
+                      onReload: controller.loadOffers,
+                    ),
                   ),
                 );
               }),
@@ -76,9 +79,10 @@ class FreelancerJobOffersTab extends GetView<FreelancerJobOffersController> {
 // ---------------------------------------------------------------------------
 
 class _OfferCard extends StatelessWidget {
-  const _OfferCard({required this.brief});
+  const _OfferCard({required this.brief, required this.onReload});
 
   final BriefModel brief;
+  final Future<void> Function() onReload;
 
   String get _displayTitle =>
       brief.title.isNotEmpty ? brief.title : brief.category;
@@ -86,7 +90,7 @@ class _OfferCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => _showDetail(context),
+      onTap: _openDetail,
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white.withValues(alpha: 0.9),
@@ -208,13 +212,14 @@ class _OfferCard extends StatelessWidget {
     );
   }
 
-  void _showDetail(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (_) => _OfferDetailSheet(brief: brief),
+  Future<void> _openDetail() async {
+    final result = await Get.toNamed(
+      AppRoutes.freelancerOfferDetail,
+      arguments: {'brief': brief},
     );
+    if (result == 'rejected') {
+      await onReload();
+    }
   }
 }
 
@@ -245,114 +250,6 @@ class _InfoChip extends StatelessWidget {
               fontWeight: FontWeight.w500,
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Offer detail bottom sheet
-// ---------------------------------------------------------------------------
-
-class _OfferDetailSheet extends StatelessWidget {
-  const _OfferDetailSheet({required this.brief});
-
-  final BriefModel brief;
-
-  String get _displayTitle =>
-      brief.title.isNotEmpty ? brief.title : brief.category;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
-      decoration: const BoxDecoration(
-        color: Color(0xFFF5EBD8),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.black12,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
-          Text(
-            _displayTitle,
-            style: AppTextStyles.heading2.copyWith(
-              color: Colors.black87,
-              fontSize: 22,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            brief.category,
-            style: AppTextStyles.caption.copyWith(color: Colors.black45),
-          ),
-          const SizedBox(height: 16),
-          Wrap(
-            spacing: 8,
-            runSpacing: 6,
-            children: [
-              if (brief.answers.budget != null)
-                _InfoChip(
-                  icon: Icons.monetization_on_outlined,
-                  label: brief.answers.budget!,
-                ),
-              if (brief.answers.dateRange != null)
-                _InfoChip(
-                  icon: Icons.calendar_today_outlined,
-                  label: brief.answers.dateRange!,
-                ),
-              if (brief.answers.location != null)
-                _InfoChip(
-                  icon: Icons.location_on_outlined,
-                  label: brief.answers.location!,
-                ),
-              if (brief.answers.deliveryTime != null)
-                _InfoChip(
-                  icon: Icons.timer_outlined,
-                  label: 'Teslim: ${brief.answers.deliveryTime!}',
-                ),
-            ],
-          ),
-          if (brief.answers.notes != null &&
-              brief.answers.notes!.isNotEmpty) ...[
-            const SizedBox(height: 16),
-            Text(
-              'BRIEF',
-              style: AppTextStyles.caption.copyWith(
-                color: Colors.black45,
-                letterSpacing: 1.2,
-                fontSize: 11,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.85),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Text(
-                brief.answers.notes!,
-                style: AppTextStyles.body2.copyWith(
-                  color: Colors.black87,
-                  height: 1.6,
-                ),
-              ),
-            ),
-          ],
         ],
       ),
     );

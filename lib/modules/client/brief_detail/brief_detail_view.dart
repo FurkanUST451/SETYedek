@@ -168,8 +168,10 @@ class BriefDetailView extends GetView<BriefDetailController> {
                     ],
 
                     // Freelancerlar
-                    Obx(() => _buildFreelancerSection()),
-                    const SizedBox(height: 12),
+                    if (brief.sentToIds.isNotEmpty) ...[
+                      Obx(() => _buildFreelancerSection()),
+                      const SizedBox(height: 12),
+                    ],
 
                     // Proje Bilgileri
                     _Section(

@@ -28,4 +28,5 @@ class AppRoutes {
   // Freelancer (Hizmet Ver) flow — implementation pending
   static const String freelancerOnboarding = '/freelancer/onboarding';
   static const String freelancerHome = '/freelancer/home';
+  static const String freelancerOfferDetail = '/freelancer/offer-detail';
 }

@@ -43,6 +43,14 @@ class BriefRepository {
     });
   }
 
+  Future<void> removeSentToId(
+      String briefId, String freelancerId, List<String> updatedIds) async {
+    await _briefs.doc(briefId).update({
+      'sentToIds': updatedIds,
+      'updatedAt': DateTime.now().toIso8601String(),
+    });
+  }
+
   Future<void> updateNotes(String briefId, String notes) async {
     await _briefs.doc(briefId).update({
       'answers.notes': notes,

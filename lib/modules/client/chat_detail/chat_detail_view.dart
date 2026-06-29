@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -7,6 +5,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../data/models/message_model.dart';
 import 'chat_detail_controller.dart';
 
 class ChatDetailView extends GetView<ChatDetailController> {
@@ -18,29 +17,31 @@ class ChatDetailView extends GetView<ChatDetailController> {
       canPop: false,
       onPopInvokedWithResult: (_, __) => controller.goBack(),
       child: Scaffold(
-      backgroundColor: const Color(0xFF141210),
-      appBar: _buildAppBar(),
-      body: Column(
-        children: [
-          Expanded(
-            child: Obx(() => ListView.builder(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.md,
-                    AppSpacing.sm,
-                    AppSpacing.md,
-                    AppSpacing.sm,
-                  ),
-                  itemCount: controller.messages.length + 1,
-                  itemBuilder: (_, i) {
-                    if (i == 0) return const _ActiveProjectCard();
-                    final msg = controller.messages[i - 1];
-                    return _buildMessage(msg);
-                  },
-                )),
-          ),
-          _Composer(controller: controller),
-        ],
-      ),
+        backgroundColor: const Color(0xFF141210),
+        appBar: _buildAppBar(),
+        body: Column(
+          children: [
+            Expanded(
+              child: Obx(() => ListView.builder(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.md,
+                      AppSpacing.sm,
+                      AppSpacing.md,
+                      AppSpacing.sm,
+                    ),
+                    itemCount: controller.messages.length + 1,
+                    itemBuilder: (_, i) {
+                      if (i == 0) {
+                        return _BriefCard(title: controller.briefTitle);
+                      }
+                      final msg = controller.messages[i - 1];
+                      return _buildMessage(msg);
+                    },
+                  )),
+            ),
+            _Composer(controller: controller),
+          ],
+        ),
       ),
     );
   }
@@ -57,7 +58,6 @@ class ChatDetailView extends GetView<ChatDetailController> {
       ),
       title: Row(
         children: [
-          // Avatar
           Container(
             width: 38,
             height: 38,
@@ -73,7 +73,8 @@ class ChatDetailView extends GetView<ChatDetailController> {
                   .split(' ')
                   .map((w) => w.isNotEmpty ? w[0] : '')
                   .take(2)
-                  .join(),
+                  .join()
+                  .toUpperCase(),
               style: AppTextStyles.caption.copyWith(
                 color: AppColors.textPrimary,
                 fontWeight: FontWeight.w700,
@@ -87,49 +88,41 @@ class ChatDetailView extends GetView<ChatDetailController> {
               Text(controller.chatName,
                   style: AppTextStyles.body1
                       .copyWith(fontWeight: FontWeight.w600)),
-              Text('Director',
-                  style: AppTextStyles.caption
-                      .copyWith(color: AppColors.textSecondary)),
             ],
           ),
         ],
       ),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.phone_outlined,
-              color: AppColors.textSecondary, size: 20),
-          onPressed: () {},
-        ),
-        IconButton(
-          icon: const Icon(Icons.videocam_outlined,
-              color: AppColors.textSecondary, size: 22),
-          onPressed: () {},
-        ),
-      ],
     );
   }
 
-  Widget _buildMessage(ChatMsg msg) {
-    switch (msg.type) {
-      case ChatMsgType.text:
-        return _TheirBubble(text: msg.text ?? '', time: msg.time);
-      case ChatMsgType.photos:
-        return _PhotoGrid(time: msg.time);
-      case ChatMsgType.voice:
-        return _VoiceMessage(time: msg.time);
-      case ChatMsgType.mine:
-        return _MyBubble(text: msg.text ?? '', time: msg.time);
+  Widget _buildMessage(MessageModel msg) {
+    final isMe = msg.senderId == controller.myId;
+    final time = controller.formatTime(msg.createdAt);
+    if (isMe) {
+      return _MyBubble(text: msg.content, time: time);
     }
+    return _TheirBubble(
+      text: msg.content,
+      time: time,
+      initials: controller.chatName
+          .split(' ')
+          .map((w) => w.isNotEmpty ? w[0] : '')
+          .take(2)
+          .join()
+          .toUpperCase(),
+    );
   }
 }
 
-// ─── Active Project Card ─────────────────────────────────────────────────────
+// ─── Brief Card ───────────────────────────────────────────────────────────────
 
-class _ActiveProjectCard extends StatelessWidget {
-  const _ActiveProjectCard();
+class _BriefCard extends StatelessWidget {
+  const _BriefCard({required this.title});
+  final String title;
 
   @override
   Widget build(BuildContext context) {
+    if (title.isEmpty) return const SizedBox(height: AppSpacing.sm);
     return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.lg),
       padding: const EdgeInsets.all(AppSpacing.md),
@@ -139,77 +132,36 @@ class _ActiveProjectCard extends StatelessWidget {
         border: Border.all(color: const Color(0xFF2E2820)),
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: AppColors.accentGold.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(AppRadius.md),
+            ),
+            child: const Icon(Icons.work_outline_rounded,
+                color: AppColors.accentGold, size: 20),
+          ),
+          const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Active Project',
+                  'Brief',
                   style: AppTextStyles.caption
                       .copyWith(color: AppColors.textSecondary),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 Text(
-                  'Luxury Product Film',
-                  style: AppTextStyles.heading3
-                      .copyWith(color: AppColors.textPrimary, fontSize: 18),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Row(
-                  children: [
-                    const Icon(Icons.schedule_outlined,
-                        size: 13, color: AppColors.textSecondary),
-                    const SizedBox(width: 4),
-                    Text('3 - 4 Weeks',
-                        style: AppTextStyles.caption
-                            .copyWith(color: AppColors.textSecondary)),
-                    const SizedBox(width: AppSpacing.sm),
-                    const Icon(Icons.attach_money_rounded,
-                        size: 13, color: AppColors.textSecondary),
-                    Text('\$15K - \$30K',
-                        style: AppTextStyles.caption
-                            .copyWith(color: AppColors.textSecondary)),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: AppColors.accentGold.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(AppRadius.full),
-                    border: Border.all(
-                        color: AppColors.accentGold.withValues(alpha: 0.4)),
-                  ),
-                  child: Text(
-                    'In Progress',
-                    style: AppTextStyles.caption.copyWith(
-                      color: AppColors.accentGold,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  title,
+                  style: AppTextStyles.heading3.copyWith(
+                      color: AppColors.textPrimary, fontSize: 15),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          // Thumbnail placeholder
-          ClipRRect(
-            borderRadius: BorderRadius.circular(AppRadius.md),
-            child: Container(
-              width: 72,
-              height: 72,
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Color(0xFF2A2018), Color(0xFF1A1510)],
-                ),
-              ),
-              child: const Icon(Icons.movie_outlined,
-                  color: Color(0xFF4A3A28), size: 32),
             ),
           ),
         ],
@@ -221,9 +173,11 @@ class _ActiveProjectCard extends StatelessWidget {
 // ─── Their text bubble ────────────────────────────────────────────────────────
 
 class _TheirBubble extends StatelessWidget {
-  const _TheirBubble({required this.text, required this.time});
+  const _TheirBubble(
+      {required this.text, required this.time, required this.initials});
   final String text;
   final String time;
+  final String initials;
 
   @override
   Widget build(BuildContext context) {
@@ -243,8 +197,8 @@ class _TheirBubble extends StatelessWidget {
               ),
             ),
             alignment: Alignment.center,
-            child: const Text('JP',
-                style: TextStyle(
+            child: Text(initials,
+                style: const TextStyle(
                     color: Colors.white,
                     fontSize: 9,
                     fontWeight: FontWeight.w700)),
@@ -282,135 +236,6 @@ class _TheirBubble extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-// ─── Photo grid ───────────────────────────────────────────────────────────────
-
-class _PhotoGrid extends StatelessWidget {
-  const _PhotoGrid({required this.time});
-  final String time;
-
-  static const _gradients = [
-    [Color(0xFF2A2018), Color(0xFF4A3828)],
-    [Color(0xFF1A1A1A), Color(0xFF2A2A2A)],
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 36, bottom: AppSpacing.sm),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: List.generate(2, (i) {
-              return Expanded(
-                child: Container(
-                  margin: EdgeInsets.only(right: i == 0 ? 4 : 0),
-                  height: 110,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(AppRadius.md),
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: _gradients[i],
-                    ),
-                  ),
-                  child: Icon(
-                    i == 0
-                        ? Icons.camera_alt_outlined
-                        : Icons.image_outlined,
-                    color: const Color(0xFF5A4A38),
-                    size: 28,
-                  ),
-                ),
-              );
-            }),
-          ),
-          const SizedBox(height: 3),
-          Text(time,
-              style: AppTextStyles.caption
-                  .copyWith(color: AppColors.textTertiary, fontSize: 10)),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── Voice Message ────────────────────────────────────────────────────────────
-
-class _VoiceMessage extends StatelessWidget {
-  const _VoiceMessage({required this.time});
-  final String time;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 36, bottom: AppSpacing.sm),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: BoxDecoration(
-              color: const Color(0xFF1E1A14),
-              borderRadius: BorderRadius.circular(AppRadius.lg),
-              border: Border.all(color: const Color(0xFF2E2820)),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Color(0xFF2A2018),
-                  ),
-                  child: const Icon(Icons.play_arrow_rounded,
-                      color: AppColors.textPrimary, size: 20),
-                ),
-                const SizedBox(width: 10),
-                _Waveform(),
-                const SizedBox(width: 10),
-                Text('0:28',
-                    style: AppTextStyles.caption
-                        .copyWith(color: AppColors.textSecondary)),
-              ],
-            ),
-          ),
-          const SizedBox(height: 3),
-          Text(time,
-              style: AppTextStyles.caption
-                  .copyWith(color: AppColors.textTertiary, fontSize: 10)),
-        ],
-      ),
-    );
-  }
-}
-
-class _Waveform extends StatelessWidget {
-  final _rng = Random(42);
-
-  _Waveform();
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: List.generate(28, (i) {
-        final h = 8.0 + _rng.nextDouble() * 18;
-        return Container(
-          width: 2.5,
-          height: h,
-          margin: const EdgeInsets.symmetric(horizontal: 1),
-          decoration: BoxDecoration(
-            color: AppColors.textSecondary.withValues(alpha: 0.6),
-            borderRadius: BorderRadius.circular(2),
-          ),
-        );
-      }),
     );
   }
 }
@@ -498,40 +323,29 @@ class _Composer extends StatelessWidget {
                   borderRadius: BorderRadius.circular(AppRadius.full),
                   border: Border.all(color: const Color(0xFF2E2820)),
                 ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: controller.messageController,
-                        style: AppTextStyles.body1
-                            .copyWith(color: AppColors.textPrimary),
-                        cursorColor: AppColors.accentGold,
-                        decoration: InputDecoration(
-                          hintText: 'Message...',
-                          hintStyle: AppTextStyles.body1
-                              .copyWith(color: AppColors.textTertiary),
-                          border: InputBorder.none,
-                          contentPadding:
-                              const EdgeInsets.symmetric(vertical: 10),
-                          isCollapsed: true,
-                        ),
-                        onSubmitted: (_) => controller.send(),
-                      ),
-                    ),
-                  ],
+                child: TextField(
+                  controller: controller.messageController,
+                  style: AppTextStyles.body1
+                      .copyWith(color: AppColors.textPrimary),
+                  cursorColor: AppColors.accentGold,
+                  decoration: InputDecoration(
+                    hintText: 'Mesaj yaz...',
+                    hintStyle: AppTextStyles.body1
+                        .copyWith(color: AppColors.textTertiary),
+                    border: InputBorder.none,
+                    contentPadding:
+                        const EdgeInsets.symmetric(vertical: 10),
+                    isCollapsed: true,
+                  ),
+                  onSubmitted: (_) => controller.send(),
                 ),
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
-            _IconBtn(icon: Icons.attach_file_rounded, onTap: () {}),
-            const SizedBox(width: 6),
-            _IconBtn(icon: Icons.mic_none_rounded, onTap: () {}),
-            const SizedBox(width: 6),
-            _IconBtn(
-              icon: Icons.add_rounded,
-              onTap: controller.send,
-              filled: true,
-            ),
+            Obx(() => _SendBtn(
+                  onTap: controller.send,
+                  isLoading: controller.isSending.value,
+                )),
           ],
         ),
       ),
@@ -539,32 +353,29 @@ class _Composer extends StatelessWidget {
   }
 }
 
-class _IconBtn extends StatelessWidget {
-  const _IconBtn(
-      {required this.icon, required this.onTap, this.filled = false});
-  final IconData icon;
+class _SendBtn extends StatelessWidget {
+  const _SendBtn({required this.onTap, required this.isLoading});
   final VoidCallback onTap;
-  final bool filled;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: isLoading ? null : onTap,
       child: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
+        width: 44,
+        height: 44,
+        decoration: const BoxDecoration(
           shape: BoxShape.circle,
-          color: filled ? AppColors.accentGold : const Color(0xFF1E1A14),
-          border: filled
-              ? null
-              : Border.all(color: const Color(0xFF2E2820)),
+          color: AppColors.accentGold,
         ),
-        child: Icon(
-          icon,
-          size: 20,
-          color: filled ? Colors.black : AppColors.textSecondary,
-        ),
+        child: isLoading
+            ? const Padding(
+                padding: EdgeInsets.all(12),
+                child: CircularProgressIndicator(
+                    strokeWidth: 2, color: Colors.black),
+              )
+            : const Icon(Icons.send_rounded, size: 20, color: Colors.black),
       ),
     );
   }

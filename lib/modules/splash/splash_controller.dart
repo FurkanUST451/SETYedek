@@ -2,11 +2,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 
 import '../../data/models/user_model.dart';
+import '../../data/repositories/user_repository.dart';
 import '../../data/services/storage_service.dart';
 import '../../routes/app_routes.dart';
-
+import '../app/user_controller.dart';
 
 class SplashController extends GetxController {
+  final UserController _userController = Get.find<UserController>();
+  final UserRepository _userRepo = Get.find<UserRepository>();
+
   @override
   void onReady() {
     super.onReady();
@@ -32,6 +36,14 @@ class SplashController extends GetxController {
       StorageService.remove(StorageService.userRole);
       Get.offAllNamed(AppRoutes.chooseAuth);
       return;
+    }
+
+    // Önceki oturumdan gelen kullanıcıyı UserController'a yükle
+    if (!_userController.hasUser) {
+      try {
+        final stored = await _userRepo.fetchUser(firebaseUser.uid);
+        if (stored != null) _userController.setUser(stored);
+      } catch (_) {}
     }
 
     final roleName = StorageService.read<String>(StorageService.userRole);

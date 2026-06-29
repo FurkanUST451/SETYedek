@@ -25,6 +25,8 @@ import '../modules/client/send_offer/send_offer_binding.dart';
 import '../modules/client/send_offer/send_offer_view.dart';
 import '../modules/freelancer/home/freelancer_home_binding.dart';
 import '../modules/freelancer/home/freelancer_home_view.dart';
+import '../modules/freelancer/offer_detail/freelancer_offer_detail_binding.dart';
+import '../modules/freelancer/offer_detail/freelancer_offer_detail_view.dart';
 import '../modules/freelancer/onboarding/freelancer_onboarding_binding.dart';
 import '../modules/freelancer/onboarding/freelancer_onboarding_view.dart';
 import '../modules/onboarding/onboarding_binding.dart';
@@ -129,6 +131,11 @@ class AppPages {
       name: AppRoutes.freelancerHome,
       page: () => const FreelancerHomeView(),
       binding: FreelancerHomeBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.freelancerOfferDetail,
+      page: () => const FreelancerOfferDetailView(),
+      binding: FreelancerOfferDetailBinding(),
     ),
   ];
 }
