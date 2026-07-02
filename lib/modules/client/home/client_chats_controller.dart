@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
 import '../../../data/models/chat_model.dart';
+import '../../../data/models/user_model.dart';
 import '../../../data/repositories/chat_repository.dart';
 import '../../app/user_controller.dart';
 
@@ -23,8 +24,12 @@ class ClientChatsController extends GetxController {
 
   void _subscribe() {
     _sub?.cancel();
-    final userId = _userController.currentUser?.id ?? '';
-    if (userId.isEmpty) return;
+    final user = _userController.currentUser;
+    if (user == null || user.role != UserRole.client) {
+      chats.clear();
+      return;
+    }
+    final userId = user.id;
 
     _sub = _chatRepo.chatsForClient(userId).listen(
       (list) => chats.assignAll(list),

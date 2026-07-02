@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
 
-import 'freelancer_chats_controller.dart';
 import 'freelancer_home_controller.dart';
 import 'freelancer_job_offers_controller.dart';
 
@@ -9,6 +8,5 @@ class FreelancerHomeBinding extends Bindings {
   void dependencies() {
     Get.lazyPut(() => FreelancerHomeController());
     Get.lazyPut(() => FreelancerJobOffersController());
-    Get.put(FreelancerChatsController());
   }
 }
