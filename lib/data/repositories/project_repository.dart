@@ -1,0 +1,52 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+import '../models/offer_model.dart';
+import '../models/project_model.dart';
+
+class ProjectRepository {
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
+
+  CollectionReference<Map<String, dynamic>> get _projects =>
+      _db.collection('projects');
+
+  Future<ProjectModel> createFromOffer(
+    OfferModel offer, {
+    required String clientId,
+    required String freelancerId,
+  }) async {
+    final ref = _projects.doc();
+    final project = ProjectModel(
+      id: ref.id,
+      clientId: clientId,
+      freelancerId: freelancerId,
+      status: ProjectStatus.active,
+      title: offer.briefTitle,
+      description: offer.message,
+      budget: offer.amount,
+      createdAt: DateTime.now(),
+      offerId: offer.id,
+      briefId: offer.briefId,
+      chatId: offer.chatId,
+    );
+    await ref.set(project.toJson());
+    return project;
+  }
+
+  Future<List<ProjectModel>> fetchByClient(String clientId) async {
+    final snapshot =
+        await _projects.where('clientId', isEqualTo: clientId).get();
+    final list =
+        snapshot.docs.map((d) => ProjectModel.fromJson(d.data())).toList();
+    list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return list;
+  }
+
+  Future<List<ProjectModel>> fetchByFreelancer(String freelancerId) async {
+    final snapshot =
+        await _projects.where('freelancerId', isEqualTo: freelancerId).get();
+    final list =
+        snapshot.docs.map((d) => ProjectModel.fromJson(d.data())).toList();
+    list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return list;
+  }
+}

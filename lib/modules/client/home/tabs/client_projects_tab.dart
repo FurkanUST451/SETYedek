@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../data/models/brief_model.dart';
+import '../../../../data/models/project_model.dart';
 import '../../../../routes/app_routes.dart';
 import '../client_projects_controller.dart';
 
@@ -89,20 +90,52 @@ class ClientProjectsTab extends StatelessWidget {
                     ),
                   );
                 }
-                if (controller.briefs.isEmpty) {
+                if (controller.briefs.isEmpty && controller.projects.isEmpty) {
                   return const _EmptyState();
                 }
+                final activeProjects = controller.projects
+                    .where((p) => p.status == ProjectStatus.active)
+                    .toList();
                 return RefreshIndicator(
                   color: const Color(0xFFE8B84B),
                   onRefresh: controller.loadBriefs,
-                  child: ListView.separated(
+                  child: ListView(
                     padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
-                    itemCount: controller.briefs.length,
-                    separatorBuilder: (_, _) => const SizedBox(height: 12),
-                    itemBuilder: (_, i) => _BriefCard(
-                      brief: controller.briefs[i],
-                      controller: controller,
-                    ),
+                    children: [
+                      if (activeProjects.isNotEmpty) ...[
+                        Text(
+                          'AKTİF PROJELER',
+                          style: AppTextStyles.caption.copyWith(
+                            color: Colors.black45,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.4,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        ...activeProjects.map((p) => Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: _ProjectCard(project: p),
+                            )),
+                        const SizedBox(height: 8),
+                      ],
+                      if (controller.briefs.isNotEmpty) ...[
+                        if (activeProjects.isNotEmpty) ...[
+                          Text(
+                            'BRIEFLER',
+                            style: AppTextStyles.caption.copyWith(
+                              color: Colors.black45,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.4,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                        ],
+                        ...controller.briefs.map((b) => Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: _BriefCard(brief: b, controller: controller),
+                            )),
+                      ],
+                    ],
                   ),
                 );
               }),
@@ -160,6 +193,14 @@ class _BriefCard extends StatelessWidget {
 
   String get _displayTitle =>
       brief.title.isNotEmpty ? brief.title : brief.category;
+
+  String get _displaySubtitle {
+    final shootingType = brief.answers.shootingType;
+    if (shootingType != null && shootingType.isNotEmpty) {
+      return shootingType;
+    }
+    return brief.category;
+  }
 
   IconData get _categoryIcon {
     final cat = brief.category.toLowerCase();
@@ -302,7 +343,7 @@ class _BriefCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          brief.category,
+                          _displaySubtitle,
                           style: AppTextStyles.caption.copyWith(
                             color: Colors.black45,
                             fontSize: 12,
@@ -452,6 +493,75 @@ class _BriefCard extends StatelessWidget {
         'category': brief.category,
         'brief': brief,
       },
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Active project card
+// ---------------------------------------------------------------------------
+
+class _ProjectCard extends StatelessWidget {
+  const _ProjectCard({required this.project});
+
+  final ProjectModel project;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFF2E7D32).withValues(alpha: 0.25)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: const Color(0xFF2E7D32).withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(Icons.work_history_outlined,
+                size: 22, color: Color(0xFF2E7D32)),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  project.title.isNotEmpty ? project.title : 'Proje',
+                  style: AppTextStyles.heading3.copyWith(
+                    color: Colors.black87,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${project.budget.toStringAsFixed(0)} ₺ · Aktif',
+                  style: AppTextStyles.caption.copyWith(
+                    color: const Color(0xFF2E7D32),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Icon(Icons.chevron_right, size: 18, color: Colors.black26),
+        ],
+      ),
     );
   }
 }

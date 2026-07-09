@@ -1,0 +1,110 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    match /briefs/{briefId} {
+      allow create: if request.auth != null;
+      allow read, update, delete: if request.auth != null
+        && (
+          request.auth.uid == resource.data.ownerId
+          || request.auth.uid in resource.data.sentToIds
+        );
+    }
+
+    match /freelancers/{userId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    match /chats/{chatId} {
+      allow get: if request.auth != null;
+
+      // Parantezler doğru — && operatörü || 'den önce gelir
+      allow list: if request.auth != null
+        && (
+          request.auth.uid == resource.data.clientId
+          || request.auth.uid == resource.data.freelancerId
+        );
+
+      allow create: if request.auth != null
+        && (
+          request.auth.uid == request.resource.data.clientId
+          || request.auth.uid == request.resource.data.freelancerId
+        );
+
+      allow update: if request.auth != null
+        && (
+          request.auth.uid == resource.data.clientId
+          || request.auth.uid == resource.data.freelancerId
+        );
+
+      allow delete: if false;
+
+      match /messages/{messageId} {
+        allow read: if request.auth != null
+          && (
+            get(/databases/$(database)/documents/chats/$(chatId)).data.clientId == request.auth.uid
+            || get(/databases/$(database)/documents/chats/$(chatId)).data.freelancerId == request.auth.uid
+          );
+
+        allow create: if request.auth != null
+          && request.auth.uid == request.resource.data.senderId
+          && (
+            get(/databases/$(database)/documents/chats/$(chatId)).data.clientId == request.auth.uid
+            || get(/databases/$(database)/documents/chats/$(chatId)).data.freelancerId == request.auth.uid
+          );
+
+        allow update, delete: if false;
+      }
+    }
+
+    match /offers/{offerId} {
+      allow get: if request.auth != null
+        && (
+          request.auth.uid == resource.data.senderId
+          || request.auth.uid == resource.data.receiverId
+        );
+
+      allow create: if request.auth != null
+        && request.auth.uid == request.resource.data.senderId
+        && request.resource.data.status == 'pending';
+
+      // Sadece teklifi alan taraf, sadece 'status' alanını değiştirebilir
+      allow update: if request.auth != null
+        && request.auth.uid == resource.data.receiverId
+        && resource.data.status == 'pending'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+        && request.resource.data.status in ['accepted', 'rejected'];
+
+      allow list, delete: if false;
+    }
+
+    match /projects/{projectId} {
+      allow get: if request.auth != null
+        && (
+          request.auth.uid == resource.data.clientId
+          || request.auth.uid == resource.data.freelancerId
+        );
+
+      allow list: if request.auth != null
+        && (
+          request.auth.uid == resource.data.clientId
+          || request.auth.uid == resource.data.freelancerId
+        );
+
+      allow create: if request.auth != null
+        && (
+          request.auth.uid == request.resource.data.clientId
+          || request.auth.uid == request.resource.data.freelancerId
+        );
+
+      allow update, delete: if false;
+    }
+
+  }
+}

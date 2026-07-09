@@ -56,6 +56,8 @@ class ChatRepository {
     required String chatId,
     required String senderId,
     required String content,
+    String type = 'text',
+    String? offerId,
   }) async {
     final msgRef = _msgs(chatId).doc();
     final msg = MessageModel(
@@ -64,14 +66,23 @@ class ChatRepository {
       senderId: senderId,
       content: content,
       createdAt: DateTime.now(),
+      type: type,
+      offerId: offerId,
     );
     await Future.wait([
       msgRef.set(msg.toJson()),
       _chats.doc(chatId).update({
-        'lastMessage': content,
+        'lastMessage': type == 'offer' ? 'Fiyat teklifi' : content,
         'lastMessageAt': msg.createdAt.toIso8601String(),
       }),
     ]);
+  }
+
+  Future<ChatModel?> fetchChat(String chatId) async {
+    final doc = await _chats.doc(chatId).get();
+    final data = doc.data();
+    if (data == null) return null;
+    return ChatModel.fromJson(data);
   }
 
   Stream<List<MessageModel>> messagesStream(String chatId) {

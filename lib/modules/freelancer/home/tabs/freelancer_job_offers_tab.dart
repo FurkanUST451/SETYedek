@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../data/models/brief_model.dart';
+import '../../../../data/models/project_model.dart';
 import '../../../../routes/app_routes.dart';
 import '../freelancer_job_offers_controller.dart';
 
@@ -59,16 +60,131 @@ class FreelancerJobOffersTab extends GetView<FreelancerJobOffersController> {
                     padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
                     itemCount: controller.offers.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 12),
-                    itemBuilder: (_, i) => _OfferCard(
-                      brief: controller.offers[i],
-                      onReload: controller.loadOffers,
-                    ),
+                    itemBuilder: (_, i) {
+                      final brief = controller.offers[i];
+                      final project =
+                          controller.acceptedProjectsByBriefId[brief.id];
+                      if (project != null) {
+                        return _AcceptedCard(brief: brief, project: project);
+                      }
+                      return _OfferCard(
+                        brief: brief,
+                        onReload: controller.loadOffers,
+                      );
+                    },
                   ),
                 );
               }),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Accepted (simplified) card
+// ---------------------------------------------------------------------------
+
+class _AcceptedCard extends StatelessWidget {
+  const _AcceptedCard({required this.brief, required this.project});
+
+  final BriefModel brief;
+  final ProjectModel project;
+
+  String get _displayTitle =>
+      brief.title.isNotEmpty ? brief.title : brief.category;
+
+  String get _displaySubtitle {
+    final shootingType = brief.answers.shootingType;
+    if (shootingType != null && shootingType.isNotEmpty) {
+      return shootingType;
+    }
+    return brief.category;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.6),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFF2E7D32).withValues(alpha: 0.25)),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: const Color(0xFF2E7D32).withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(Icons.check_circle_outline,
+                size: 18, color: Color(0xFF2E7D32)),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _displayTitle,
+                  style: AppTextStyles.body1.copyWith(
+                    color: Colors.black54,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                if (_displaySubtitle.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    _displaySubtitle,
+                    style: AppTextStyles.caption.copyWith(
+                      color: Colors.black38,
+                      fontSize: 12,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                '${project.budget.toStringAsFixed(0)} ₺',
+                style: AppTextStyles.body1.copyWith(
+                  color: const Color(0xFF2E7D32),
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 3),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF2E7D32).withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  'Kabul Edildi',
+                  style: AppTextStyles.caption.copyWith(
+                    color: const Color(0xFF2E7D32),
+                    fontWeight: FontWeight.w700,
+                    fontSize: 10,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -86,6 +202,14 @@ class _OfferCard extends StatelessWidget {
 
   String get _displayTitle =>
       brief.title.isNotEmpty ? brief.title : brief.category;
+
+  String get _displaySubtitle {
+    final shootingType = brief.answers.shootingType;
+    if (shootingType != null && shootingType.isNotEmpty) {
+      return shootingType;
+    }
+    return brief.category;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -122,9 +246,9 @@ class _OfferCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 3),
-                      if (brief.category.isNotEmpty)
+                      if (_displaySubtitle.isNotEmpty)
                         Text(
-                          brief.category,
+                          _displaySubtitle,
                           style: AppTextStyles.caption.copyWith(
                             color: Colors.black45,
                             fontSize: 12,

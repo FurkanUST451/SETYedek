@@ -5,7 +5,9 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../data/models/brief_model.dart';
 import '../../../data/models/message_model.dart';
+import '../../../data/models/offer_model.dart';
 import 'chat_detail_controller.dart';
 
 class ChatDetailView extends GetView<ChatDetailController> {
@@ -32,7 +34,7 @@ class ChatDetailView extends GetView<ChatDetailController> {
                     itemCount: controller.messages.length + 1,
                     itemBuilder: (_, i) {
                       if (i == 0) {
-                        return _BriefCard(title: controller.briefTitle);
+                        return _BriefCard(controller: controller);
                       }
                       final msg = controller.messages[i - 1];
                       return _buildMessage(msg);
@@ -98,6 +100,23 @@ class ChatDetailView extends GetView<ChatDetailController> {
   Widget _buildMessage(MessageModel msg) {
     final isMe = msg.senderId == controller.myId;
     final time = controller.formatTime(msg.createdAt);
+
+    if (msg.type == 'offer' && msg.offerId != null) {
+      return Obx(() {
+        final offer = controller.offers[msg.offerId];
+        if (offer == null) {
+          return const SizedBox.shrink();
+        }
+        return _OfferBubble(
+          offer: offer,
+          isMe: isMe,
+          time: time,
+          onAccept: () => controller.respondToOffer(offer, true),
+          onReject: () => controller.respondToOffer(offer, false),
+        );
+      });
+    }
+
     if (isMe) {
       return _MyBubble(text: msg.content, time: time);
     }
@@ -117,54 +136,344 @@ class ChatDetailView extends GetView<ChatDetailController> {
 // ─── Brief Card ───────────────────────────────────────────────────────────────
 
 class _BriefCard extends StatelessWidget {
-  const _BriefCard({required this.title});
-  final String title;
+  const _BriefCard({required this.controller});
+  final ChatDetailController controller;
 
   @override
   Widget build(BuildContext context) {
-    if (title.isEmpty) return const SizedBox(height: AppSpacing.sm);
+    return Obx(() {
+      final brief = controller.brief.value;
+      final category =
+          brief?.category.isNotEmpty == true ? brief!.category : controller.briefTitle;
+      final shootingType = brief?.answers.shootingType;
+      if (category.isEmpty) return const SizedBox(height: AppSpacing.sm);
+
+      return GestureDetector(
+        onTap: brief == null ? null : () => _showBriefDetail(context, brief),
+        child: Container(
+          margin: const EdgeInsets.only(bottom: AppSpacing.lg),
+          padding: const EdgeInsets.all(AppSpacing.md),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1E1A14),
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+            border: Border.all(color: const Color(0xFF2E2820)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: AppColors.accentGold.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                ),
+                child: const Icon(Icons.work_outline_rounded,
+                    color: AppColors.accentGold, size: 20),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      category,
+                      style: AppTextStyles.heading3.copyWith(
+                          color: AppColors.textPrimary, fontSize: 15),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (shootingType != null && shootingType.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        shootingType,
+                        style: AppTextStyles.caption
+                            .copyWith(color: AppColors.textSecondary),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              if (brief != null)
+                const Icon(Icons.chevron_right,
+                    size: 18, color: AppColors.textTertiary),
+            ],
+          ),
+        ),
+      );
+    });
+  }
+
+  void _showBriefDetail(BuildContext context, BriefModel brief) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1E1A14),
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => _BriefDetailSheet(brief: brief),
+    );
+  }
+}
+
+class _BriefDetailSheet extends StatelessWidget {
+  const _BriefDetailSheet({required this.brief});
+  final BriefModel brief;
+
+  @override
+  Widget build(BuildContext context) {
+    final a = brief.answers;
+    final items = <(IconData, String, String)>[
+      if (a.shootingType != null && a.shootingType!.isNotEmpty)
+        (Icons.movie_creation_outlined, 'Çekim Türü', a.shootingType!),
+      if (a.dateRange != null && a.dateRange!.isNotEmpty)
+        (Icons.calendar_today_outlined, 'Çekim Tarihi', a.dateRange!),
+      if (a.deliveryTime != null && a.deliveryTime!.isNotEmpty)
+        (Icons.access_time_outlined, 'Teslim Süresi', a.deliveryTime!),
+      if (a.budget != null && a.budget!.isNotEmpty)
+        (Icons.attach_money_outlined, 'Bütçe', a.budget!),
+      if (a.location != null && a.location!.isNotEmpty)
+        (Icons.location_on_outlined, 'Lokasyon', a.location!),
+      if (a.vibes != null && a.vibes!.isNotEmpty)
+        (Icons.show_chart_rounded, 'Duygu', a.vibes!.join(', ')),
+    ];
+
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.lg),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              brief.category.isNotEmpty ? brief.category : 'İş',
+              style: AppTextStyles.heading3
+                  .copyWith(color: AppColors.textPrimary, fontSize: 18),
+            ),
+            if (a.shootingType != null && a.shootingType!.isNotEmpty) ...[
+              const SizedBox(height: 2),
+              Text(
+                a.shootingType!,
+                style: AppTextStyles.body2
+                    .copyWith(color: AppColors.textSecondary),
+              ),
+            ],
+            const SizedBox(height: AppSpacing.lg),
+            if (items.isNotEmpty)
+              Wrap(
+                spacing: AppSpacing.md,
+                runSpacing: AppSpacing.md,
+                children: items
+                    .map((item) => _DetailChip(
+                          icon: item.$1,
+                          label: item.$2,
+                          value: item.$3,
+                        ))
+                    .toList(),
+              ),
+            if (a.notes != null && a.notes!.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.lg),
+              Text(
+                'İŞ TARİFİ',
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.textTertiary,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.4,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                a.notes!,
+                style: AppTextStyles.body2.copyWith(
+                  color: AppColors.textSecondary,
+                  height: 1.5,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DetailChip extends StatelessWidget {
+  const _DetailChip(
+      {required this.icon, required this.label, required this.value});
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: AppSpacing.lg),
-      padding: const EdgeInsets.all(AppSpacing.md),
+      constraints: const BoxConstraints(minWidth: 130),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E1A14),
-        borderRadius: BorderRadius.circular(AppRadius.lg),
+        color: const Color(0xFF141210),
+        borderRadius: BorderRadius.circular(AppRadius.md),
         border: Border.all(color: const Color(0xFF2E2820)),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: AppColors.accentGold.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(AppRadius.md),
-            ),
-            child: const Icon(Icons.work_outline_rounded,
-                color: AppColors.accentGold, size: 20),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Brief',
+          Row(
+            children: [
+              Icon(icon, size: 13, color: AppColors.textTertiary),
+              const SizedBox(width: 4),
+              Text(label,
                   style: AppTextStyles.caption
-                      .copyWith(color: AppColors.textSecondary),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  title,
-                  style: AppTextStyles.heading3.copyWith(
-                      color: AppColors.textPrimary, fontSize: 15),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+                      .copyWith(color: AppColors.textTertiary, fontSize: 10)),
+            ],
+          ),
+          const SizedBox(height: 3),
+          Text(
+            value,
+            style: AppTextStyles.body2.copyWith(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ─── Offer bubble ─────────────────────────────────────────────────────────────
+
+class _OfferBubble extends StatelessWidget {
+  const _OfferBubble({
+    required this.offer,
+    required this.isMe,
+    required this.time,
+    required this.onAccept,
+    required this.onReject,
+  });
+
+  final OfferModel offer;
+  final bool isMe;
+  final String time;
+  final VoidCallback onAccept;
+  final VoidCallback onReject;
+
+  String get _statusLabel {
+    switch (offer.status) {
+      case OfferStatus.accepted:
+        return 'Kabul Edildi';
+      case OfferStatus.rejected:
+        return 'Reddedildi';
+      case OfferStatus.pending:
+        return isMe ? 'Yanıt Bekleniyor' : 'Yanıt Bekliyor';
+    }
+  }
+
+  Color get _statusColor {
+    switch (offer.status) {
+      case OfferStatus.accepted:
+        return const Color(0xFF2E7D32);
+      case OfferStatus.rejected:
+        return const Color(0xFFD32F2F);
+      case OfferStatus.pending:
+        return AppColors.accentGold;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+      child: Align(
+        alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+        child: Container(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          constraints: BoxConstraints(
+            maxWidth: MediaQuery.of(context).size.width * 0.78,
+          ),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1E1A14),
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+            border: Border.all(color: AppColors.accentGold.withValues(alpha: 0.4)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.payments_outlined,
+                      size: 18, color: AppColors.accentGold),
+                  const SizedBox(width: 6),
+                  Text('Fiyat Teklifi',
+                      style: AppTextStyles.caption
+                          .copyWith(color: AppColors.textSecondary)),
+                  const Spacer(),
+                  Text(
+                    _statusLabel,
+                    style: AppTextStyles.caption.copyWith(
+                      color: _statusColor,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Text(
+                '${offer.amount.toStringAsFixed(0)} ₺',
+                style: AppTextStyles.heading3.copyWith(
+                  color: AppColors.textPrimary,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              if (offer.message.isNotEmpty) ...[
+                const SizedBox(height: 4),
+                Text(offer.message,
+                    style: AppTextStyles.body2
+                        .copyWith(color: AppColors.textSecondary)),
+              ],
+              if (!isMe && offer.status == OfferStatus.pending) ...[
+                const SizedBox(height: AppSpacing.sm),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: onReject,
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFFD32F2F),
+                          side: const BorderSide(color: Color(0xFFD32F2F)),
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                        ),
+                        child: const Text('Reddet'),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: onAccept,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.accentGold,
+                          foregroundColor: Colors.black,
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                        ),
+                        child: const Text('Kabul Et'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+              const SizedBox(height: 4),
+              Text(time,
+                  style: AppTextStyles.caption
+                      .copyWith(color: AppColors.textTertiary, fontSize: 10)),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -314,6 +623,21 @@ class _Composer extends StatelessWidget {
         color: const Color(0xFF141210),
         child: Row(
           children: [
+            GestureDetector(
+              onTap: () => _showOfferSheet(context, controller),
+              child: Container(
+                width: 44,
+                height: 44,
+                margin: const EdgeInsets.only(right: AppSpacing.sm),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1E1A14),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: const Color(0xFF2E2820)),
+                ),
+                child: const Icon(Icons.payments_outlined,
+                    size: 20, color: AppColors.accentGold),
+              ),
+            ),
             Expanded(
               child: Container(
                 padding: const EdgeInsets.symmetric(
@@ -351,6 +675,95 @@ class _Composer extends StatelessWidget {
       ),
     );
   }
+}
+
+void _showOfferSheet(BuildContext context, ChatDetailController controller) {
+  showModalBottomSheet(
+    context: context,
+    backgroundColor: const Color(0xFF1E1A14),
+    isScrollControlled: true,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+    ),
+    builder: (ctx) {
+      return Padding(
+        padding: EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.lg,
+          AppSpacing.lg,
+          MediaQuery.of(ctx).viewInsets.bottom + AppSpacing.lg,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Fiyat Teklifi Gönder',
+                style: AppTextStyles.heading3
+                    .copyWith(color: AppColors.textPrimary)),
+            const SizedBox(height: AppSpacing.md),
+            TextField(
+              controller: controller.offerAmountController,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              style: AppTextStyles.body1.copyWith(color: AppColors.textPrimary),
+              cursorColor: AppColors.accentGold,
+              decoration: InputDecoration(
+                hintText: 'Tutar (₺)',
+                hintStyle: AppTextStyles.body1.copyWith(color: AppColors.textTertiary),
+                filled: true,
+                fillColor: const Color(0xFF141210),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            TextField(
+              controller: controller.offerNoteController,
+              maxLines: 2,
+              style: AppTextStyles.body1.copyWith(color: AppColors.textPrimary),
+              cursorColor: AppColors.accentGold,
+              decoration: InputDecoration(
+                hintText: 'Not (opsiyonel)',
+                hintStyle: AppTextStyles.body1.copyWith(color: AppColors.textTertiary),
+                filled: true,
+                fillColor: const Color(0xFF141210),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            SizedBox(
+              width: double.infinity,
+              child: Obx(() => ElevatedButton(
+                    onPressed: controller.isSendingOffer.value
+                        ? null
+                        : controller.sendOffer,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.accentGold,
+                      foregroundColor: Colors.black,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppRadius.md),
+                      ),
+                    ),
+                    child: controller.isSendingOffer.value
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2, color: Colors.black),
+                          )
+                        : const Text('Teklifi Gönder'),
+                  )),
+            ),
+          ],
+        ),
+      );
+    },
+  );
 }
 
 class _SendBtn extends StatelessWidget {

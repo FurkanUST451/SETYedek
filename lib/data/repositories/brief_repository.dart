@@ -12,6 +12,13 @@ class BriefRepository {
     await _briefs.doc(brief.id).set(brief.toJson());
   }
 
+  Future<BriefModel?> fetchBrief(String briefId) async {
+    final doc = await _briefs.doc(briefId).get();
+    final data = doc.data();
+    if (data == null) return null;
+    return BriefModel.fromJson(data);
+  }
+
   Future<List<BriefModel>> fetchByOwner(String ownerId) async {
     final snapshot = await _briefs
         .where('ownerId', isEqualTo: ownerId)

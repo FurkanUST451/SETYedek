@@ -5,6 +5,8 @@ class MessageModel {
     required this.senderId,
     required this.content,
     required this.createdAt,
+    this.type = 'text',
+    this.offerId,
   });
 
   final String id;
@@ -12,6 +14,8 @@ class MessageModel {
   final String senderId;
   final String content;
   final DateTime createdAt;
+  final String type; // 'text' | 'offer'
+  final String? offerId;
 
   factory MessageModel.fromJson(Map<String, dynamic> json) {
     return MessageModel(
@@ -20,6 +24,8 @@ class MessageModel {
       senderId: json['senderId'] as String,
       content: json['content'] as String? ?? '',
       createdAt: DateTime.parse(json['createdAt'] as String),
+      type: json['type'] as String? ?? 'text',
+      offerId: json['offerId'] as String?,
     );
   }
 
@@ -29,6 +35,8 @@ class MessageModel {
         'senderId': senderId,
         'content': content,
         'createdAt': createdAt.toIso8601String(),
+        'type': type,
+        'offerId': offerId,
       };
 
   MessageModel copyWith({
@@ -37,6 +45,8 @@ class MessageModel {
     String? senderId,
     String? content,
     DateTime? createdAt,
+    String? type,
+    String? offerId,
   }) {
     return MessageModel(
       id: id ?? this.id,
@@ -44,6 +54,8 @@ class MessageModel {
       senderId: senderId ?? this.senderId,
       content: content ?? this.content,
       createdAt: createdAt ?? this.createdAt,
+      type: type ?? this.type,
+      offerId: offerId ?? this.offerId,
     );
   }
 }

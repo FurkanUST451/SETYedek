@@ -16,33 +16,47 @@ class ProjectModel {
   const ProjectModel({
     required this.id,
     required this.clientId,
-    this.freelancerId,
+    required this.freelancerId,
     required this.status,
     required this.title,
     required this.description,
     required this.budget,
-    required this.deadline,
+    required this.createdAt,
+    this.offerId,
+    this.briefId,
+    this.chatId,
+    this.deadline,
   });
 
   final String id;
   final String clientId;
-  final String? freelancerId;
+  final String freelancerId;
   final ProjectStatus status;
   final String title;
   final String description;
   final double budget;
-  final DateTime deadline;
+  final DateTime createdAt;
+  final String? offerId;
+  final String? briefId;
+  final String? chatId;
+  final DateTime? deadline;
 
   factory ProjectModel.fromJson(Map<String, dynamic> json) {
     return ProjectModel(
       id: json['id'] as String,
       clientId: json['clientId'] as String,
-      freelancerId: json['freelancerId'] as String?,
+      freelancerId: json['freelancerId'] as String,
       status: ProjectStatus.fromName(json['status'] as String?),
       title: json['title'] as String,
       description: json['description'] as String? ?? '',
       budget: (json['budget'] as num?)?.toDouble() ?? 0,
-      deadline: DateTime.parse(json['deadline'] as String),
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      offerId: json['offerId'] as String?,
+      briefId: json['briefId'] as String?,
+      chatId: json['chatId'] as String?,
+      deadline: json['deadline'] != null
+          ? DateTime.parse(json['deadline'] as String)
+          : null,
     );
   }
 
@@ -54,7 +68,11 @@ class ProjectModel {
         'title': title,
         'description': description,
         'budget': budget,
-        'deadline': deadline.toIso8601String(),
+        'createdAt': createdAt.toIso8601String(),
+        'offerId': offerId,
+        'briefId': briefId,
+        'chatId': chatId,
+        'deadline': deadline?.toIso8601String(),
       };
 
   ProjectModel copyWith({
@@ -65,6 +83,10 @@ class ProjectModel {
     String? title,
     String? description,
     double? budget,
+    DateTime? createdAt,
+    String? offerId,
+    String? briefId,
+    String? chatId,
     DateTime? deadline,
   }) {
     return ProjectModel(
@@ -75,6 +97,10 @@ class ProjectModel {
       title: title ?? this.title,
       description: description ?? this.description,
       budget: budget ?? this.budget,
+      createdAt: createdAt ?? this.createdAt,
+      offerId: offerId ?? this.offerId,
+      briefId: briefId ?? this.briefId,
+      chatId: chatId ?? this.chatId,
       deadline: deadline ?? this.deadline,
     );
   }

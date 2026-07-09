@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../data/models/user_model.dart';
 import '../../data/repositories/user_repository.dart';
+import '../../data/services/notification_service.dart';
 import '../../data/services/storage_service.dart';
 import '../../routes/app_routes.dart';
 import '../app/user_controller.dart';
@@ -45,6 +46,9 @@ class SplashController extends GetxController {
         if (stored != null) _userController.setUser(stored);
       } catch (_) {}
     }
+
+    // Oturum devam ediyorsa cihaz token'ını güncelle (bildirimler için)
+    Get.find<NotificationService>().registerDevice(firebaseUser.uid);
 
     final roleName = StorageService.read<String>(StorageService.userRole);
 
