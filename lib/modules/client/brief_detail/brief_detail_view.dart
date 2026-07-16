@@ -1,18 +1,62 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-import '../../../core/theme/app_text_styles.dart';
 import '../../../data/models/freelancer_model.dart';
 import 'brief_detail_controller.dart';
+
+// ─── Palet ────────────────────────────────────────────────────────────────────
+const _kCream = Color(0xFFFEFDFB);
+const _kGold = Color(0xFFD9A84E);
+const _kInk = Color(0xFF35333F);
+const _kTaupe = Color(0xFF9B8E7B);
+const _kMuted = Color(0xFFB6AD9A);
+const _kDivider = Color(0x12000000);
+const _kCardBorder = Color(0x14000000);
+
+TextStyle _serif({
+  required double size,
+  FontWeight weight = FontWeight.w500,
+  required Color color,
+  double height = 1.05,
+}) => GoogleFonts.cormorantGaramond(
+  fontSize: size,
+  fontWeight: weight,
+  color: color,
+  height: height,
+);
+
+TextStyle _mono({
+  required double size,
+  FontWeight weight = FontWeight.w400,
+  required Color color,
+  double spacing = 0.5,
+  double height = 1.4,
+}) => GoogleFonts.spaceMono(
+  fontSize: size,
+  fontWeight: weight,
+  color: color,
+  letterSpacing: spacing,
+  height: height,
+);
 
 class BriefDetailView extends GetView<BriefDetailController> {
   const BriefDetailView({super.key});
 
-  // ── Helpers ───────────────────────────────────────────────────────────────
-
   static const _months = [
-    '', 'Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz',
-    'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara',
+    '',
+    'Oca',
+    'Şub',
+    'Mar',
+    'Nis',
+    'May',
+    'Haz',
+    'Tem',
+    'Ağu',
+    'Eyl',
+    'Eki',
+    'Kas',
+    'Ara',
   ];
 
   String _fmtFull(DateTime d) {
@@ -40,242 +84,269 @@ class BriefDetailView extends GetView<BriefDetailController> {
   Color get _statusColor {
     switch (controller.brief.status) {
       case 'offer_sent':
-        return const Color(0xFFE8882A);
       case 'submitted':
-        return const Color(0xFF2A7AE8);
+        return _kGold;
       default:
-        return Colors.black38;
+        return _kMuted;
     }
   }
 
   IconData get _categoryIcon {
     final cat = controller.brief.category.toLowerCase();
     if (cat.contains('video') || cat.contains('film')) {
-      return Icons.videocam_outlined;
+      return Icons.videocam_rounded;
     } else if (cat.contains('fotoğraf') || cat.contains('photo')) {
-      return Icons.camera_alt_outlined;
-    } else if (cat.contains('ses') || cat.contains('müzik') || cat.contains('audio')) {
-      return Icons.music_note_outlined;
-    } else if (cat.contains('illüstrasyon') || cat.contains('çizim')) {
-      return Icons.brush_outlined;
+      return Icons.camera_alt_rounded;
+    } else if (cat.contains('ses') || cat.contains('müzik')) {
+      return Icons.music_note_rounded;
+    } else if (cat.contains('cgi') || cat.contains('vfx')) {
+      return Icons.auto_awesome_rounded;
     }
-    return Icons.work_outline;
+    return Icons.work_rounded;
   }
 
-  Color get _categoryIconBg {
-    final cat = controller.brief.category.toLowerCase();
-    if (cat.contains('video') || cat.contains('film')) return const Color(0xFFFFF3E0);
-    if (cat.contains('fotoğraf') || cat.contains('photo')) return const Color(0xFFE8F5E9);
-    if (cat.contains('ses') || cat.contains('müzik')) return const Color(0xFFE3F2FD);
-    if (cat.contains('illüstrasyon') || cat.contains('çizim')) return const Color(0xFFF3E5F5);
-    return const Color(0xFFF0E8DC);
+  // İlerleme — freelancer'ın eklediği aşamaların salt-okunur görünümü.
+  List<_Milestone> get _milestones {
+    final brief = controller.brief;
+    final title = brief.title.isNotEmpty ? brief.title : brief.category;
+    return [
+      _Milestone(title: 'Brief Onayı', subtitle: title, timeLabel: 'Bugün'),
+      _Milestone(title: 'Ekip Kesinleşir', subtitle: title, timeLabel: '18:00'),
+      _Milestone(
+        title: 'Çekim Planlama',
+        subtitle: title,
+        timeLabel: brief.answers.dateRange ?? '—',
+      ),
+    ];
   }
-
-  Color get _categoryIconColor {
-    final cat = controller.brief.category.toLowerCase();
-    if (cat.contains('video') || cat.contains('film')) return const Color(0xFFE8882A);
-    if (cat.contains('fotoğraf') || cat.contains('photo')) return const Color(0xFF388E3C);
-    if (cat.contains('ses') || cat.contains('müzik')) return const Color(0xFF1976D2);
-    if (cat.contains('illüstrasyon') || cat.contains('çizim')) return const Color(0xFF7B1FA2);
-    return Colors.black54;
-  }
-
-  // ── Build ──────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
     final brief = controller.brief;
     final a = brief.answers;
+    final double s = (MediaQuery.sizeOf(context).width / 390)
+        .clamp(0.85, 1.15)
+        .toDouble();
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5EBD8),
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            // ── Top bar ──────────────────────────────────────────────────
-            Padding(
-              padding: const EdgeInsets.fromLTRB(4, 8, 8, 0),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.black87),
-                    onPressed: () => Get.back(),
-                  ),
-                  Expanded(
-                    child: Text(
-                      'Proje Detayı',
-                      textAlign: TextAlign.center,
-                      style: AppTextStyles.heading3.copyWith(
-                        color: Colors.black87,
-                        fontSize: 17,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.more_horiz, color: Colors.black54),
-                    onPressed: () {},
-                  ),
-                ],
-              ),
-            ),
-
-            // ── Scrollable body ──────────────────────────────────────────
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+    return MediaQuery.withNoTextScaling(
+      child: Scaffold(
+        backgroundColor: _kCream,
+        body: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              // Üst bar
+              Padding(
+                padding: EdgeInsets.fromLTRB(8 * s, 8 * s, 8 * s, 8 * s),
+                child: Row(
                   children: [
-                    // Header card
-                    _buildHeaderCard(),
-                    const SizedBox(height: 12),
-
-                    // Brief Bilgileri
-                    if (a.shootingType != null ||
-                        a.vibes != null ||
-                        a.dateRange != null ||
-                        a.deliveryTime != null ||
-                        a.budget != null ||
-                        a.location != null) ...[
-                      _Section(
-                        icon: Icons.assignment_outlined,
-                        label: 'BRIEF BİLGİLERİ',
-                        child: _buildBriefGrid(a),
-                      ),
-                      const SizedBox(height: 12),
-                    ],
-
-                    // İş Tarifi (notes)
-                    if (a.notes != null && a.notes!.isNotEmpty) ...[
-                      _Section(
-                        icon: Icons.description_outlined,
-                        label: 'İŞ TARİFİ',
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 10),
-                          child: Text(
-                            a.notes!,
-                            style: AppTextStyles.body2.copyWith(
-                              color: Colors.black87,
-                              height: 1.6,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                    ],
-
-                    // Freelancerlar
-                    if (brief.sentToIds.isNotEmpty) ...[
-                      Obx(() => _buildFreelancerSection()),
-                      const SizedBox(height: 12),
-                    ],
-
-                    // Proje Bilgileri
-                    _Section(
-                      icon: Icons.info_outline,
-                      label: 'PROJE BİLGİLERİ',
+                    GestureDetector(
+                      onTap: () => Get.back<void>(),
+                      behavior: HitTestBehavior.opaque,
                       child: Padding(
-                        padding: const EdgeInsets.only(top: 12),
-                        child: Column(
-                          children: [
-                            _InfoRow(
-                              label: 'Oluşturulma Tarihi',
-                              value: _fmtFull(brief.createdAt),
-                            ),
-                            const SizedBox(height: 10),
-                            _InfoRow(
-                              label: 'Son Güncelleme',
-                              value: _fmtFull(brief.updatedAt),
-                            ),
-                            const SizedBox(height: 10),
-                            _InfoRow(
-                              label: 'Proje ID',
-                              value: _projectId,
-                              mono: true,
-                            ),
-                          ],
+                        padding: EdgeInsets.all(8 * s),
+                        child: Icon(
+                          Icons.arrow_back_rounded,
+                          size: 22 * s,
+                          color: _kInk,
                         ),
                       ),
                     ),
-
-                    const SizedBox(height: 120),
+                    Expanded(
+                      child: Text(
+                        'Proje Detayı',
+                        textAlign: TextAlign.center,
+                        style: _serif(
+                          size: 22 * s,
+                          weight: FontWeight.w600,
+                          color: _kInk,
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {},
+                      behavior: HitTestBehavior.opaque,
+                      child: Padding(
+                        padding: EdgeInsets.all(8 * s),
+                        child: Icon(
+                          Icons.more_horiz_rounded,
+                          size: 22 * s,
+                          color: _kTaupe,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
-            ),
-          ],
-        ),
-      ),
 
-      // ── Bottom action bar ────────────────────────────────────────────────
-      bottomNavigationBar: _buildBottomBar(),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.fromLTRB(20 * s, 6 * s, 20 * s, 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildHeaderCard(s),
+                      SizedBox(height: 14 * s),
+
+                      if (a.shootingType != null ||
+                          a.vibes != null ||
+                          a.dateRange != null ||
+                          a.deliveryTime != null ||
+                          a.budget != null ||
+                          a.location != null) ...[
+                        _Section(
+                          scale: s,
+                          icon: Icons.assignment_outlined,
+                          label: 'BRIEF BİLGİLERİ',
+                          child: _buildBriefGrid(a, s),
+                        ),
+                        SizedBox(height: 14 * s),
+                      ],
+
+                      if (a.notes != null && a.notes!.isNotEmpty) ...[
+                        _Section(
+                          scale: s,
+                          icon: Icons.description_outlined,
+                          label: 'İŞ TARİFİ',
+                          child: Padding(
+                            padding: EdgeInsets.only(top: 12 * s),
+                            child: Text(
+                              a.notes!,
+                              style: _mono(
+                                size: 10 * s,
+                                color: _kInk,
+                                spacing: 0.2,
+                                height: 1.6,
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 14 * s),
+                      ],
+
+                      if (brief.sentToIds.isNotEmpty) ...[
+                        Obx(() => _buildFreelancerSection(s)),
+                        SizedBox(height: 14 * s),
+                      ],
+
+                      // İlerleme — sadece görüntüleme; düzenleme freelancer'da.
+                      _Section(
+                        scale: s,
+                        icon: Icons.timeline_outlined,
+                        label: 'İLERLEME',
+                        child: Padding(
+                          padding: EdgeInsets.only(top: 6 * s),
+                          child: Column(
+                            children: [
+                              for (var i = 0; i < _milestones.length; i++) ...[
+                                _MilestoneRow(
+                                  scale: s,
+                                  milestone: _milestones[i],
+                                ),
+                                if (i < _milestones.length - 1)
+                                  const Divider(
+                                    height: 1,
+                                    thickness: 1,
+                                    color: _kDivider,
+                                  ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 14 * s),
+
+                      _Section(
+                        scale: s,
+                        icon: Icons.info_outline,
+                        label: 'PROJE BİLGİLERİ',
+                        child: Padding(
+                          padding: EdgeInsets.only(top: 14 * s),
+                          child: Column(
+                            children: [
+                              _InfoRow(
+                                scale: s,
+                                label: 'Oluşturulma Tarihi',
+                                value: _fmtFull(brief.createdAt),
+                              ),
+                              SizedBox(height: 12 * s),
+                              _InfoRow(
+                                scale: s,
+                                label: 'Son Güncelleme',
+                                value: _fmtFull(brief.updatedAt),
+                              ),
+                              SizedBox(height: 12 * s),
+                              _InfoRow(
+                                scale: s,
+                                label: 'Proje ID',
+                                value: _projectId,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      SizedBox(height: 120 * s),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        bottomNavigationBar: _buildBottomBar(s),
+      ),
     );
   }
 
-  // ── Header card ────────────────────────────────────────────────────────────
-
-  Widget _buildHeaderCard() {
+  // ── Header kartı ────────────────────────────────────────────────────────────
+  Widget _buildHeaderCard(double s) {
     final brief = controller.brief;
     return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
+      padding: EdgeInsets.all(16 * s),
+      decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 14,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        border: Border.fromBorderSide(BorderSide(color: _kCardBorder)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Category icon
           Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: _categoryIconBg,
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Icon(_categoryIcon, size: 28, color: _categoryIconColor),
+            width: 56 * s,
+            height: 56 * s,
+            color: _kGold,
+            alignment: Alignment.center,
+            child: Icon(_categoryIcon, size: 28 * s, color: Colors.white),
           ),
-          const SizedBox(width: 14),
-          // Text
+          SizedBox(width: 14 * s),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   _statusLabel,
-                  style: AppTextStyles.caption.copyWith(
+                  style: _mono(
+                    size: 8 * s,
+                    weight: FontWeight.w700,
                     color: _statusColor,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 11,
-                    letterSpacing: 0.4,
+                    spacing: 1.2,
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: 5 * s),
                 Text(
                   brief.title.isNotEmpty ? brief.title : brief.category,
-                  style: AppTextStyles.heading2.copyWith(
-                    color: Colors.black87,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: _serif(
+                    size: 24 * s,
+                    weight: FontWeight.w600,
+                    color: _kInk,
                   ),
                 ),
-                const SizedBox(height: 2),
+                SizedBox(height: 2 * s),
                 Text(
                   brief.category,
-                  style: AppTextStyles.caption.copyWith(
-                    color: Colors.black45,
-                    fontSize: 13,
-                  ),
+                  style: _mono(size: 8 * s, color: _kMuted, spacing: 0.5),
                 ),
               ],
             ),
@@ -285,85 +356,83 @@ class BriefDetailView extends GetView<BriefDetailController> {
     );
   }
 
-  // ── Brief info grid ────────────────────────────────────────────────────────
-
-  Widget _buildBriefGrid(dynamic a) {
+  // ── Brief bilgi grid ─────────────────────────────────────────────────────────
+  Widget _buildBriefGrid(dynamic a, double s) {
     final items = <_GridItem>[];
 
-    if (a.shootingType != null && (a.shootingType as String).isNotEmpty) {
-      items.add(_GridItem(
-        icon: Icons.movie_creation_outlined,
-        label: 'Çekim Türü',
-        value: a.shootingType as String,
-      ));
+    void add(bool cond, IconData icon, String label, String value) {
+      if (cond && value.isNotEmpty) {
+        items.add(_GridItem(icon: icon, label: label, value: value));
+      }
     }
-    if (a.vibes != null && (a.vibes as List).isNotEmpty) {
-      items.add(_GridItem(
-        icon: Icons.show_chart_rounded,
-        label: 'Duygu',
-        value: (a.vibes as List<String>).join(', '),
-      ));
-    }
-    if (a.dateRange != null && (a.dateRange as String).isNotEmpty) {
-      items.add(_GridItem(
-        icon: Icons.calendar_today_outlined,
-        label: 'Çekim Tarihi',
-        value: a.dateRange as String,
-      ));
-    }
-    if (a.deliveryTime != null && (a.deliveryTime as String).isNotEmpty) {
-      items.add(_GridItem(
-        icon: Icons.access_time_outlined,
-        label: 'Teslim Süresi',
-        value: a.deliveryTime as String,
-      ));
-    }
-    if (a.budget != null && (a.budget as String).isNotEmpty) {
-      items.add(_GridItem(
-        icon: Icons.attach_money_outlined,
-        label: 'Bütçe',
-        value: a.budget as String,
-      ));
-    }
-    if (a.location != null && (a.location as String).isNotEmpty) {
-      items.add(_GridItem(
-        icon: Icons.location_on_outlined,
-        label: 'Lokasyon',
-        value: a.location as String,
-      ));
-    }
+
+    add(
+      a.shootingType != null,
+      Icons.movie_creation_outlined,
+      'Çekim Türü',
+      (a.shootingType as String?) ?? '',
+    );
+    add(
+      a.vibes != null && (a.vibes as List).isNotEmpty,
+      Icons.show_chart_rounded,
+      'Duygu',
+      a.vibes != null ? (a.vibes as List<String>).join(', ') : '',
+    );
+    add(
+      a.dateRange != null,
+      Icons.calendar_today_outlined,
+      'Çekim Tarihi',
+      (a.dateRange as String?) ?? '',
+    );
+    add(
+      a.deliveryTime != null,
+      Icons.access_time_outlined,
+      'Teslim Süresi',
+      (a.deliveryTime as String?) ?? '',
+    );
+    add(
+      a.budget != null,
+      Icons.payments_outlined,
+      'Bütçe',
+      (a.budget as String?) ?? '',
+    );
+    add(
+      a.location != null,
+      Icons.location_on_outlined,
+      'Lokasyon',
+      (a.location as String?) ?? '',
+    );
 
     if (items.isEmpty) return const SizedBox.shrink();
 
-    // Split into rows of 3
     final rows = <Widget>[];
     for (var i = 0; i < items.length; i += 3) {
-      final rowItems = items.sublist(i, i + 3 > items.length ? items.length : i + 3);
-      // Pad to 3 with empty if needed
-      while (rowItems.length < 3) {
-        rowItems.add(_GridItem(icon: Icons.abc, label: '', value: ''));
-      }
-      rows.add(Row(
-        children: rowItems.asMap().entries.map((e) {
-          return Expanded(
-            child: e.value.label.isEmpty
-                ? const SizedBox.shrink()
-                : _GridCell(item: e.value),
-          );
-        }).toList(),
-      ));
-      if (i + 3 < items.length) rows.add(const SizedBox(height: 10));
+      final rowItems = items.sublist(
+        i,
+        i + 3 > items.length ? items.length : i + 3,
+      );
+      rows.add(
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: List.generate(3, (j) {
+            if (j >= rowItems.length) return const Expanded(child: SizedBox());
+            return Expanded(
+              child: _GridCell(scale: s, item: rowItems[j]),
+            );
+          }),
+        ),
+      );
+      if (i + 3 < items.length) rows.add(SizedBox(height: 14 * s));
     }
 
     return Padding(
-      padding: const EdgeInsets.only(top: 14),
+      padding: EdgeInsets.only(top: 16 * s),
       child: Column(children: rows),
     );
   }
 
-  // ── Freelancer section ──────────────────────────────────────────────────────
-
-  Widget _buildFreelancerSection() {
+  // ── Freelancer bölümü ─────────────────────────────────────────────────────────
+  Widget _buildFreelancerSection(double s) {
     final brief = controller.brief;
     if (brief.sentToIds.isEmpty) return const SizedBox.shrink();
 
@@ -372,102 +441,99 @@ class BriefDetailView extends GetView<BriefDetailController> {
     final count = brief.sentToIds.length;
     final show = freelancers.take(3).toList();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _Section(
-          icon: Icons.send_outlined,
-          label: 'TEKLİF GÖNDERİLEN FREELANCERLAR ($count)',
-          child: Padding(
-            padding: const EdgeInsets.only(top: 10),
-            child: loading
-                ? const Center(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(vertical: 16),
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Color(0xFFE8B84B),
+    return _Section(
+      scale: s,
+      icon: Icons.send_outlined,
+      label: 'TEKLİF GÖNDERİLEN FREELANCERLAR ($count)',
+      child: Padding(
+        padding: EdgeInsets.only(top: 10 * s),
+        child: loading
+            ? Padding(
+                padding: EdgeInsets.symmetric(vertical: 16 * s),
+                child: const Center(
+                  child: SizedBox(
+                    width: 22,
+                    height: 22,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: _kGold,
+                    ),
+                  ),
+                ),
+              )
+            : Column(
+                children: [
+                  ...show.map((f) => _FreelancerRow(scale: s, freelancer: f)),
+                  if (show.length < count) ...[
+                    SizedBox(height: 4 * s),
+                    GestureDetector(
+                      onTap: controller.sendToNewFreelancer,
+                      behavior: HitTestBehavior.opaque,
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 10 * s),
+                        child: Row(
+                          children: [
+                            Text(
+                              'TÜMÜNÜ GÖR',
+                              style: _mono(
+                                size: 8 * s,
+                                weight: FontWeight.w700,
+                                color: _kGold,
+                                spacing: 1.2,
+                              ),
+                            ),
+                            SizedBox(width: 4 * s),
+                            Icon(
+                              Icons.chevron_right,
+                              size: 16 * s,
+                              color: _kGold,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  )
-                : Column(
-                    children: [
-                      ...show.map((f) => _FreelancerRow(freelancer: f)),
-                      if (show.length < count) ...[
-                        const SizedBox(height: 4),
-                        GestureDetector(
-                          onTap: controller.sendToNewFreelancer,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            child: Row(
-                              children: [
-                                Text(
-                                  'Tümünü Gör',
-                                  style: AppTextStyles.body2.copyWith(
-                                    color: const Color(0xFFE8882A),
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                                const SizedBox(width: 4),
-                                const Icon(
-                                  Icons.chevron_right,
-                                  size: 18,
-                                  color: Color(0xFFE8882A),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-          ),
-        ),
-        const SizedBox(height: 12),
-      ],
+                  ],
+                ],
+              ),
+      ),
     );
   }
 
-  // ── Bottom bar ──────────────────────────────────────────────────────────────
-
-  Widget _buildBottomBar() {
+  // ── Alt bar ────────────────────────────────────────────────────────────────
+  Widget _buildBottomBar(double s) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF5EBD8),
-        border: Border(
-          top: BorderSide(color: Colors.black.withValues(alpha: 0.08)),
-        ),
+      padding: EdgeInsets.fromLTRB(20 * s, 12 * s, 20 * s, 28 * s),
+      decoration: const BoxDecoration(
+        color: _kCream,
+        border: Border(top: BorderSide(color: _kDivider)),
       ),
       child: Row(
         children: [
-          // Düzenle
           Expanded(
             flex: 2,
             child: GestureDetector(
               onTap: controller.openEdit,
+              behavior: HitTestBehavior.opaque,
               child: Container(
-                height: 52,
+                height: 52 * s,
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: Colors.black.withValues(alpha: 0.12),
+                    color: Colors.black.withValues(alpha: 0.14),
                   ),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.edit_outlined,
-                        size: 18, color: Colors.black87),
-                    const SizedBox(width: 6),
+                    Icon(Icons.edit_outlined, size: 16 * s, color: _kInk),
+                    SizedBox(width: 7 * s),
                     Text(
-                      'Düzenle',
-                      style: AppTextStyles.button.copyWith(
-                        color: Colors.black87,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
+                      'DÜZENLE',
+                      style: _mono(
+                        size: 10 * s,
+                        weight: FontWeight.w700,
+                        color: _kInk,
+                        spacing: 1.2,
                       ),
                     ),
                   ],
@@ -475,37 +541,27 @@ class BriefDetailView extends GetView<BriefDetailController> {
               ),
             ),
           ),
-          const SizedBox(width: 10),
-          // Yeni Freelancer'a Gönder
+          SizedBox(width: 10 * s),
           Expanded(
             flex: 3,
             child: GestureDetector(
               onTap: controller.sendToNewFreelancer,
+              behavior: HitTestBehavior.opaque,
               child: Container(
-                height: 52,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE8B84B),
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.12),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
+                height: 52 * s,
+                color: _kGold,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.send_outlined,
-                        size: 17, color: Colors.black87),
-                    const SizedBox(width: 6),
+                    Icon(Icons.send_rounded, size: 15 * s, color: Colors.white),
+                    SizedBox(width: 8 * s),
                     Text(
-                      "Yeni Freelancer'a Gönder",
-                      style: AppTextStyles.button.copyWith(
-                        color: Colors.black,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
+                      "YENİ FREELANCER'A GÖNDER",
+                      style: _mono(
+                        size: 9 * s,
+                        weight: FontWeight.w700,
+                        color: Colors.white,
+                        spacing: 1,
                       ),
                     ),
                   ],
@@ -519,50 +575,46 @@ class BriefDetailView extends GetView<BriefDetailController> {
   }
 }
 
-// ── Section wrapper ────────────────────────────────────────────────────────────
-
+// ── Bölüm sarmalayıcı ────────────────────────────────────────────────────────
 class _Section extends StatelessWidget {
   const _Section({
+    required this.scale,
     required this.icon,
     required this.label,
     required this.child,
   });
 
+  final double scale;
   final IconData icon;
   final String label;
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
+    final s = scale;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
-      decoration: BoxDecoration(
+      padding: EdgeInsets.fromLTRB(16 * s, 14 * s, 16 * s, 16 * s),
+      decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
+        border: Border.fromBorderSide(BorderSide(color: _kCardBorder)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icon, size: 16, color: Colors.black45),
-              const SizedBox(width: 7),
-              Text(
-                label,
-                style: const TextStyle(
-                  fontFamily: 'SpaceGrotesk',
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.black45,
-                  letterSpacing: 0.6,
+              Icon(icon, size: 14 * s, color: _kGold),
+              SizedBox(width: 8 * s),
+              Expanded(
+                child: Text(
+                  label,
+                  style: _mono(
+                    size: 8 * s,
+                    weight: FontWeight.w700,
+                    color: _kInk,
+                    spacing: 1.4,
+                  ),
                 ),
               ),
             ],
@@ -574,8 +626,7 @@ class _Section extends StatelessWidget {
   }
 }
 
-// ── Grid item ──────────────────────────────────────────────────────────────────
-
+// ── Grid hücresi ─────────────────────────────────────────────────────────────
 class _GridItem {
   const _GridItem({
     required this.icon,
@@ -588,78 +639,78 @@ class _GridItem {
 }
 
 class _GridCell extends StatelessWidget {
-  const _GridCell({required this.item});
+  const _GridCell({required this.scale, required this.item});
+  final double scale;
   final _GridItem item;
 
   @override
   Widget build(BuildContext context) {
+    final s = scale;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Icon(item.icon, size: 14, color: Colors.black38),
-            const SizedBox(width: 4),
+            Icon(item.icon, size: 11 * s, color: _kTaupe),
+            SizedBox(width: 4 * s),
             Expanded(
               child: Text(
-                item.label,
-                style: const TextStyle(
-                  fontFamily: 'SpaceGrotesk',
-                  fontSize: 10,
-                  color: Colors.black45,
-                  fontWeight: FontWeight.w500,
-                ),
+                item.label.toUpperCase(),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
+                style: _mono(size: 7 * s, color: _kMuted, spacing: 0.8),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 3),
+        SizedBox(height: 4 * s),
         Text(
           item.value,
-          style: const TextStyle(
-            fontFamily: 'SpaceGrotesk',
-            fontSize: 13,
-            color: Colors.black87,
-            fontWeight: FontWeight.w600,
-          ),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
+          style: _mono(
+            size: 10 * s,
+            weight: FontWeight.w700,
+            color: _kInk,
+            spacing: 0.2,
+          ),
         ),
       ],
     );
   }
 }
 
-// ── Info row ───────────────────────────────────────────────────────────────────
-
+// ── Bilgi satırı ─────────────────────────────────────────────────────────────
 class _InfoRow extends StatelessWidget {
-  const _InfoRow({required this.label, required this.value, this.mono = false});
+  const _InfoRow({
+    required this.scale,
+    required this.label,
+    required this.value,
+  });
+  final double scale;
   final String label;
   final String value;
-  final bool mono;
 
   @override
   Widget build(BuildContext context) {
+    final s = scale;
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontFamily: 'SpaceGrotesk',
-            fontSize: 13,
-            color: Colors.black45,
+        Expanded(
+          child: Text(
+            label,
+            style: _mono(size: 9 * s, color: _kTaupe, spacing: 0.3),
           ),
         ),
+        SizedBox(width: 10 * s),
         Text(
           value,
-          style: TextStyle(
-            fontFamily: mono ? 'monospace' : 'SpaceGrotesk',
-            fontSize: 13,
-            color: Colors.black87,
-            fontWeight: FontWeight.w600,
+          style: _mono(
+            size: 9 * s,
+            weight: FontWeight.w700,
+            color: _kInk,
+            spacing: 0.3,
           ),
         ),
       ],
@@ -667,25 +718,24 @@ class _InfoRow extends StatelessWidget {
   }
 }
 
-// ── Freelancer row ─────────────────────────────────────────────────────────────
-
+// ── Freelancer satırı ────────────────────────────────────────────────────────
 class _FreelancerRow extends StatelessWidget {
-  const _FreelancerRow({required this.freelancer});
+  const _FreelancerRow({required this.scale, required this.freelancer});
+  final double scale;
   final FreelancerModel freelancer;
 
   @override
   Widget build(BuildContext context) {
+    final s = scale;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: EdgeInsets.symmetric(vertical: 8 * s),
       child: Row(
         children: [
-          // Avatar
           Container(
-            width: 42,
-            height: 42,
+            width: 40 * s,
+            height: 40 * s,
             decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: const Color(0xFFE8D5B7),
+              color: const Color(0xFFEADCBB),
               image: freelancer.profileImageUrl != null
                   ? DecorationImage(
                       image: NetworkImage(freelancer.profileImageUrl!),
@@ -693,70 +743,224 @@ class _FreelancerRow extends StatelessWidget {
                     )
                   : null,
             ),
+            alignment: Alignment.center,
             child: freelancer.profileImageUrl == null
-                ? Center(
-                    child: Text(
-                      freelancer.name.isNotEmpty
-                          ? freelancer.name[0].toUpperCase()
-                          : '?',
-                      style: const TextStyle(
-                        fontFamily: 'SpaceGrotesk',
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.black54,
-                      ),
+                ? Text(
+                    freelancer.name.isNotEmpty
+                        ? freelancer.name[0].toUpperCase()
+                        : '?',
+                    style: _mono(
+                      size: 12 * s,
+                      weight: FontWeight.w700,
+                      color: _kInk,
+                      spacing: 0.5,
                     ),
                   )
                 : null,
           ),
-          const SizedBox(width: 12),
-          // Name + category
+          SizedBox(width: 12 * s),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   freelancer.fullName,
-                  style: const TextStyle(
-                    fontFamily: 'SpaceGrotesk',
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: _serif(
+                    size: 15 * s,
+                    weight: FontWeight.w600,
+                    color: _kInk,
                   ),
                 ),
                 if (freelancer.categories.isNotEmpty)
                   Text(
-                    freelancer.categories.first,
-                    style: const TextStyle(
-                      fontFamily: 'SpaceGrotesk',
-                      fontSize: 12,
-                      color: Colors.black45,
-                    ),
+                    freelancer.categories.first.toUpperCase(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: _mono(size: 7 * s, color: _kMuted, spacing: 1),
                   ),
               ],
             ),
           ),
-          // Status badge
+          SizedBox(width: 8 * s),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            decoration: BoxDecoration(
-              color: const Color(0xFF2A7AE8).withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Text(
-              'Teklif Bekleniyor',
-              style: TextStyle(
-                fontFamily: 'SpaceGrotesk',
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF2A7AE8),
+            padding: EdgeInsets.symmetric(horizontal: 8 * s, vertical: 4 * s),
+            color: _kGold.withValues(alpha: 0.12),
+            child: Text(
+              'TEKLİF BEKLENİYOR',
+              style: _mono(
+                size: 7 * s,
+                weight: FontWeight.w700,
+                color: _kGold,
+                spacing: 0.8,
               ),
             ),
           ),
-          const SizedBox(width: 6),
-          const Icon(Icons.chevron_right, size: 18, color: Colors.black26),
+          SizedBox(width: 6 * s),
+          Icon(Icons.chevron_right, size: 16 * s, color: _kMuted),
         ],
       ),
+    );
+  }
+}
+
+// ── İlerleme (salt-okunur) ────────────────────────────────────────────────────
+class _Milestone {
+  const _Milestone({
+    required this.title,
+    required this.subtitle,
+    required this.timeLabel,
+  });
+
+  final String title;
+  final String subtitle;
+  final String timeLabel;
+}
+
+class _MilestoneRow extends StatelessWidget {
+  const _MilestoneRow({required this.scale, required this.milestone});
+  final double scale;
+  final _Milestone milestone;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = scale;
+    return GestureDetector(
+      onTap: () => _showMilestoneDetail(context, milestone, s),
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 12 * s),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            _MilestoneDot(scale: s),
+            SizedBox(width: 14 * s),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${milestone.title} · ${milestone.timeLabel}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: _mono(
+                      size: 11 * s,
+                      weight: FontWeight.w700,
+                      color: _kInk,
+                      spacing: 0.2,
+                    ),
+                  ),
+                  SizedBox(height: 3 * s),
+                  Text(
+                    milestone.subtitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: _mono(
+                      size: 9 * s,
+                      weight: FontWeight.w600,
+                      color: _kGold,
+                      spacing: 0.3,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right, size: 16 * s, color: _kMuted),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── İlerleme detayı — salt-okunur bottomsheet ─────────────────────────────────
+void _showMilestoneDetail(BuildContext context, _Milestone m, double s) {
+  showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: _kCream,
+    isScrollControlled: true,
+    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+    builder: (ctx) {
+      return Padding(
+        padding: EdgeInsets.fromLTRB(
+          20 * s,
+          20 * s,
+          20 * s,
+          MediaQuery.of(ctx).viewInsets.bottom + 28 * s,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 36 * s,
+                height: 3 * s,
+                color: _kDivider,
+                margin: EdgeInsets.only(bottom: 18 * s),
+              ),
+            ),
+            Row(
+              children: [
+                _MilestoneDot(scale: s),
+                SizedBox(width: 12 * s),
+                Expanded(
+                  child: Text(
+                    m.title,
+                    style: _serif(
+                      size: 22 * s,
+                      weight: FontWeight.w600,
+                      color: _kInk,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 14 * s),
+            Text(
+              m.timeLabel.toUpperCase(),
+              style: _mono(
+                size: 8 * s,
+                weight: FontWeight.w700,
+                color: _kGold,
+                spacing: 1.2,
+              ),
+            ),
+            SizedBox(height: 16 * s),
+            Text(
+              m.subtitle,
+              style: _mono(
+                size: 11 * s,
+                color: _kInk,
+                spacing: 0.2,
+                height: 1.6,
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
+class _MilestoneDot extends StatelessWidget {
+  const _MilestoneDot({required this.scale});
+  final double scale;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = scale;
+    final size = 26 * s;
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.white,
+        border: Border.all(color: _kInk, width: 1.4),
+      ),
+      child: Icon(Icons.check_rounded, size: 14 * s, color: _kInk),
     );
   }
 }

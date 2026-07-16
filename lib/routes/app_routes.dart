@@ -24,6 +24,7 @@ class AppRoutes {
   static const String chatDetail = '/client/chat-detail';
   static const String projectDetail = '/client/project-detail';
   static const String briefDetail = '/client/brief-detail';
+  static const String setProjects = '/client/set-projects';
 
   // Freelancer (Hizmet Ver) flow — implementation pending
   static const String freelancerOnboarding = '/freelancer/onboarding';

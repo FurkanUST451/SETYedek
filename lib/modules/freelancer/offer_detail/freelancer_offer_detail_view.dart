@@ -1,43 +1,65 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-import '../../../core/theme/app_text_styles.dart';
 import 'freelancer_offer_detail_controller.dart';
+
+// ─── Palet ────────────────────────────────────────────────────────────────────
+const _kCream = Color(0xFFFEFDFB);
+const _kGold = Color(0xFFD9A84E);
+const _kInk = Color(0xFF35333F);
+const _kTaupe = Color(0xFF9B8E7B);
+const _kMuted = Color(0xFFB6AD9A);
+const _kDivider = Color(0x12000000);
+const _kCardBorder = Color(0x14000000);
+const _kDanger = Color(0xFFBE6A5A);
+
+TextStyle _serif({
+  required double size,
+  FontWeight weight = FontWeight.w500,
+  required Color color,
+  double height = 1.05,
+}) =>
+    GoogleFonts.cormorantGaramond(
+        fontSize: size, fontWeight: weight, color: color, height: height);
+
+TextStyle _mono({
+  required double size,
+  FontWeight weight = FontWeight.w400,
+  required Color color,
+  double spacing = 0.5,
+  double height = 1.4,
+}) =>
+    GoogleFonts.spaceMono(
+        fontSize: size,
+        fontWeight: weight,
+        color: color,
+        letterSpacing: spacing,
+        height: height);
 
 class FreelancerOfferDetailView
     extends GetView<FreelancerOfferDetailController> {
   const FreelancerOfferDetailView({super.key});
 
-  // ── Category helpers (same logic as BriefDetailView) ─────────────────────
+  // ── Category helper (aynı mantık: BriefDetailView) ─────────────────────────
 
   static IconData _categoryIcon(String cat) {
     final c = cat.toLowerCase();
-    if (c.contains('video') || c.contains('film')) return Icons.videocam_outlined;
-    if (c.contains('fotoğraf') || c.contains('photo')) return Icons.camera_alt_outlined;
-    if (c.contains('ses') || c.contains('müzik') || c.contains('audio')) {
-      return Icons.music_note_outlined;
+    if (c.contains('video') || c.contains('film')) return Icons.videocam_rounded;
+    if (c.contains('fotoğraf') || c.contains('photo')) {
+      return Icons.camera_alt_rounded;
     }
-    if (c.contains('illüstrasyon') || c.contains('çizim')) return Icons.brush_outlined;
-    return Icons.work_outline;
+    if (c.contains('ses') || c.contains('müzik')) return Icons.music_note_rounded;
+    if (c.contains('cgi') || c.contains('vfx')) return Icons.auto_awesome_rounded;
+    return Icons.work_rounded;
   }
 
-  static Color _categoryIconBg(String cat) {
-    final c = cat.toLowerCase();
-    if (c.contains('video') || c.contains('film')) return const Color(0xFFFFF3E0);
-    if (c.contains('fotoğraf') || c.contains('photo')) return const Color(0xFFE8F5E9);
-    if (c.contains('ses') || c.contains('müzik')) return const Color(0xFFE3F2FD);
-    if (c.contains('illüstrasyon') || c.contains('çizim')) return const Color(0xFFF3E5F5);
-    return const Color(0xFFF0E8DC);
-  }
+  static const _months = [
+    '', 'Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz',
+    'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara',
+  ];
 
-  static Color _categoryIconColor(String cat) {
-    final c = cat.toLowerCase();
-    if (c.contains('video') || c.contains('film')) return const Color(0xFFE8882A);
-    if (c.contains('fotoğraf') || c.contains('photo')) return const Color(0xFF388E3C);
-    if (c.contains('ses') || c.contains('müzik')) return const Color(0xFF1976D2);
-    if (c.contains('illüstrasyon') || c.contains('çizim')) return const Color(0xFF7B1FA2);
-    return Colors.black54;
-  }
+  String _fmtDate(DateTime d) => '${d.day} ${_months[d.month]} ${d.year}';
 
   // ── Build ──────────────────────────────────────────────────────────────────
 
@@ -45,193 +67,172 @@ class FreelancerOfferDetailView
   Widget build(BuildContext context) {
     final brief = controller.brief;
     final a = brief.answers;
+    final double s = (MediaQuery.sizeOf(context).width / 390)
+        .clamp(0.85, 1.15)
+        .toDouble();
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5EBD8),
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            // ── Top bar ────────────────────────────────────────────────────
-            Padding(
-              padding: const EdgeInsets.fromLTRB(4, 8, 8, 0),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.black87),
-                    onPressed: () => Get.back(),
-                  ),
-                  Expanded(
-                    child: Text(
-                      'İş Teklifi',
-                      textAlign: TextAlign.center,
-                      style: AppTextStyles.heading3.copyWith(
-                        color: Colors.black87,
-                        fontSize: 17,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 48),
-                ],
-              ),
-            ),
-
-            // ── Scrollable body ────────────────────────────────────────────
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+    return MediaQuery.withNoTextScaling(
+      child: Scaffold(
+        backgroundColor: _kCream,
+        body: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              // ── Üst bar ────────────────────────────────────────────────────
+              Padding(
+                padding: EdgeInsets.fromLTRB(8 * s, 8 * s, 8 * s, 8 * s),
+                child: Row(
                   children: [
-                    // Header card
-                    _buildHeaderCard(brief.category, brief.title),
-                    const SizedBox(height: 12),
-
-                    // Brief Bilgileri
-                    if (a.shootingType != null ||
-                        a.vibes != null ||
-                        a.dateRange != null ||
-                        a.deliveryTime != null ||
-                        a.budget != null ||
-                        a.location != null) ...[
-                      _Section(
-                        icon: Icons.assignment_outlined,
-                        label: 'BRIEF BİLGİLERİ',
-                        child: _buildBriefGrid(a),
-                      ),
-                      const SizedBox(height: 12),
-                    ],
-
-                    // İş Tarifi
-                    if (a.notes != null && a.notes!.isNotEmpty) ...[
-                      _Section(
-                        icon: Icons.description_outlined,
-                        label: 'İŞ TARİFİ',
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 10),
-                          child: Text(
-                            a.notes!,
-                            style: AppTextStyles.body2.copyWith(
-                              color: Colors.black87,
-                              height: 1.6,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                    ],
-
-                    // Proje Bilgileri
-                    _Section(
-                      icon: Icons.info_outline,
-                      label: 'PROJE BİLGİLERİ',
+                    GestureDetector(
+                      onTap: () => Get.back<void>(),
+                      behavior: HitTestBehavior.opaque,
                       child: Padding(
-                        padding: const EdgeInsets.only(top: 12),
-                        child: Column(
-                          children: [
-                            _InfoRow(
-                              label: 'Gönderilme Tarihi',
-                              value: _fmtDate(brief.updatedAt),
-                            ),
-                            const SizedBox(height: 10),
-                            _InfoRow(
-                              label: 'Proje ID',
-                              value:
-                                  '#PRJ-${brief.createdAt.year}-${brief.id.substring(0, 8).toUpperCase()}',
-                              mono: true,
-                            ),
-                          ],
-                        ),
+                        padding: EdgeInsets.all(8 * s),
+                        child: Icon(Icons.arrow_back_rounded,
+                            size: 22 * s, color: _kInk),
                       ),
                     ),
-
-                    const SizedBox(height: 120),
+                    Expanded(
+                      child: Text(
+                        'İş Teklifi',
+                        textAlign: TextAlign.center,
+                        style: _serif(
+                            size: 22 * s, weight: FontWeight.w600, color: _kInk),
+                      ),
+                    ),
+                    SizedBox(width: 38 * s),
                   ],
                 ),
               ),
-            ),
-          ],
-        ),
-      ),
 
-      // ── Bottom bar ──────────────────────────────────────────────────────────
-      bottomNavigationBar: _buildBottomBar(),
+              // ── Kaydırılabilir gövde ────────────────────────────────────────
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.fromLTRB(20 * s, 6 * s, 20 * s, 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildHeaderCard(brief.category, brief.title, s),
+                      SizedBox(height: 14 * s),
+
+                      if (a.shootingType != null ||
+                          a.vibes != null ||
+                          a.dateRange != null ||
+                          a.deliveryTime != null ||
+                          a.budget != null ||
+                          a.location != null) ...[
+                        _Section(
+                          scale: s,
+                          icon: Icons.assignment_outlined,
+                          label: 'BRIEF BİLGİLERİ',
+                          child: _buildBriefGrid(a, s),
+                        ),
+                        SizedBox(height: 14 * s),
+                      ],
+
+                      if (a.notes != null && a.notes!.isNotEmpty) ...[
+                        _Section(
+                          scale: s,
+                          icon: Icons.description_outlined,
+                          label: 'İŞ TARİFİ',
+                          child: Padding(
+                            padding: EdgeInsets.only(top: 12 * s),
+                            child: Text(
+                              a.notes!,
+                              style: _mono(
+                                  size: 10 * s,
+                                  color: _kInk,
+                                  spacing: 0.2,
+                                  height: 1.6),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 14 * s),
+                      ],
+
+                      _Section(
+                        scale: s,
+                        icon: Icons.info_outline,
+                        label: 'PROJE BİLGİLERİ',
+                        child: Padding(
+                          padding: EdgeInsets.only(top: 14 * s),
+                          child: Column(
+                            children: [
+                              _InfoRow(
+                                scale: s,
+                                label: 'Gönderilme Tarihi',
+                                value: _fmtDate(brief.updatedAt),
+                              ),
+                              SizedBox(height: 12 * s),
+                              _InfoRow(
+                                scale: s,
+                                label: 'Proje ID',
+                                value:
+                                    '#PRJ-${brief.createdAt.year}-${brief.id.substring(0, 8).toUpperCase()}',
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      SizedBox(height: 120 * s),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        bottomNavigationBar: _buildBottomBar(s),
+      ),
     );
   }
 
-  // ── Header card ────────────────────────────────────────────────────────────
+  // ── Header kartı ────────────────────────────────────────────────────────────
 
-  Widget _buildHeaderCard(String category, String title) {
+  Widget _buildHeaderCard(String category, String title, double s) {
     return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
+      padding: EdgeInsets.all(16 * s),
+      decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 14,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        border: Border.fromBorderSide(BorderSide(color: _kCardBorder)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: _categoryIconBg(category),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Icon(
-              _categoryIcon(category),
-              size: 28,
-              color: _categoryIconColor(category),
-            ),
+            width: 56 * s,
+            height: 56 * s,
+            color: _kGold,
+            alignment: Alignment.center,
+            child: Icon(_categoryIcon(category), size: 28 * s, color: Colors.white),
           ),
-          const SizedBox(width: 14),
+          SizedBox(width: 14 * s),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE8B84B).withValues(alpha: 0.18),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Text(
-                    'YENİ TEKLİF',
-                    style: TextStyle(
-                      fontFamily: 'SpaceGrotesk',
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFFB8860B),
-                      letterSpacing: 0.5,
-                    ),
-                  ),
+                Text(
+                  'YENİ TEKLİF',
+                  style: _mono(
+                      size: 8 * s,
+                      weight: FontWeight.w700,
+                      color: _kGold,
+                      spacing: 1.2),
                 ),
-                const SizedBox(height: 6),
+                SizedBox(height: 5 * s),
                 Text(
                   title.isNotEmpty ? title : category,
-                  style: AppTextStyles.heading2.copyWith(
-                    color: Colors.black87,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: _serif(
+                      size: 24 * s, weight: FontWeight.w600, color: _kInk),
                 ),
-                const SizedBox(height: 2),
+                SizedBox(height: 2 * s),
                 Text(
                   category,
-                  style: AppTextStyles.caption.copyWith(
-                    color: Colors.black45,
-                    fontSize: 13,
-                  ),
+                  style: _mono(size: 8 * s, color: _kMuted, spacing: 0.5),
                 ),
               ],
             ),
@@ -241,9 +242,9 @@ class FreelancerOfferDetailView
     );
   }
 
-  // ── Brief info grid ────────────────────────────────────────────────────────
+  // ── Brief bilgi grid ─────────────────────────────────────────────────────────
 
-  Widget _buildBriefGrid(dynamic a) {
+  Widget _buildBriefGrid(dynamic a, double s) {
     final items = <_GridItem>[];
 
     if (a.shootingType != null && (a.shootingType as String).isNotEmpty) {
@@ -276,7 +277,7 @@ class FreelancerOfferDetailView
     }
     if (a.budget != null && (a.budget as String).isNotEmpty) {
       items.add(_GridItem(
-        icon: Icons.attach_money_outlined,
+        icon: Icons.payments_outlined,
         label: 'Bütçe',
         value: a.budget as String,
       ));
@@ -295,37 +296,30 @@ class FreelancerOfferDetailView
     for (var i = 0; i < items.length; i += 3) {
       final rowItems =
           items.sublist(i, i + 3 > items.length ? items.length : i + 3);
-      while (rowItems.length < 3) {
-        rowItems.add(_GridItem(icon: Icons.abc, label: '', value: ''));
-      }
       rows.add(Row(
-        children: rowItems.asMap().entries.map((e) {
-          return Expanded(
-            child: e.value.label.isEmpty
-                ? const SizedBox.shrink()
-                : _GridCell(item: e.value),
-          );
-        }).toList(),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: List.generate(3, (j) {
+          if (j >= rowItems.length) return const Expanded(child: SizedBox());
+          return Expanded(child: _GridCell(scale: s, item: rowItems[j]));
+        }),
       ));
-      if (i + 3 < items.length) rows.add(const SizedBox(height: 10));
+      if (i + 3 < items.length) rows.add(SizedBox(height: 14 * s));
     }
 
     return Padding(
-      padding: const EdgeInsets.only(top: 14),
+      padding: EdgeInsets.only(top: 16 * s),
       child: Column(children: rows),
     );
   }
 
-  // ── Bottom bar ──────────────────────────────────────────────────────────────
+  // ── Alt bar ────────────────────────────────────────────────────────────────
 
-  Widget _buildBottomBar() {
+  Widget _buildBottomBar(double s) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF5EBD8),
-        border: Border(
-          top: BorderSide(color: Colors.black.withValues(alpha: 0.08)),
-        ),
+      padding: EdgeInsets.fromLTRB(20 * s, 12 * s, 20 * s, 28 * s),
+      decoration: const BoxDecoration(
+        color: _kCream,
+        border: Border(top: BorderSide(color: _kDivider)),
       ),
       child: Row(
         children: [
@@ -333,93 +327,78 @@ class FreelancerOfferDetailView
           Expanded(
             flex: 2,
             child: Obx(() => GestureDetector(
-                  onTap: controller.isRejecting.value
-                      ? null
-                      : controller.rejectOffer,
+                  onTap:
+                      controller.isRejecting.value ? null : controller.rejectOffer,
                   child: Container(
-                    height: 52,
+                    height: 52 * s,
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: const Color(0xFFD32F2F).withValues(alpha: 0.4),
-                      ),
+                      border: Border.all(color: _kDanger.withValues(alpha: 0.4)),
                     ),
                     child: controller.isRejecting.value
-                        ? const Center(
+                        ? Center(
                             child: SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
+                              width: 20 * s,
+                              height: 20 * s,
+                              child: const CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: Color(0xFFD32F2F),
+                                color: _kDanger,
                               ),
                             ),
                           )
                         : Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(Icons.close_rounded,
-                                  size: 18, color: Color(0xFFD32F2F)),
-                              const SizedBox(width: 6),
+                              Icon(Icons.close_rounded,
+                                  size: 16 * s, color: _kDanger),
+                              SizedBox(width: 6 * s),
                               Text(
-                                'Reddet',
-                                style: AppTextStyles.button.copyWith(
-                                  color: const Color(0xFFD32F2F),
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                'REDDET',
+                                style: _mono(
+                                    size: 10 * s,
+                                    weight: FontWeight.w700,
+                                    color: _kDanger,
+                                    spacing: 1),
                               ),
                             ],
                           ),
                   ),
                 )),
           ),
-          const SizedBox(width: 10),
+          SizedBox(width: 10 * s),
           // Mesajlaş
           Expanded(
             flex: 3,
             child: Obx(() => GestureDetector(
-                  onTap: controller.isOpeningChat.value
-                      ? null
-                      : controller.openChat,
+                  onTap:
+                      controller.isOpeningChat.value ? null : controller.openChat,
                   child: Container(
-                    height: 52,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE8B84B),
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.12),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
+                    height: 52 * s,
+                    color: _kGold,
                     child: controller.isOpeningChat.value
-                        ? const Center(
+                        ? Center(
                             child: SizedBox(
-                              width: 22,
-                              height: 22,
-                              child: CircularProgressIndicator(
+                              width: 22 * s,
+                              height: 22 * s,
+                              child: const CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: Colors.black54,
+                                color: Colors.white,
                               ),
                             ),
                           )
                         : Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(Icons.chat_bubble_outline_rounded,
-                                  size: 17, color: Colors.black87),
-                              const SizedBox(width: 6),
+                              Icon(Icons.chat_bubble_outline_rounded,
+                                  size: 16 * s, color: Colors.white),
+                              SizedBox(width: 8 * s),
                               Text(
-                                'Mesajlaş',
-                                style: AppTextStyles.button.copyWith(
-                                  color: Colors.black,
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w700,
-                                ),
+                                'MESAJLAŞ',
+                                style: _mono(
+                                    size: 11 * s,
+                                    weight: FontWeight.w700,
+                                    color: Colors.white,
+                                    spacing: 1.2),
                               ),
                             ],
                           ),
@@ -430,63 +409,48 @@ class FreelancerOfferDetailView
       ),
     );
   }
-
-  // ── Helpers ────────────────────────────────────────────────────────────────
-
-  static const _months = [
-    '', 'Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz',
-    'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara',
-  ];
-
-  String _fmtDate(DateTime d) {
-    return '${d.day} ${_months[d.month]} ${d.year}';
-  }
 }
 
-// ── Section wrapper ────────────────────────────────────────────────────────────
+// ── Bölüm sarmalayıcı ────────────────────────────────────────────────────────
 
 class _Section extends StatelessWidget {
   const _Section({
+    required this.scale,
     required this.icon,
     required this.label,
     required this.child,
   });
 
+  final double scale;
   final IconData icon;
   final String label;
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
+    final s = scale;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
-      decoration: BoxDecoration(
+      padding: EdgeInsets.fromLTRB(16 * s, 14 * s, 16 * s, 16 * s),
+      decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
+        border: Border.fromBorderSide(BorderSide(color: _kCardBorder)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icon, size: 16, color: Colors.black45),
-              const SizedBox(width: 7),
-              Text(
-                label,
-                style: const TextStyle(
-                  fontFamily: 'SpaceGrotesk',
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.black45,
-                  letterSpacing: 0.6,
+              Icon(icon, size: 14 * s, color: _kGold),
+              SizedBox(width: 8 * s),
+              Expanded(
+                child: Text(
+                  label,
+                  style: _mono(
+                      size: 8 * s,
+                      weight: FontWeight.w700,
+                      color: _kInk,
+                      spacing: 1.4),
                 ),
               ),
             ],
@@ -498,7 +462,7 @@ class _Section extends StatelessWidget {
   }
 }
 
-// ── Grid item ──────────────────────────────────────────────────────────────────
+// ── Grid hücresi ─────────────────────────────────────────────────────────────
 
 class _GridItem {
   const _GridItem({
@@ -512,79 +476,68 @@ class _GridItem {
 }
 
 class _GridCell extends StatelessWidget {
-  const _GridCell({required this.item});
+  const _GridCell({required this.scale, required this.item});
+  final double scale;
   final _GridItem item;
 
   @override
   Widget build(BuildContext context) {
+    final s = scale;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Icon(item.icon, size: 14, color: Colors.black38),
-            const SizedBox(width: 4),
+            Icon(item.icon, size: 11 * s, color: _kTaupe),
+            SizedBox(width: 4 * s),
             Expanded(
               child: Text(
-                item.label,
-                style: const TextStyle(
-                  fontFamily: 'SpaceGrotesk',
-                  fontSize: 10,
-                  color: Colors.black45,
-                  fontWeight: FontWeight.w500,
-                ),
+                item.label.toUpperCase(),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
+                style: _mono(size: 7 * s, color: _kMuted, spacing: 0.8),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 3),
+        SizedBox(height: 4 * s),
         Text(
           item.value,
-          style: const TextStyle(
-            fontFamily: 'SpaceGrotesk',
-            fontSize: 13,
-            color: Colors.black87,
-            fontWeight: FontWeight.w600,
-          ),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
+          style: _mono(
+              size: 10 * s, weight: FontWeight.w700, color: _kInk, spacing: 0.2),
         ),
       ],
     );
   }
 }
 
-// ── Info row ───────────────────────────────────────────────────────────────────
+// ── Bilgi satırı ─────────────────────────────────────────────────────────────
 
 class _InfoRow extends StatelessWidget {
-  const _InfoRow({required this.label, required this.value, this.mono = false});
+  const _InfoRow({required this.scale, required this.label, required this.value});
+  final double scale;
   final String label;
   final String value;
-  final bool mono;
 
   @override
   Widget build(BuildContext context) {
+    final s = scale;
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontFamily: 'SpaceGrotesk',
-            fontSize: 13,
-            color: Colors.black45,
+        Expanded(
+          child: Text(
+            label,
+            style: _mono(size: 9 * s, color: _kTaupe, spacing: 0.3),
           ),
         ),
+        SizedBox(width: 10 * s),
         Text(
           value,
-          style: TextStyle(
-            fontFamily: mono ? 'monospace' : 'SpaceGrotesk',
-            fontSize: 13,
-            color: Colors.black87,
-            fontWeight: FontWeight.w600,
-          ),
+          style: _mono(
+              size: 9 * s, weight: FontWeight.w700, color: _kInk, spacing: 0.3),
         ),
       ],
     );

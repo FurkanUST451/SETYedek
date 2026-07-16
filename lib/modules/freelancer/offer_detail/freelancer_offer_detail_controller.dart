@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../../data/models/brief_model.dart';
 import '../../../data/repositories/brief_repository.dart';
@@ -73,38 +74,49 @@ class FreelancerOfferDetailController extends GetxController {
   Future<void> rejectOffer() async {
     final confirmed = await Get.dialog<bool>(
       AlertDialog(
-        backgroundColor: const Color(0xFFF5EBD8),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        title: const Text(
+        backgroundColor: const Color(0xFFFEFDFB),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.zero,
+          side: BorderSide(color: Color(0x14000000)),
+        ),
+        title: Text(
           'Teklifi Reddet',
-          style: TextStyle(
-            fontFamily: 'SpaceGrotesk',
-            fontWeight: FontWeight.w700,
-            color: Colors.black87,
+          style: GoogleFonts.cormorantGaramond(
+            fontSize: 22,
+            fontWeight: FontWeight.w600,
+            color: const Color(0xFF35333F),
           ),
         ),
-        content: const Text(
+        content: Text(
           'Bu teklifi reddetmek istediğinize emin misiniz?',
-          style: TextStyle(
-            fontFamily: 'SpaceGrotesk',
-            color: Colors.black54,
+          style: GoogleFonts.spaceMono(
+            fontSize: 12,
+            color: const Color(0xFF9B8E7B),
+            height: 1.4,
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Get.back(result: false),
-            child: const Text(
-              'Vazgeç',
-              style: TextStyle(color: Colors.black54),
+            child: Text(
+              'VAZGEÇ',
+              style: GoogleFonts.spaceMono(
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF9B8E7B),
+                letterSpacing: 1,
+              ),
             ),
           ),
           TextButton(
             onPressed: () => Get.back(result: true),
-            child: const Text(
-              'Reddet',
-              style: TextStyle(
-                color: Color(0xFFD32F2F),
+            child: Text(
+              'REDDET',
+              style: GoogleFonts.spaceMono(
+                fontSize: 10,
                 fontWeight: FontWeight.w700,
+                color: const Color(0xFFBE6A5A),
+                letterSpacing: 1,
               ),
             ),
           ),

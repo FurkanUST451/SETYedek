@@ -103,7 +103,7 @@ class ProjectDetailView extends StatelessWidget {
     const currentStep = 2;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5EBD8),
+      backgroundColor: const Color(0xFFFEFDFB),
       body: Stack(
         children: [
           // ── Hero background image ──────────────────────────────────────────

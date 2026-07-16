@@ -1,113 +1,251 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_radius.dart';
-import '../../../core/theme/app_spacing.dart';
-import '../../../core/theme/app_text_styles.dart';
 import '../../../data/models/brief_model.dart';
 import '../../../data/models/message_model.dart';
 import '../../../data/models/offer_model.dart';
 import 'chat_detail_controller.dart';
+
+// ─── Palet ────────────────────────────────────────────────────────────────────
+const _kCream = Color(0xFFFEFDFB); // üst bar
+const _kChatBg = Color(0xFFEDE8DC); // sohbet zemini
+const _kGold = Color(0xFFD9A84E);
+const _kInk = Color(0xFF35333F);
+const _kBubbleMe = Color(0xFF23212B); // giden balon (koyu)
+const _kTaupe = Color(0xFF9B8E7B);
+const _kMuted = Color(0xFFB6AD9A);
+const _kAvatarBg = Color(0xFFEADCBB);
+const _kAccepted = Color(0xFF6B8F71);
+const _kDanger = Color(0xFFBE6A5A);
+const _kCardBorder = Color(0x14000000);
+
+TextStyle _serif({
+  required double size,
+  FontWeight weight = FontWeight.w500,
+  required Color color,
+  double height = 1.05,
+}) =>
+    GoogleFonts.cormorantGaramond(
+        fontSize: size, fontWeight: weight, color: color, height: height);
+
+TextStyle _mono({
+  required double size,
+  FontWeight weight = FontWeight.w400,
+  required Color color,
+  double spacing = 0.5,
+  double height = 1.4,
+}) =>
+    GoogleFonts.spaceMono(
+        fontSize: size,
+        fontWeight: weight,
+        color: color,
+        letterSpacing: spacing,
+        height: height);
+
+const _monthsShort = [
+  '', 'Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz',
+  'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara',
+];
+
+String _initialsOf(String name) {
+  final parts = name.trim().split(RegExp(r'\s+'));
+  if (parts.length >= 2 && parts[0].isNotEmpty && parts[1].isNotEmpty) {
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+  final t = name.trim();
+  return t.isEmpty ? '?' : t.substring(0, t.length >= 2 ? 2 : 1).toUpperCase();
+}
+
+String _hhmm(DateTime dt) =>
+    '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+
+String _dayLabel(DateTime dt) {
+  final now = DateTime.now();
+  final d0 = DateTime(now.year, now.month, now.day);
+  final d = DateTime(dt.year, dt.month, dt.day);
+  final diff = d0.difference(d).inDays;
+  if (diff == 0) return 'BUGÜN';
+  if (diff == 1) return 'DÜN';
+  return '${dt.day} ${_monthsShort[dt.month]}'.toUpperCase();
+}
+
+bool _sameDay(DateTime a, DateTime b) =>
+    a.year == b.year && a.month == b.month && a.day == b.day;
+
+// « » içindeki metni altın renkle vurgular.
+List<TextSpan> _highlightSpans(String text, Color accent) {
+  final spans = <TextSpan>[];
+  final reg = RegExp(r'«[^»]*»');
+  var last = 0;
+  for (final m in reg.allMatches(text)) {
+    if (m.start > last) spans.add(TextSpan(text: text.substring(last, m.start)));
+    spans.add(TextSpan(
+      text: m.group(0),
+      style: TextStyle(color: accent, fontWeight: FontWeight.w700),
+    ));
+    last = m.end;
+  }
+  if (last < text.length) spans.add(TextSpan(text: text.substring(last)));
+  return spans;
+}
 
 class ChatDetailView extends GetView<ChatDetailController> {
   const ChatDetailView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+    final double s = (width / 390).clamp(0.85, 1.15).toDouble();
+
     return PopScope(
       canPop: false,
-      onPopInvokedWithResult: (_, __) => controller.goBack(),
-      child: Scaffold(
-        backgroundColor: const Color(0xFF141210),
-        appBar: _buildAppBar(),
-        body: Column(
-          children: [
-            Expanded(
-              child: Obx(() => ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(
-                      AppSpacing.md,
-                      AppSpacing.sm,
-                      AppSpacing.md,
-                      AppSpacing.sm,
-                    ),
-                    itemCount: controller.messages.length + 1,
-                    itemBuilder: (_, i) {
-                      if (i == 0) {
-                        return _BriefCard(controller: controller);
-                      }
-                      final msg = controller.messages[i - 1];
-                      return _buildMessage(msg);
-                    },
-                  )),
-            ),
-            _Composer(controller: controller),
-          ],
+      onPopInvokedWithResult: (didPop, result) => controller.goBack(),
+      child: MediaQuery.withNoTextScaling(
+        child: Scaffold(
+          backgroundColor: _kChatBg,
+          appBar: _buildAppBar(s),
+          body: Column(
+            children: [
+              Expanded(
+                child: Stack(
+                  children: [
+                    const Positioned.fill(child: _DotBackground()),
+                    Obx(() {
+                      final msgs = controller.messages;
+                      return ListView.builder(
+                        padding: EdgeInsets.fromLTRB(16 * s, 16 * s, 16 * s, 16 * s),
+                        itemCount: msgs.length + 1,
+                        itemBuilder: (_, i) {
+                          if (i == 0) {
+                            return _BriefCard(scale: s, controller: controller);
+                          }
+                          final msg = msgs[i - 1];
+                          final showDay = i == 1 ||
+                              !_sameDay(msgs[i - 2].createdAt, msg.createdAt);
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              if (showDay) _DayChip(scale: s, label: _dayLabel(msg.createdAt)),
+                              _buildMessage(s, msg),
+                            ],
+                          );
+                        },
+                      );
+                    }),
+                  ],
+                ),
+              ),
+              _Composer(scale: s, controller: controller),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  PreferredSizeWidget _buildAppBar() {
-    return AppBar(
-      backgroundColor: const Color(0xFF141210),
-      elevation: 0,
-      titleSpacing: 0,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new,
-            size: 18, color: AppColors.textPrimary),
-        onPressed: controller.goBack,
-      ),
-      title: Row(
-        children: [
-          Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: const LinearGradient(
-                colors: [Color(0xFF3A2D1B), Color(0xFF5C4A2D)],
-              ),
-            ),
-            alignment: Alignment.center,
-            child: Text(
-              controller.chatName
-                  .split(' ')
-                  .map((w) => w.isNotEmpty ? w[0] : '')
-                  .take(2)
-                  .join()
-                  .toUpperCase(),
-              style: AppTextStyles.caption.copyWith(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.w700,
-              ),
+  PreferredSizeWidget _buildAppBar(double s) {
+    return PreferredSize(
+      preferredSize: Size.fromHeight(64 * s),
+      child: Container(
+        decoration: const BoxDecoration(
+          color: _kCream,
+          border: Border(bottom: BorderSide(color: Color(0x14000000))),
+        ),
+        child: SafeArea(
+          bottom: false,
+          child: SizedBox(
+            height: 64 * s,
+            child: Row(
+              children: [
+                SizedBox(width: 6 * s),
+                GestureDetector(
+                  onTap: controller.goBack,
+                  behavior: HitTestBehavior.opaque,
+                  child: Padding(
+                    padding: EdgeInsets.all(10 * s),
+                    child: Icon(Icons.arrow_back_rounded, size: 20 * s, color: _kInk),
+                  ),
+                ),
+                SizedBox(width: 2 * s),
+                Container(
+                  width: 40 * s,
+                  height: 40 * s,
+                  decoration: BoxDecoration(
+                    color: _kAvatarBg,
+                    borderRadius: BorderRadius.zero,
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    _initialsOf(controller.chatName),
+                    style: _mono(
+                        size: 11 * s,
+                        weight: FontWeight.w700,
+                        color: _kInk,
+                        spacing: 0.5),
+                  ),
+                ),
+                SizedBox(width: 12 * s),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        controller.chatName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: _serif(
+                            size: 19 * s, weight: FontWeight.w600, color: _kInk),
+                      ),
+                      SizedBox(height: 2 * s),
+                      Row(
+                        children: [
+                          Container(
+                            width: 6 * s,
+                            height: 6 * s,
+                            color: _kGold,
+                          ),
+                          SizedBox(width: 6 * s),
+                          Flexible(
+                            child: Text(
+                              controller.briefTitle.isNotEmpty
+                                  ? 'ÇEVRİMİÇİ · ${controller.briefTitle.toUpperCase()}'
+                                  : 'ÇEVRİMİÇİ',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style:
+                                  _mono(size: 7.5 * s, color: _kTaupe, spacing: 1),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(width: 8 * s),
+                _SquareBtn(scale: s, icon: Icons.call_outlined, onTap: () {}),
+                SizedBox(width: 8 * s),
+                _SquareBtn(scale: s, icon: Icons.videocam_outlined, onTap: () {}),
+                SizedBox(width: 14 * s),
+              ],
             ),
           ),
-          const SizedBox(width: AppSpacing.sm),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(controller.chatName,
-                  style: AppTextStyles.body1
-                      .copyWith(fontWeight: FontWeight.w600)),
-            ],
-          ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildMessage(MessageModel msg) {
+  Widget _buildMessage(double s, MessageModel msg) {
     final isMe = msg.senderId == controller.myId;
-    final time = controller.formatTime(msg.createdAt);
+    final time = _hhmm(msg.createdAt);
 
     if (msg.type == 'offer' && msg.offerId != null) {
       return Obx(() {
         final offer = controller.offers[msg.offerId];
-        if (offer == null) {
-          return const SizedBox.shrink();
-        }
+        if (offer == null) return const SizedBox.shrink();
         return _OfferBubble(
+          scale: s,
           offer: offer,
           isMe: isMe,
           time: time,
@@ -117,77 +255,62 @@ class ChatDetailView extends GetView<ChatDetailController> {
       });
     }
 
-    if (isMe) {
-      return _MyBubble(text: msg.content, time: time);
-    }
-    return _TheirBubble(
-      text: msg.content,
-      time: time,
-      initials: controller.chatName
-          .split(' ')
-          .map((w) => w.isNotEmpty ? w[0] : '')
-          .take(2)
-          .join()
-          .toUpperCase(),
-    );
+    return isMe
+        ? _MyBubble(scale: s, text: msg.content, time: time)
+        : _TheirBubble(scale: s, text: msg.content, time: time);
   }
 }
 
-// ─── Brief Card ───────────────────────────────────────────────────────────────
-
+// ─── Brief kartı (sohbetin en üstünde) ────────────────────────────────────────
 class _BriefCard extends StatelessWidget {
-  const _BriefCard({required this.controller});
+  const _BriefCard({required this.scale, required this.controller});
+  final double scale;
   final ChatDetailController controller;
 
   @override
   Widget build(BuildContext context) {
+    final s = scale;
     return Obx(() {
       final brief = controller.brief.value;
       final category =
           brief?.category.isNotEmpty == true ? brief!.category : controller.briefTitle;
       final shootingType = brief?.answers.shootingType;
-      if (category.isEmpty) return const SizedBox(height: AppSpacing.sm);
+      if (category.isEmpty) return SizedBox(height: 8 * s);
 
       return GestureDetector(
-        onTap: brief == null ? null : () => _showBriefDetail(context, brief),
+        onTap: brief == null ? null : () => _showBriefDetail(context, brief, s),
         child: Container(
-          margin: const EdgeInsets.only(bottom: AppSpacing.lg),
-          padding: const EdgeInsets.all(AppSpacing.md),
+          margin: EdgeInsets.only(bottom: 16 * s),
+          padding: EdgeInsets.all(14 * s),
           decoration: BoxDecoration(
-            color: const Color(0xFF1E1A14),
-            borderRadius: BorderRadius.circular(AppRadius.lg),
-            border: Border.all(color: const Color(0xFF2E2820)),
+            color: Colors.white,
+            border: Border.all(color: _kGold.withValues(alpha: 0.35)),
           ),
           child: Row(
             children: [
               Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: AppColors.accentGold.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(AppRadius.md),
-                ),
-                child: const Icon(Icons.work_outline_rounded,
-                    color: AppColors.accentGold, size: 20),
+                width: 38 * s,
+                height: 38 * s,
+                color: _kGold.withValues(alpha: 0.15),
+                alignment: Alignment.center,
+                child: Icon(Icons.work_outline_rounded, color: _kGold, size: 18 * s),
               ),
-              const SizedBox(width: AppSpacing.md),
+              SizedBox(width: 12 * s),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       category,
-                      style: AppTextStyles.heading3.copyWith(
-                          color: AppColors.textPrimary, fontSize: 15),
+                      style: _serif(size: 15 * s, weight: FontWeight.w600, color: _kInk),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     if (shootingType != null && shootingType.isNotEmpty) ...[
-                      const SizedBox(height: 2),
+                      SizedBox(height: 2 * s),
                       Text(
                         shootingType,
-                        style: AppTextStyles.caption
-                            .copyWith(color: AppColors.textSecondary),
+                        style: _mono(size: 8 * s, color: _kTaupe, spacing: 0.3),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -196,8 +319,7 @@ class _BriefCard extends StatelessWidget {
                 ),
               ),
               if (brief != null)
-                const Icon(Icons.chevron_right,
-                    size: 18, color: AppColors.textTertiary),
+                Icon(Icons.chevron_right, size: 18 * s, color: _kMuted),
             ],
           ),
         ),
@@ -205,14 +327,12 @@ class _BriefCard extends StatelessWidget {
     });
   }
 
-  void _showBriefDetail(BuildContext context, BriefModel brief) {
-    showModalBottomSheet(
+  void _showBriefDetail(BuildContext context, BriefModel brief, double s) {
+    showModalBottomSheet<void>(
       context: context,
-      backgroundColor: const Color(0xFF1E1A14),
+      backgroundColor: _kCream,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
       builder: (ctx) => _BriefDetailSheet(brief: brief),
     );
   }
@@ -224,6 +344,7 @@ class _BriefDetailSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = (MediaQuery.sizeOf(context).width / 390).clamp(0.85, 1.15).toDouble();
     final a = brief.answers;
     final items = <(IconData, String, String)>[
       if (a.shootingType != null && a.shootingType!.isNotEmpty)
@@ -243,32 +364,30 @@ class _BriefDetailSheet extends StatelessWidget {
     return SafeArea(
       top: false,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-            AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.lg),
+        padding: EdgeInsets.fromLTRB(20 * s, 20 * s, 20 * s, 20 * s),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               brief.category.isNotEmpty ? brief.category : 'İş',
-              style: AppTextStyles.heading3
-                  .copyWith(color: AppColors.textPrimary, fontSize: 18),
+              style: _serif(size: 20 * s, weight: FontWeight.w600, color: _kInk),
             ),
             if (a.shootingType != null && a.shootingType!.isNotEmpty) ...[
-              const SizedBox(height: 2),
+              SizedBox(height: 2 * s),
               Text(
                 a.shootingType!,
-                style: AppTextStyles.body2
-                    .copyWith(color: AppColors.textSecondary),
+                style: _mono(size: 9 * s, color: _kTaupe, spacing: 0.3),
               ),
             ],
-            const SizedBox(height: AppSpacing.lg),
+            SizedBox(height: 18 * s),
             if (items.isNotEmpty)
               Wrap(
-                spacing: AppSpacing.md,
-                runSpacing: AppSpacing.md,
+                spacing: 10 * s,
+                runSpacing: 10 * s,
                 children: items
                     .map((item) => _DetailChip(
+                          scale: s,
                           icon: item.$1,
                           label: item.$2,
                           value: item.$3,
@@ -276,22 +395,15 @@ class _BriefDetailSheet extends StatelessWidget {
                     .toList(),
               ),
             if (a.notes != null && a.notes!.isNotEmpty) ...[
-              const SizedBox(height: AppSpacing.lg),
+              SizedBox(height: 18 * s),
               Text(
                 'İŞ TARİFİ',
-                style: AppTextStyles.caption.copyWith(
-                  color: AppColors.textTertiary,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.4,
-                ),
+                style: _mono(size: 8 * s, weight: FontWeight.w700, color: _kMuted, spacing: 1.2),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8 * s),
               Text(
                 a.notes!,
-                style: AppTextStyles.body2.copyWith(
-                  color: AppColors.textSecondary,
-                  height: 1.5,
-                ),
+                style: _mono(size: 10 * s, color: _kInk, height: 1.6, spacing: 0.2),
               ),
             ],
           ],
@@ -302,42 +414,41 @@ class _BriefDetailSheet extends StatelessWidget {
 }
 
 class _DetailChip extends StatelessWidget {
-  const _DetailChip(
-      {required this.icon, required this.label, required this.value});
+  const _DetailChip({
+    required this.scale,
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+  final double scale;
   final IconData icon;
   final String label;
   final String value;
 
   @override
   Widget build(BuildContext context) {
+    final s = scale;
     return Container(
-      constraints: const BoxConstraints(minWidth: 130),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      constraints: BoxConstraints(minWidth: 130 * s),
+      padding: EdgeInsets.symmetric(horizontal: 12 * s, vertical: 10 * s),
       decoration: BoxDecoration(
-        color: const Color(0xFF141210),
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(color: const Color(0xFF2E2820)),
+        color: Colors.white,
+        border: Border.all(color: _kCardBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icon, size: 13, color: AppColors.textTertiary),
-              const SizedBox(width: 4),
-              Text(label,
-                  style: AppTextStyles.caption
-                      .copyWith(color: AppColors.textTertiary, fontSize: 10)),
+              Icon(icon, size: 12 * s, color: _kTaupe),
+              SizedBox(width: 4 * s),
+              Text(label, style: _mono(size: 7 * s, color: _kMuted, spacing: 0.5)),
             ],
           ),
-          const SizedBox(height: 3),
+          SizedBox(height: 4 * s),
           Text(
             value,
-            style: AppTextStyles.body2.copyWith(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.w600,
-              fontSize: 13,
-            ),
+            style: _mono(size: 10 * s, weight: FontWeight.w700, color: _kInk, spacing: 0.2),
           ),
         ],
       ),
@@ -345,10 +456,10 @@ class _DetailChip extends StatelessWidget {
   }
 }
 
-// ─── Offer bubble ─────────────────────────────────────────────────────────────
-
+// ─── Teklif balonu ─────────────────────────────────────────────────────────────
 class _OfferBubble extends StatelessWidget {
   const _OfferBubble({
+    required this.scale,
     required this.offer,
     required this.isMe,
     required this.time,
@@ -356,6 +467,7 @@ class _OfferBubble extends StatelessWidget {
     required this.onReject,
   });
 
+  final double scale;
   final OfferModel offer;
   final bool isMe;
   final String time;
@@ -376,101 +488,103 @@ class _OfferBubble extends StatelessWidget {
   Color get _statusColor {
     switch (offer.status) {
       case OfferStatus.accepted:
-        return const Color(0xFF2E7D32);
+        return _kAccepted;
       case OfferStatus.rejected:
-        return const Color(0xFFD32F2F);
+        return _kDanger;
       case OfferStatus.pending:
-        return AppColors.accentGold;
+        return _kGold;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final s = scale;
     return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+      padding: EdgeInsets.only(bottom: 12 * s),
       child: Align(
         alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
         child: Container(
-          padding: const EdgeInsets.all(AppSpacing.md),
+          padding: EdgeInsets.all(14 * s),
           constraints: BoxConstraints(
             maxWidth: MediaQuery.of(context).size.width * 0.78,
           ),
           decoration: BoxDecoration(
-            color: const Color(0xFF1E1A14),
-            borderRadius: BorderRadius.circular(AppRadius.lg),
-            border: Border.all(color: AppColors.accentGold.withValues(alpha: 0.4)),
+            color: Colors.white,
+            border: Border.all(color: _kGold.withValues(alpha: 0.4)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
-                  const Icon(Icons.payments_outlined,
-                      size: 18, color: AppColors.accentGold),
-                  const SizedBox(width: 6),
-                  Text('Fiyat Teklifi',
-                      style: AppTextStyles.caption
-                          .copyWith(color: AppColors.textSecondary)),
+                  Icon(Icons.payments_outlined, size: 16 * s, color: _kGold),
+                  SizedBox(width: 6 * s),
+                  Text('FİYAT TEKLİFİ',
+                      style: _mono(size: 8 * s, color: _kTaupe, spacing: 0.8)),
                   const Spacer(),
                   Text(
                     _statusLabel,
-                    style: AppTextStyles.caption.copyWith(
-                      color: _statusColor,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 11,
-                    ),
+                    style: _mono(
+                        size: 8 * s,
+                        weight: FontWeight.w700,
+                        color: _statusColor,
+                        spacing: 0.4),
                   ),
                 ],
               ),
-              const SizedBox(height: 6),
+              SizedBox(height: 6 * s),
               Text(
                 '${offer.amount.toStringAsFixed(0)} ₺',
-                style: AppTextStyles.heading3.copyWith(
-                  color: AppColors.textPrimary,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                ),
+                style: _serif(size: 22 * s, weight: FontWeight.w600, color: _kInk),
               ),
               if (offer.message.isNotEmpty) ...[
-                const SizedBox(height: 4),
+                SizedBox(height: 4 * s),
                 Text(offer.message,
-                    style: AppTextStyles.body2
-                        .copyWith(color: AppColors.textSecondary)),
+                    style: _mono(size: 9 * s, color: _kTaupe, spacing: 0.2)),
               ],
               if (!isMe && offer.status == OfferStatus.pending) ...[
-                const SizedBox(height: AppSpacing.sm),
+                SizedBox(height: 10 * s),
                 Row(
                   children: [
                     Expanded(
-                      child: OutlinedButton(
-                        onPressed: onReject,
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFFD32F2F),
-                          side: const BorderSide(color: Color(0xFFD32F2F)),
-                          padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: GestureDetector(
+                        onTap: onReject,
+                        child: Container(
+                          height: 38 * s,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                              border: Border.all(color: _kDanger)),
+                          child: Text('Reddet',
+                              style: _mono(
+                                  size: 9 * s,
+                                  weight: FontWeight.w700,
+                                  color: _kDanger,
+                                  spacing: 0.4)),
                         ),
-                        child: const Text('Reddet'),
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8 * s),
                     Expanded(
-                      child: ElevatedButton(
-                        onPressed: onAccept,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.accentGold,
-                          foregroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: GestureDetector(
+                        onTap: onAccept,
+                        child: Container(
+                          height: 38 * s,
+                          alignment: Alignment.center,
+                          color: _kGold,
+                          child: Text('Kabul Et',
+                              style: _mono(
+                                  size: 9 * s,
+                                  weight: FontWeight.w700,
+                                  color: Colors.white,
+                                  spacing: 0.4)),
                         ),
-                        child: const Text('Kabul Et'),
                       ),
                     ),
                   ],
                 ),
               ],
-              const SizedBox(height: 4),
-              Text(time,
-                  style: AppTextStyles.caption
-                      .copyWith(color: AppColors.textTertiary, fontSize: 10)),
+              SizedBox(height: 4 * s),
+              Text(time, style: _mono(size: 7.5 * s, color: _kMuted, spacing: 0.5)),
             ],
           ),
         ),
@@ -479,125 +593,141 @@ class _OfferBubble extends StatelessWidget {
   }
 }
 
-// ─── Their text bubble ────────────────────────────────────────────────────────
-
-class _TheirBubble extends StatelessWidget {
-  const _TheirBubble(
-      {required this.text, required this.time, required this.initials});
-  final String text;
-  final String time;
-  final String initials;
+// ─── Nokta desenli zemin ──────────────────────────────────────────
+class _DotBackground extends StatelessWidget {
+  const _DotBackground();
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Container(
-            width: 28,
-            height: 28,
-            margin: const EdgeInsets.only(right: 8),
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(
-                colors: [Color(0xFF3A2D1B), Color(0xFF5C4A2D)],
-              ),
-            ),
-            alignment: Alignment.center,
-            child: Text(initials,
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 9,
-                    fontWeight: FontWeight.w700)),
-          ),
-          Flexible(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 14, vertical: 10),
-                  constraints: BoxConstraints(
-                    maxWidth: MediaQuery.of(context).size.width * 0.68,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1E1A14),
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(18),
-                      topRight: Radius.circular(18),
-                      bottomLeft: Radius.circular(4),
-                      bottomRight: Radius.circular(18),
-                    ),
-                    border: Border.all(color: const Color(0xFF2E2820)),
-                  ),
-                  child: Text(text,
-                      style: AppTextStyles.body1
-                          .copyWith(color: AppColors.textPrimary)),
-                ),
-                const SizedBox(height: 3),
-                Text(time,
-                    style: AppTextStyles.caption
-                        .copyWith(color: AppColors.textTertiary, fontSize: 10)),
-              ],
-            ),
-          ),
-        ],
+    return CustomPaint(painter: _DotPainter(), size: Size.infinite);
+  }
+}
+
+class _DotPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = _kInk.withValues(alpha: 0.05);
+    const gap = 22.0;
+    const r = 1.1;
+    for (double y = 10; y < size.height; y += gap) {
+      for (double x = 10; x < size.width; x += gap) {
+        canvas.drawCircle(Offset(x, y), r, paint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// ─── Gün ayracı ───────────────────────────────────────────────────
+class _DayChip extends StatelessWidget {
+  const _DayChip({required this.scale, required this.label});
+  final double scale;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = scale;
+    return Center(
+      child: Container(
+        margin: EdgeInsets.symmetric(vertical: 12 * s),
+        padding: EdgeInsets.symmetric(horizontal: 12 * s, vertical: 5 * s),
+        decoration: BoxDecoration(
+          color: Colors.black.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.zero,
+        ),
+        child: Text(label, style: _mono(size: 8 * s, color: _kTaupe, spacing: 1.5)),
       ),
     );
   }
 }
 
-// ─── My bubble ────────────────────────────────────────────────────────────────
-
-class _MyBubble extends StatelessWidget {
-  const _MyBubble({required this.text, required this.time});
+// ─── Gelen balon (beyaz) ──────────────────────────────────────────
+class _TheirBubble extends StatelessWidget {
+  const _TheirBubble({required this.scale, required this.text, required this.time});
+  final double scale;
   final String text;
   final String time;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: Align(
-        alignment: Alignment.centerRight,
+    final s = scale;
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        margin: EdgeInsets.only(bottom: 12 * s, right: 40 * s),
+        padding: EdgeInsets.fromLTRB(14 * s, 12 * s, 14 * s, 8 * s),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.zero,
+          border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
+        ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width * 0.68,
-              ),
-              decoration: BoxDecoration(
-                color: AppColors.accentGold,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(18),
-                  topRight: Radius.circular(18),
-                  bottomLeft: Radius.circular(18),
-                  bottomRight: Radius.circular(4),
-                ),
-              ),
-              child: Text(
-                text,
-                style: AppTextStyles.body1.copyWith(
-                  color: Colors.black,
-                  fontWeight: FontWeight.w500,
-                ),
+            Text.rich(
+              TextSpan(
+                style: _mono(size: 10 * s, color: _kInk, spacing: 0.2),
+                children: _highlightSpans(text, _kGold),
               ),
             ),
-            const SizedBox(height: 3),
+            SizedBox(height: 4 * s),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Text(time,
+                  style: _mono(size: 7.5 * s, color: _kMuted, spacing: 0.5)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Giden balon (koyu) ───────────────────────────────────────────
+class _MyBubble extends StatelessWidget {
+  const _MyBubble({required this.scale, required this.text, required this.time});
+  final double scale;
+  final String text;
+  final String time;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = scale;
+    return Align(
+      alignment: Alignment.centerRight,
+      child: Container(
+        margin: EdgeInsets.only(bottom: 12 * s, left: 40 * s),
+        padding: EdgeInsets.fromLTRB(14 * s, 12 * s, 14 * s, 8 * s),
+        decoration: BoxDecoration(
+          color: _kBubbleMe,
+          borderRadius: BorderRadius.zero,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text.rich(
+              TextSpan(
+                style: _mono(
+                    size: 10 * s,
+                    color: Colors.white.withValues(alpha: 0.92),
+                    spacing: 0.2),
+                children: _highlightSpans(text, _kGold),
+              ),
+            ),
+            SizedBox(height: 4 * s),
             Row(
               mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Text(time,
-                    style: AppTextStyles.caption.copyWith(
-                        color: AppColors.textTertiary, fontSize: 10)),
-                const SizedBox(width: 4),
-                const Icon(Icons.done_all_rounded,
-                    size: 13, color: AppColors.accentGold),
+                    style: _mono(
+                        size: 7.5 * s,
+                        color: Colors.white.withValues(alpha: 0.45),
+                        spacing: 0.5)),
+                SizedBox(width: 4 * s),
+                Icon(Icons.done_all_rounded, size: 12 * s, color: _kGold),
               ],
             ),
           ],
@@ -607,156 +737,213 @@ class _MyBubble extends StatelessWidget {
   }
 }
 
-// ─── Composer ─────────────────────────────────────────────────────────────────
+// ─── Bar ikon butonu ──────────────────────────────────────────────
+class _SquareBtn extends StatelessWidget {
+  const _SquareBtn({required this.scale, required this.icon, required this.onTap});
+  final double scale;
+  final IconData icon;
+  final VoidCallback onTap;
 
+  @override
+  Widget build(BuildContext context) {
+    final s = scale;
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        width: 40 * s,
+        height: 40 * s,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.zero,
+          border: Border.all(color: Colors.black.withValues(alpha: 0.10)),
+        ),
+        child: Icon(icon, size: 18 * s, color: _kInk),
+      ),
+    );
+  }
+}
+
+// ─── Composer ─────────────────────────────────────────────────────
 class _Composer extends StatelessWidget {
-  const _Composer({required this.controller});
+  const _Composer({required this.scale, required this.controller});
+  final double scale;
   final ChatDetailController controller;
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      top: false,
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(
-            AppSpacing.md, AppSpacing.sm, AppSpacing.md, AppSpacing.md),
-        color: const Color(0xFF141210),
-        child: Row(
-          children: [
-            GestureDetector(
-              onTap: () => _showOfferSheet(context, controller),
-              child: Container(
-                width: 44,
-                height: 44,
-                margin: const EdgeInsets.only(right: AppSpacing.sm),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1E1A14),
-                  shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFF2E2820)),
-                ),
-                child: const Icon(Icons.payments_outlined,
-                    size: 20, color: AppColors.accentGold),
-              ),
-            ),
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.md, vertical: 4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1E1A14),
-                  borderRadius: BorderRadius.circular(AppRadius.full),
-                  border: Border.all(color: const Color(0xFF2E2820)),
-                ),
-                child: TextField(
-                  controller: controller.messageController,
-                  style: AppTextStyles.body1
-                      .copyWith(color: AppColors.textPrimary),
-                  cursorColor: AppColors.accentGold,
-                  decoration: InputDecoration(
-                    hintText: 'Mesaj yaz...',
-                    hintStyle: AppTextStyles.body1
-                        .copyWith(color: AppColors.textTertiary),
-                    border: InputBorder.none,
-                    contentPadding:
-                        const EdgeInsets.symmetric(vertical: 10),
-                    isCollapsed: true,
+    final s = scale;
+    return Container(
+      decoration: const BoxDecoration(
+        color: _kCream,
+        border: Border(top: BorderSide(color: Color(0x14000000))),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(16 * s, 10 * s, 16 * s, 12 * s),
+          child: Row(
+            children: [
+              GestureDetector(
+                onTap: () => _showOfferSheet(context, controller, s),
+                child: Container(
+                  width: 46 * s,
+                  height: 46 * s,
+                  margin: EdgeInsets.only(right: 10 * s),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(color: _kGold.withValues(alpha: 0.5)),
                   ),
-                  onSubmitted: (_) => controller.send(),
+                  child: Icon(Icons.payments_outlined, size: 19 * s, color: _kGold),
                 ),
               ),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Obx(() => _SendBtn(
-                  onTap: controller.send,
-                  isLoading: controller.isSending.value,
-                )),
-          ],
+              Expanded(
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 16 * s),
+                  height: 46 * s,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.zero,
+                    border:
+                        Border.all(color: Colors.black.withValues(alpha: 0.08)),
+                  ),
+                  alignment: Alignment.center,
+                  child: TextField(
+                    controller: controller.messageController,
+                    cursorColor: _kGold,
+                    style: _mono(size: 10 * s, color: _kInk, spacing: 0.2, height: 1.2),
+                    decoration: InputDecoration(
+                      isCollapsed: true,
+                      filled: false,
+                      fillColor: Colors.transparent,
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      disabledBorder: InputBorder.none,
+                      hintText: 'Mesaj yaz...',
+                      hintStyle:
+                          _mono(size: 10 * s, color: _kMuted, spacing: 0.2),
+                    ),
+                    onSubmitted: (_) => controller.send(),
+                  ),
+                ),
+              ),
+              SizedBox(width: 10 * s),
+              Obx(() => _SendBtn(
+                    scale: s,
+                    onTap: controller.send,
+                    isLoading: controller.isSending.value,
+                  )),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-void _showOfferSheet(BuildContext context, ChatDetailController controller) {
-  showModalBottomSheet(
+void _showOfferSheet(
+    BuildContext context, ChatDetailController controller, double s) {
+  showModalBottomSheet<void>(
     context: context,
-    backgroundColor: const Color(0xFF1E1A14),
+    backgroundColor: _kCream,
     isScrollControlled: true,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-    ),
+    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
     builder: (ctx) {
       return Padding(
         padding: EdgeInsets.fromLTRB(
-          AppSpacing.lg,
-          AppSpacing.lg,
-          AppSpacing.lg,
-          MediaQuery.of(ctx).viewInsets.bottom + AppSpacing.lg,
+          20 * s,
+          20 * s,
+          20 * s,
+          MediaQuery.of(ctx).viewInsets.bottom + 20 * s,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Fiyat Teklifi Gönder',
-                style: AppTextStyles.heading3
-                    .copyWith(color: AppColors.textPrimary)),
-            const SizedBox(height: AppSpacing.md),
+                style: _serif(size: 20 * s, weight: FontWeight.w600, color: _kInk)),
+            SizedBox(height: 16 * s),
             TextField(
               controller: controller.offerAmountController,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              style: AppTextStyles.body1.copyWith(color: AppColors.textPrimary),
-              cursorColor: AppColors.accentGold,
+              style: _mono(size: 11 * s, color: _kInk, spacing: 0.2),
+              cursorColor: _kGold,
               decoration: InputDecoration(
+                isDense: true,
                 hintText: 'Tutar (₺)',
-                hintStyle: AppTextStyles.body1.copyWith(color: AppColors.textTertiary),
+                hintStyle: _mono(size: 11 * s, color: _kMuted, spacing: 0.2),
                 filled: true,
-                fillColor: const Color(0xFF141210),
+                fillColor: Colors.white,
+                contentPadding: EdgeInsets.symmetric(
+                    horizontal: 14 * s, vertical: 14 * s),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppRadius.md),
-                  borderSide: BorderSide.none,
+                  borderRadius: BorderRadius.zero,
+                  borderSide: BorderSide(color: Colors.black.withValues(alpha: 0.12)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.zero,
+                  borderSide: BorderSide(color: Colors.black.withValues(alpha: 0.12)),
+                ),
+                focusedBorder: const OutlineInputBorder(
+                  borderRadius: BorderRadius.zero,
+                  borderSide: BorderSide(color: _kGold),
                 ),
               ),
             ),
-            const SizedBox(height: AppSpacing.sm),
+            SizedBox(height: 10 * s),
             TextField(
               controller: controller.offerNoteController,
               maxLines: 2,
-              style: AppTextStyles.body1.copyWith(color: AppColors.textPrimary),
-              cursorColor: AppColors.accentGold,
+              style: _mono(size: 11 * s, color: _kInk, spacing: 0.2),
+              cursorColor: _kGold,
               decoration: InputDecoration(
+                isDense: true,
                 hintText: 'Not (opsiyonel)',
-                hintStyle: AppTextStyles.body1.copyWith(color: AppColors.textTertiary),
+                hintStyle: _mono(size: 11 * s, color: _kMuted, spacing: 0.2),
                 filled: true,
-                fillColor: const Color(0xFF141210),
+                fillColor: Colors.white,
+                contentPadding: EdgeInsets.symmetric(
+                    horizontal: 14 * s, vertical: 14 * s),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppRadius.md),
-                  borderSide: BorderSide.none,
+                  borderRadius: BorderRadius.zero,
+                  borderSide: BorderSide(color: Colors.black.withValues(alpha: 0.12)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.zero,
+                  borderSide: BorderSide(color: Colors.black.withValues(alpha: 0.12)),
+                ),
+                focusedBorder: const OutlineInputBorder(
+                  borderRadius: BorderRadius.zero,
+                  borderSide: BorderSide(color: _kGold),
                 ),
               ),
             ),
-            const SizedBox(height: AppSpacing.lg),
+            SizedBox(height: 18 * s),
             SizedBox(
               width: double.infinity,
-              child: Obx(() => ElevatedButton(
-                    onPressed: controller.isSendingOffer.value
+              child: Obx(() => GestureDetector(
+                    onTap: controller.isSendingOffer.value
                         ? null
                         : controller.sendOffer,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.accentGold,
-                      foregroundColor: Colors.black,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppRadius.md),
-                      ),
+                    child: Container(
+                      height: 50 * s,
+                      color: _kGold,
+                      alignment: Alignment.center,
+                      child: controller.isSendingOffer.value
+                          ? SizedBox(
+                              width: 18 * s,
+                              height: 18 * s,
+                              child: const CircularProgressIndicator(
+                                  strokeWidth: 2, color: Colors.white),
+                            )
+                          : Text('Teklifi Gönder',
+                              style: _mono(
+                                  size: 10 * s,
+                                  weight: FontWeight.w700,
+                                  color: Colors.white,
+                                  spacing: 0.6)),
                     ),
-                    child: controller.isSendingOffer.value
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                                strokeWidth: 2, color: Colors.black),
-                          )
-                        : const Text('Teklifi Gönder'),
                   )),
             ),
           ],
@@ -767,28 +954,32 @@ void _showOfferSheet(BuildContext context, ChatDetailController controller) {
 }
 
 class _SendBtn extends StatelessWidget {
-  const _SendBtn({required this.onTap, required this.isLoading});
+  const _SendBtn({required this.scale, required this.onTap, required this.isLoading});
+  final double scale;
   final VoidCallback onTap;
   final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
+    final s = scale;
     return GestureDetector(
       onTap: isLoading ? null : onTap,
       child: Container(
-        width: 44,
-        height: 44,
-        decoration: const BoxDecoration(
-          shape: BoxShape.circle,
-          color: AppColors.accentGold,
+        width: 46 * s,
+        height: 46 * s,
+        decoration: BoxDecoration(
+          color: _kGold,
+          borderRadius: BorderRadius.zero,
         ),
+        alignment: Alignment.center,
         child: isLoading
-            ? const Padding(
-                padding: EdgeInsets.all(12),
-                child: CircularProgressIndicator(
-                    strokeWidth: 2, color: Colors.black),
+            ? SizedBox(
+                width: 18 * s,
+                height: 18 * s,
+                child: const CircularProgressIndicator(
+                    strokeWidth: 2, color: Colors.white),
               )
-            : const Icon(Icons.send_rounded, size: 20, color: Colors.black),
+            : Icon(Icons.arrow_upward_rounded, size: 20 * s, color: Colors.white),
       ),
     );
   }

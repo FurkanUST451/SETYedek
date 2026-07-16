@@ -23,14 +23,15 @@ import '../modules/client/home/client_home_view.dart';
 import '../modules/client/project_mode/project_mode_view.dart';
 import '../modules/client/send_offer/send_offer_binding.dart';
 import '../modules/client/send_offer/send_offer_view.dart';
+import '../modules/client/set_projects/set_projects_view.dart';
 import '../modules/freelancer/home/freelancer_home_binding.dart';
 import '../modules/freelancer/home/freelancer_home_view.dart';
 import '../modules/freelancer/offer_detail/freelancer_offer_detail_binding.dart';
 import '../modules/freelancer/offer_detail/freelancer_offer_detail_view.dart';
 import '../modules/freelancer/project_detail/project_detail_binding.dart';
-import '../modules/freelancer/project_detail/project_detail_view.dart';
 import '../modules/freelancer/onboarding/freelancer_onboarding_binding.dart';
 import '../modules/freelancer/onboarding/freelancer_onboarding_view.dart';
+import '../modules/freelancer/project_detail/freelancer_project_detail_view.dart';
 import '../modules/onboarding/onboarding_binding.dart';
 import '../modules/onboarding/onboarding_view.dart';
 import '../modules/role_selection/role_selection_binding.dart';
@@ -121,6 +122,10 @@ class AppPages {
       name: AppRoutes.briefDetail,
       page: () => const BriefDetailView(),
       binding: BriefDetailBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.setProjects,
+      page: () => const SetProjectsView(),
     ),
 
     // Freelancer (Hizmet Ver) — implementation pending

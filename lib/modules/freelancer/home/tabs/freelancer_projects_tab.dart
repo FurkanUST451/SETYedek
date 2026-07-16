@@ -1,307 +1,405 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/app_text_styles.dart';
 import '../../../../data/models/project_model.dart';
 import '../../../../routes/app_routes.dart';
-import '../../../../widgets/set_section_header.dart';
 import '../freelancer_projects_controller.dart';
 
-class FreelancerProjectsTab extends StatelessWidget {
+// ─── Palet ────────────────────────────────────────────────────────────────────
+const _kCream = Color(0xFFFEFDFB);
+const _kGold = Color(0xFFD9A84E);
+const _kInk = Color(0xFF35333F);
+const _kTaupe = Color(0xFF9B8E7B);
+const _kMuted = Color(0xFFB6AD9A);
+const _kDivider = Color(0x12000000);
+const _kCardBorder = Color(0x0F000000);
+
+// ─── Tipografi yardımcıları ───────────────────────────────────────────────────
+TextStyle _serif({
+  required double size,
+  FontWeight weight = FontWeight.w500,
+  required Color color,
+  double height = 1.05,
+}) => GoogleFonts.cormorantGaramond(
+  fontSize: size,
+  fontWeight: weight,
+  color: color,
+  height: height,
+);
+
+TextStyle _mono({
+  required double size,
+  FontWeight weight = FontWeight.w400,
+  required Color color,
+  double spacing = 0.5,
+}) => GoogleFonts.spaceMono(
+  fontSize: size,
+  fontWeight: weight,
+  color: color,
+  letterSpacing: spacing,
+);
+
+const _months = [
+  '',
+  'Oca',
+  'Şub',
+  'Mar',
+  'Nis',
+  'May',
+  'Haz',
+  'Tem',
+  'Ağu',
+  'Eyl',
+  'Eki',
+  'Kas',
+  'Ara',
+];
+
+String _formatDate(DateTime d) => '${d.day} ${_months[d.month]} ${d.year}';
+
+// ─────────────────────────────────────────────────────────────────
+// TAB
+// ─────────────────────────────────────────────────────────────────
+class FreelancerProjectsTab extends StatefulWidget {
   const FreelancerProjectsTab({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final controller = Get.find<FreelancerProjectsController>();
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final secondaryColor = isDark ? Colors.white54 : Colors.black45;
+  State<FreelancerProjectsTab> createState() => _FreelancerProjectsTabState();
+}
 
-    return Container(
-      color: Colors.white,
-      child: SafeArea(
-        bottom: false,
-        child: Obx(() {
-          if (controller.isLoading.value) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          return RefreshIndicator(
-            onRefresh: controller.loadProjects,
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.lg,
-                AppSpacing.lg,
-                AppSpacing.lg,
-                120,
-              ),
+class _FreelancerProjectsTabState extends State<FreelancerProjectsTab> {
+  final FreelancerProjectsController controller =
+      Get.find<FreelancerProjectsController>();
+
+  int _filterIndex = 0;
+
+  static const _filterLabels = ['TÜMÜ', 'AKTİF', 'TAMAMLANDI'];
+  static const _filterStatus = <ProjectStatus?>[
+    null,
+    ProjectStatus.active,
+    ProjectStatus.completed,
+  ];
+
+  List<ProjectModel> _filtered(List<ProjectModel> all) {
+    final st = _filterStatus[_filterIndex];
+    if (st == null) return all;
+    return all.where((p) => p.status == st).toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+    final double s = (width / 390).clamp(0.85, 1.15).toDouble();
+
+    return Scaffold(
+      backgroundColor: _kCream,
+      body: MediaQuery.withNoTextScaling(
+        child: SafeArea(
+          bottom: false,
+          child: Obx(() {
+            if (controller.isLoading.value && controller.projects.isEmpty) {
+              return const Center(
+                child: CircularProgressIndicator(color: _kGold),
+              );
+            }
+            final list = _filtered(controller.projects);
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SetSectionHeader(
-                  eyebrow: 'WORKSPACE',
-                  title: 'Projelerim',
-                  description: 'Aktif ve tamamlanan işler',
-                  large: true,
+                _buildHeader(s, list.length),
+                SizedBox(height: 20 * s),
+                _buildFilterBar(s),
+                SizedBox(height: 8 * s),
+                Expanded(
+                  child: RefreshIndicator(
+                    color: _kGold,
+                    onRefresh: controller.loadProjects,
+                    child: list.isEmpty
+                        ? ListView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            children: [_EmptyState(scale: s)],
+                          )
+                        : ListView.separated(
+                            padding: EdgeInsets.fromLTRB(
+                              24 * s,
+                              6 * s,
+                              24 * s,
+                              130 * s,
+                            ),
+                            itemCount: list.length,
+                            separatorBuilder: (_, _) => SizedBox(height: 18 * s),
+                            itemBuilder: (_, i) => _ProjectCard(
+                              scale: s,
+                              project: list[i],
+                              clientName: controller.clientNames[list[i].clientId],
+                            ),
+                          ),
+                  ),
                 ),
-                const SizedBox(height: AppSpacing.xl),
-                if (controller.projects.isEmpty)
-                  _EmptyState(secondaryColor: secondaryColor)
-                else
-                  ...controller.projects.map((project) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                      child: Obx(() => _ProjectCard(
-                            project: project,
-                            clientName:
-                                controller.clientNames[project.clientId],
-                          )),
-                    );
-                  }),
+              ],
+            );
+          }),
+        ),
+      ),
+    );
+  }
+
+  // ── Header ──────────────────────────────────────────────────────
+  Widget _buildHeader(double s, int count) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(26 * s, 22 * s, 18 * s, 0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'SET · ÜRETİM',
+                  style: _mono(size: 8 * s, color: _kMuted, spacing: 2),
+                ),
+                SizedBox(height: 8 * s),
+                Text(
+                  'Projelerim',
+                  style: _serif(
+                    size: 40 * s,
+                    weight: FontWeight.w600,
+                    color: _kInk,
+                  ),
+                ),
+                SizedBox(height: 6 * s),
+                Text(
+                  '$count proje görüntüleniyor',
+                  style: _mono(size: 8 * s, color: _kTaupe, spacing: 0.5),
+                ),
               ],
             ),
+          ),
+          SizedBox(width: 10 * s),
+          _IconBtn(scale: s, icon: Icons.search_rounded, onTap: () {}),
+          SizedBox(width: 8 * s),
+          _IconBtn(
+            scale: s,
+            icon: Icons.notifications_none_rounded,
+            badge: true,
+            onTap: () {},
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Filtre pilleri ──────────────────────────────────────────────
+  Widget _buildFilterBar(double s) {
+    return SizedBox(
+      height: 40 * s,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: EdgeInsets.symmetric(horizontal: 24 * s),
+        itemCount: _filterLabels.length,
+        separatorBuilder: (_, _) => SizedBox(width: 10 * s),
+        itemBuilder: (_, i) {
+          final active = i == _filterIndex;
+          return GestureDetector(
+            onTap: () => setState(() => _filterIndex = i),
+            behavior: HitTestBehavior.opaque,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              alignment: Alignment.center,
+              padding: EdgeInsets.symmetric(horizontal: 16 * s),
+              decoration: BoxDecoration(
+                color: active ? _kInk : Colors.transparent,
+                border: Border.all(
+                  color: active ? _kInk : Colors.black.withValues(alpha: 0.14),
+                ),
+              ),
+              child: Text(
+                _filterLabels[i],
+                style: _mono(
+                  size: 9 * s,
+                  weight: active ? FontWeight.w700 : FontWeight.w400,
+                  color: active ? Colors.white : _kTaupe,
+                  spacing: 1,
+                ),
+              ),
+            ),
           );
-        }),
+        },
       ),
     );
   }
 }
 
-// ---------------------------------------------------------------------------
-// Project card — anlaşılan iş kartı (brief + anlaşılan ücret verilerine göre)
-// ---------------------------------------------------------------------------
-
-/// Anlaşılan iş sürecinin adımları. Şu an modelde yalnızca genel bir
-/// [ProjectStatus] tutulduğu için, adım göstergesi bu duruma göre kabaca
-/// eşlenir: proje oluştuğunda "Anlaşıldı" tamamlanmış sayılır, tamamlanan
-/// projelerde ise tüm adımlar tamamlanmış gösterilir.
-const _projectSteps = ['Anlaşıldı', 'Çekim Planlandı', 'Çekim Tamamlandı', 'Teslim Edildi', 'Tamamlandı'];
-const _projectStepIcons = [
-  Icons.handshake_outlined,
-  Icons.event_available_outlined,
-  Icons.videocam_outlined,
-  Icons.local_shipping_outlined,
-  Icons.flag_outlined,
-];
-
+// ─────────────────────────────────────────────────────────────────
+// PROJECT CARD — sektasarım tasarımı, ProjectRepository'den gelen gerçek
+// verilerle (durum, bütçe, hizmet alan adı) beslenir.
+// ─────────────────────────────────────────────────────────────────
 class _ProjectCard extends StatelessWidget {
-  const _ProjectCard({required this.project, this.clientName});
+  const _ProjectCard({
+    required this.scale,
+    required this.project,
+    this.clientName,
+  });
 
+  final double scale;
   final ProjectModel project;
   final String? clientName;
 
   String get _category => project.category ?? '';
 
-  IconData get _categoryIcon {
-    final cat = _category.toLowerCase();
-    if (cat.contains('video') || cat.contains('film')) {
-      return Icons.videocam_outlined;
-    } else if (cat.contains('fotoğraf') || cat.contains('photo')) {
-      return Icons.camera_alt_outlined;
-    } else if (cat.contains('ses') || cat.contains('müzik') || cat.contains('audio')) {
-      return Icons.music_note_outlined;
-    } else if (cat.contains('illüstrasyon') || cat.contains('çizim')) {
-      return Icons.brush_outlined;
-    }
-    return Icons.work_outline;
-  }
-
-  Color get _categoryColor {
-    final cat = _category.toLowerCase();
-    if (cat.contains('video') || cat.contains('film')) {
-      return const Color(0xFF4A55C4);
-    } else if (cat.contains('fotoğraf') || cat.contains('photo')) {
-      return const Color(0xFFE8952A);
-    } else if (cat.contains('ses') || cat.contains('müzik') || cat.contains('audio')) {
-      return const Color(0xFF1976D2);
-    } else if (cat.contains('illüstrasyon') || cat.contains('çizim')) {
-      return const Color(0xFF7B1FA2);
-    }
-    return const Color(0xFF6D6259);
-  }
-
   String get _statusLabel {
     switch (project.status) {
       case ProjectStatus.active:
-        return 'Anlaşıldı';
+        return 'AKTİF';
       case ProjectStatus.completed:
-        return 'Tamamlandı';
+        return 'TAMAMLANDI';
       case ProjectStatus.cancelled:
-        return 'İptal Edildi';
+        return 'İPTAL EDİLDİ';
       case ProjectStatus.pending:
-        return 'Bekliyor';
+        return 'BEKLİYOR';
     }
   }
 
   Color get _statusColor {
     switch (project.status) {
       case ProjectStatus.active:
+        return _kGold;
       case ProjectStatus.completed:
-        return const Color(0xFF2E7D32);
+        return const Color(0xFF6B8F71);
       case ProjectStatus.cancelled:
-        return const Color(0xFFD32F2F);
+        return const Color(0xFFBE6A5A);
       case ProjectStatus.pending:
-        return const Color(0xFFE8882A);
+        return _kMuted;
     }
   }
 
-  int get _currentStepIndex {
-    switch (project.status) {
-      case ProjectStatus.completed:
-        return _projectSteps.length - 1;
-      case ProjectStatus.pending:
-      case ProjectStatus.active:
-      case ProjectStatus.cancelled:
-        return 0;
+  IconData get _categoryIcon {
+    final cat = _category.toLowerCase();
+    if (cat.contains('video') || cat.contains('film')) {
+      return Icons.videocam_rounded;
+    } else if (cat.contains('fotoğraf') || cat.contains('photo')) {
+      return Icons.camera_alt_rounded;
+    } else if (cat.contains('ses') || cat.contains('müzik')) {
+      return Icons.music_note_rounded;
+    } else if (cat.contains('cgi') || cat.contains('vfx')) {
+      return Icons.auto_awesome_rounded;
     }
-  }
-
-  Color get _stepAccent {
-    switch (project.status) {
-      case ProjectStatus.completed:
-        return const Color(0xFF2E7D32);
-      case ProjectStatus.cancelled:
-        return const Color(0xFFD32F2F);
-      case ProjectStatus.pending:
-      case ProjectStatus.active:
-        return const Color(0xFF4A55C4);
-    }
-  }
-
-  static const _months = [
-    '', 'Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz',
-    'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara',
-  ];
-
-  String _formatDate(DateTime date) {
-    return '${date.day} ${_months[date.month]} ${date.year}';
+    return Icons.work_rounded;
   }
 
   @override
   Widget build(BuildContext context) {
+    final s = scale;
     return GestureDetector(
       onTap: () => Get.toNamed(
         AppRoutes.freelancerProjectDetail,
         arguments: {'project': project},
       ),
       child: Container(
-        clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.06),
-              blurRadius: 14,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          border: Border.all(color: _kCardBorder),
         ),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Kategori rozeti + başlık + durum + menü ──────────────────
+            // Durum satırı
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 10, 0),
+              padding: EdgeInsets.fromLTRB(18 * s, 16 * s, 14 * s, 0),
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Container(
-                    width: 34,
-                    height: 34,
-                    decoration: BoxDecoration(
-                      color: _categoryColor,
-                      borderRadius: BorderRadius.circular(10),
+                  Container(width: 8 * s, height: 8 * s, color: _statusColor),
+                  SizedBox(width: 8 * s),
+                  Text(
+                    _statusLabel,
+                    style: _mono(
+                      size: 8 * s,
+                      weight: FontWeight.w700,
+                      color: _kInk,
+                      spacing: 1.4,
                     ),
-                    child: Icon(_categoryIcon, size: 17, color: Colors.white),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _category.isEmpty
-                        ? const SizedBox.shrink()
-                        : Text(
-                            _category,
-                            style: AppTextStyles.caption.copyWith(
-                              color: _categoryColor,
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w700,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                  ),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: _statusColor.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      _statusLabel,
-                      style: AppTextStyles.caption.copyWith(
-                        color: _statusColor,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () {},
-                    icon: const Icon(Icons.more_vert,
-                        size: 19, color: Colors.black38),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
-                    splashRadius: 16,
                   ),
                 ],
               ),
             ),
 
-            // ── Brief notu (hizmet alanın yazdığı) ────────────────────────
-            if ((project.notes ?? project.description).isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
-                child: Text(
-                  project.notes ?? project.description,
-                  style: AppTextStyles.body2.copyWith(
-                    color: Colors.black45,
-                    fontSize: 12.5,
-                    height: 1.4,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-
-            const SizedBox(height: 14),
-            Divider(height: 1, color: Colors.black.withValues(alpha: 0.07)),
-
-            // ── Bilgi grid: çekim türü / teslim süresi / çekim tarihi ────
+            // Kimlik satırı
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+              padding: EdgeInsets.fromLTRB(18 * s, 16 * s, 18 * s, 0),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: _StatCell(
-                      icon: Icons.movie_creation_outlined,
-                      label: 'Çekim Türü',
-                      value: (project.shootingType?.isNotEmpty ?? false)
-                          ? project.shootingType!
-                          : '—',
+                  Container(
+                    width: 48 * s,
+                    height: 48 * s,
+                    color: _kGold,
+                    child: Icon(
+                      _categoryIcon,
+                      size: 24 * s,
+                      color: Colors.white,
                     ),
                   ),
+                  SizedBox(width: 14 * s),
                   Expanded(
-                    child: _StatCell(
-                      icon: Icons.access_time_outlined,
-                      label: 'Teslim Süresi',
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _category,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: _serif(
+                            size: 20 * s,
+                            weight: FontWeight.w600,
+                            color: _kInk,
+                          ),
+                        ),
+                        SizedBox(height: 3 * s),
+                        Text(
+                          '${project.shootingType ?? ''} · «${project.title}»',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: _mono(size: 8 * s, color: _kMuted, spacing: 1),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Meta satırı (teslim / bütçe / çekim)
+            SizedBox(height: 18 * s),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 18 * s),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: _MetaCell(
+                      scale: s,
+                      icon: Icons.schedule_rounded,
+                      label: 'TESLİM',
                       value: (project.deliveryTime?.isNotEmpty ?? false)
                           ? project.deliveryTime!
                           : '—',
                     ),
                   ),
                   Expanded(
-                    child: _StatCell(
-                      icon: Icons.calendar_today_outlined,
-                      label: 'Çekim Tarihi',
+                    child: _MetaCell(
+                      scale: s,
+                      icon: Icons.payments_outlined,
+                      label: 'BÜTÇE',
+                      value: '${project.budget.toStringAsFixed(0)} ₺',
+                    ),
+                  ),
+                  Expanded(
+                    child: _MetaCell(
+                      scale: s,
+                      icon: Icons.calendar_today_rounded,
+                      label: 'ÇEKİM',
                       value: (project.dateRange?.isNotEmpty ?? false)
                           ? project.dateRange!
                           : '—',
@@ -311,100 +409,62 @@ class _ProjectCard extends StatelessWidget {
               ),
             ),
 
-            // ── Bilgi grid: konum / anlaşılan fiyat / hizmet alan ────────
+            // Konum
+            SizedBox(height: 16 * s),
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+              padding: EdgeInsets.symmetric(horizontal: 18 * s),
               child: Row(
                 children: [
+                  Icon(
+                    Icons.location_on_outlined,
+                    size: 13 * s,
+                    color: _kTaupe,
+                  ),
+                  SizedBox(width: 5 * s),
                   Expanded(
-                    child: _StatCell(
-                      icon: Icons.location_on_outlined,
-                      label: 'Konum',
-                      value: (project.location?.isNotEmpty ?? false)
+                    child: Text(
+                      (project.location?.isNotEmpty ?? false)
                           ? project.location!
                           : '—',
-                    ),
-                  ),
-                  Expanded(
-                    child: _StatCell(
-                      icon: Icons.account_balance_wallet_outlined,
-                      label: 'Anlaşılan Fiyat',
-                      value: '${project.budget.toStringAsFixed(0)} ₺',
-                      valueColor: const Color(0xFF2E7D32),
-                    ),
-                  ),
-                  Expanded(
-                    child: _StatCell(
-                      icon: Icons.people_outline,
-                      label: 'Hizmet Alan',
-                      value: clientName ?? '—',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: _mono(size: 9 * s, color: _kTaupe, spacing: 0.5),
                     ),
                   ),
                 ],
               ),
             ),
 
-            const SizedBox(height: 14),
-            Divider(height: 1, color: Colors.black.withValues(alpha: 0.07)),
-
-            // ── Tarihler + detay butonu ───────────────────────────────────
+            // Açıklama
+            SizedBox(height: 14 * s),
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: _DateCell(
-                      label: 'Anlaşma Tarihi',
-                      value: _formatDate(project.createdAt),
-                    ),
-                  ),
-                  Expanded(
-                    child: _DateCell(
-                      label: 'Son Teslim Tarihi',
-                      value: project.deadline != null
-                          ? _formatDate(project.deadline!)
-                          : '—',
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 9),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Colors.black.withValues(alpha: 0.12)),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Detaylar',
-                          style: AppTextStyles.caption.copyWith(
-                            color: Colors.black87,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        const Icon(Icons.chevron_right,
-                            size: 16, color: Colors.black54),
-                      ],
-                    ),
-                  ),
-                ],
+              padding: EdgeInsets.symmetric(horizontal: 18 * s),
+              child: Text(
+                (project.notes ?? project.description),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: _mono(size: 9 * s, color: _kInk, spacing: 0.2),
               ),
             ),
 
-            // ── Süreç adımları ────────────────────────────────────────────
+            // Alt bilgi — hizmet alan (varsa) ya da oluşturulma tarihi
+            SizedBox(height: 18 * s),
             Container(
-              decoration: BoxDecoration(
-                border: Border(
-                  top: BorderSide(color: Colors.black.withValues(alpha: 0.07)),
-                ),
+              decoration: const BoxDecoration(
+                border: Border(top: BorderSide(color: _kDivider)),
               ),
-              padding: const EdgeInsets.fromLTRB(10, 14, 10, 16),
-              child: _StepProgress(
-                currentStep: _currentStepIndex,
-                accent: _stepAccent,
+              padding: EdgeInsets.fromLTRB(18 * s, 12 * s, 14 * s, 14 * s),
+              child: Row(
+                children: [
+                  Text(
+                    clientName != null
+                        ? 'HİZMET ALAN · ${clientName!.toUpperCase()}'
+                        : 'OLUŞTURULMA · ${_formatDate(project.createdAt).toUpperCase()}',
+                    style: _mono(size: 8 * s, color: _kMuted, spacing: 0.8),
+                  ),
+                  const Spacer(),
+                  Icon(Icons.chevron_right, size: 16 * s, color: _kGold),
+                ],
               ),
             ),
           ],
@@ -414,182 +474,46 @@ class _ProjectCard extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Date cell helper
-// ---------------------------------------------------------------------------
-
-class _DateCell extends StatelessWidget {
-  const _DateCell({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: AppTextStyles.caption.copyWith(
-            color: Colors.black38,
-            fontSize: 10,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          value,
-          style: AppTextStyles.caption.copyWith(
-            color: Colors.black87,
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ],
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Step progress — Anlaşıldı / Çekim Planlandı / Çekim Tamamlandı / Teslim
-// Edildi / Tamamlandı
-// ---------------------------------------------------------------------------
-
-class _StepProgress extends StatelessWidget {
-  const _StepProgress({required this.currentStep, required this.accent});
-
-  final int currentStep;
-  final Color accent;
-
-  @override
-  Widget build(BuildContext context) {
-    // Her adım eşit genişlikte bir Expanded segmenttir; bağlantı çizgisi de
-    // o segmentin İÇİNDE (daire öncesi/sonrası iki yarım çizgi) çizilir.
-    // Böylece etiket metni her zaman segment genişliğine sabitlenir ve
-    // uzun etiketler (ör. "Çekim Tamamlandı") satırı taşırmadan sarar.
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: List.generate(_projectSteps.length, (i) {
-        final isDone = i <= currentStep;
-        final lineBeforeActive = i > 0 && i <= currentStep;
-        final lineAfterActive = i < _projectSteps.length - 1 && i < currentStep;
-
-        return Expanded(
-          child: Column(
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: Container(
-                      height: 1.5,
-                      color: i == 0
-                          ? Colors.transparent
-                          : (lineBeforeActive ? accent : Colors.black12),
-                    ),
-                  ),
-                  Container(
-                    width: 20,
-                    height: 20,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: isDone ? accent : Colors.white,
-                      border: Border.all(
-                        color: isDone ? accent : Colors.black26,
-                        width: 1.5,
-                      ),
-                    ),
-                    child: Icon(
-                      isDone ? Icons.check : _projectStepIcons[i],
-                      size: 11,
-                      color: isDone ? Colors.white : Colors.black26,
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      height: 1.5,
-                      color: i == _projectSteps.length - 1
-                          ? Colors.transparent
-                          : (lineAfterActive ? accent : Colors.black12),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 6),
-              Text(
-                _projectSteps[i],
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontFamily: 'SpaceGrotesk',
-                  color: isDone ? Colors.black87 : Colors.black38,
-                  fontSize: 8.5,
-                  fontWeight: isDone ? FontWeight.w700 : FontWeight.w500,
-                  height: 1.15,
-                ),
-              ),
-            ],
-          ),
-        );
-      }),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Stat cell helper
-// ---------------------------------------------------------------------------
-
-class _StatCell extends StatelessWidget {
-  const _StatCell({
+// ─── Meta hücresi ─────────────────────────────────────────────────
+class _MetaCell extends StatelessWidget {
+  const _MetaCell({
+    required this.scale,
     required this.icon,
     required this.label,
     required this.value,
-    this.valueColor,
   });
 
+  final double scale;
   final IconData icon;
   final String label;
   final String value;
-  final Color? valueColor;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    final s = scale;
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 15, color: Colors.black38),
-        const SizedBox(width: 5),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: AppTextStyles.caption.copyWith(
-                  color: Colors.black38,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w500,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 2),
-              Text(
-                value,
-                style: AppTextStyles.caption.copyWith(
-                  color: valueColor ?? Colors.black87,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
+        Row(
+          children: [
+            Icon(icon, size: 11 * s, color: _kTaupe),
+            SizedBox(width: 4 * s),
+            Text(
+              label,
+              style: _mono(size: 7 * s, color: _kMuted, spacing: 1),
+            ),
+          ],
+        ),
+        SizedBox(height: 5 * s),
+        Text(
+          value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: _mono(
+            size: 10 * s,
+            weight: FontWeight.w700,
+            color: _kInk,
+            spacing: 0.3,
           ),
         ),
       ],
@@ -597,32 +521,83 @@ class _StatCell extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Empty state
-// ---------------------------------------------------------------------------
+// ─── İkon butonu ──────────────────────────────────────────────────
+class _IconBtn extends StatelessWidget {
+  const _IconBtn({
+    required this.scale,
+    required this.icon,
+    required this.onTap,
+    this.badge = false,
+  });
 
-class _EmptyState extends StatelessWidget {
-  const _EmptyState({required this.secondaryColor});
-
-  final Color secondaryColor;
+  final double scale;
+  final IconData icon;
+  final VoidCallback onTap;
+  final bool badge;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 60),
+    final s = scale;
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        width: 44 * s,
+        height: 44 * s,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: Colors.black.withValues(alpha: 0.10)),
+        ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Icon(icon, size: 20 * s, color: _kInk),
+            if (badge)
+              Positioned(
+                top: 11 * s,
+                right: 12 * s,
+                child: Container(width: 6 * s, height: 6 * s, color: _kGold),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Boş durum ────────────────────────────────────────────────────
+class _EmptyState extends StatelessWidget {
+  const _EmptyState({required this.scale});
+  final double scale;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = scale;
+    return Center(
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.folder_open_outlined, size: 40, color: secondaryColor),
-          const SizedBox(height: AppSpacing.md),
+          Container(
+            width: 68 * s,
+            height: 68 * s,
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.black.withValues(alpha: 0.10)),
+            ),
+            child: Icon(
+              Icons.folder_open_rounded,
+              size: 30 * s,
+              color: _kMuted,
+            ),
+          ),
+          SizedBox(height: 18 * s),
           Text(
             'Henüz proje yok',
-            style: AppTextStyles.heading3.copyWith(color: secondaryColor),
+            style: _serif(size: 22 * s, weight: FontWeight.w600, color: _kInk),
           ),
-          const SizedBox(height: AppSpacing.xs),
+          SizedBox(height: 6 * s),
           Text(
-            'Bir teklif kabul edildiğinde burada görünür.',
-            style: AppTextStyles.body2.copyWith(color: secondaryColor),
-            textAlign: TextAlign.center,
+            'Kabul ettiğin işler burada görünecek.',
+            style: _mono(size: 9 * s, color: _kTaupe, spacing: 0.3),
           ),
         ],
       ),

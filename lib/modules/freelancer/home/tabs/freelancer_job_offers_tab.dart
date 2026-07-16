@@ -1,95 +1,141 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-import '../../../../core/theme/app_text_styles.dart';
 import '../../../../data/models/brief_model.dart';
 import '../../../../data/models/project_model.dart';
 import '../../../../routes/app_routes.dart';
 import '../freelancer_job_offers_controller.dart';
+
+// ─── Palet ────────────────────────────────────────────────────────────────────
+const _kCream = Color(0xFFFEFDFB);
+const _kGold = Color(0xFFD9A84E);
+const _kInk = Color(0xFF35333F);
+const _kTaupe = Color(0xFF9B8E7B);
+const _kMuted = Color(0xFFB6AD9A);
+const _kCardBorder = Color(0x0F000000);
+const _kAccepted = Color(0xFF6B8F71);
+
+// ─── Tipografi yardımcıları ───────────────────────────────────────────────────
+TextStyle _serif({
+  required double size,
+  FontWeight weight = FontWeight.w500,
+  required Color color,
+  double height = 1.05,
+}) =>
+    GoogleFonts.cormorantGaramond(
+        fontSize: size, fontWeight: weight, color: color, height: height);
+
+TextStyle _mono({
+  required double size,
+  FontWeight weight = FontWeight.w400,
+  required Color color,
+  double spacing = 0.5,
+}) =>
+    GoogleFonts.spaceMono(
+        fontSize: size, fontWeight: weight, color: color, letterSpacing: spacing);
 
 class FreelancerJobOffersTab extends GetView<FreelancerJobOffersController> {
   const FreelancerJobOffersTab({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+    final double s = (width / 390).clamp(0.85, 1.15).toDouble();
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF5EBD8),
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'İş Teklifleri',
-                    style: AppTextStyles.displayXL.copyWith(
-                      color: Colors.black87,
-                      fontSize: 36,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Sana gelen proje teklifleri.',
-                    style: AppTextStyles.body2.copyWith(color: Colors.black45),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-            Expanded(
-              child: Obx(() {
-                if (controller.isLoading.value) {
-                  return const Center(
-                    child: CircularProgressIndicator(
-                      color: Color(0xFFE8B84B),
+      backgroundColor: _kCream,
+      body: MediaQuery.withNoTextScaling(
+        child: SafeArea(
+          bottom: false,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Obx(() => _buildHeader(s, controller.offers.length)),
+              SizedBox(height: 12 * s),
+              Expanded(
+                child: Obx(() {
+                  if (controller.isLoading.value) {
+                    return const Center(
+                      child: CircularProgressIndicator(color: _kGold),
+                    );
+                  }
+                  if (controller.offers.isEmpty) {
+                    return _EmptyState(scale: s);
+                  }
+                  return RefreshIndicator(
+                    color: _kGold,
+                    onRefresh: controller.loadOffers,
+                    child: ListView.separated(
+                      padding:
+                          EdgeInsets.fromLTRB(24 * s, 6 * s, 24 * s, 130 * s),
+                      itemCount: controller.offers.length,
+                      separatorBuilder: (_, _) => SizedBox(height: 18 * s),
+                      itemBuilder: (_, i) {
+                        final brief = controller.offers[i];
+                        final project =
+                            controller.acceptedProjectsByBriefId[brief.id];
+                        if (project != null) {
+                          return _AcceptedCard(
+                            scale: s,
+                            brief: brief,
+                            project: project,
+                          );
+                        }
+                        return _OfferCard(
+                          scale: s,
+                          brief: brief,
+                          onReload: controller.loadOffers,
+                        );
+                      },
                     ),
                   );
-                }
-                if (controller.offers.isEmpty) {
-                  return const _EmptyState();
-                }
-                return RefreshIndicator(
-                  color: const Color(0xFFE8B84B),
-                  onRefresh: controller.loadOffers,
-                  child: ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
-                    itemCount: controller.offers.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 12),
-                    itemBuilder: (_, i) {
-                      final brief = controller.offers[i];
-                      final project =
-                          controller.acceptedProjectsByBriefId[brief.id];
-                      if (project != null) {
-                        return _AcceptedCard(brief: brief, project: project);
-                      }
-                      return _OfferCard(
-                        brief: brief,
-                        onReload: controller.loadOffers,
-                      );
-                    },
-                  ),
-                );
-              }),
-            ),
-          ],
+                }),
+              ),
+            ],
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildHeader(double s, int count) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(26 * s, 22 * s, 18 * s, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'SET · GELEN İŞLER',
+            style: _mono(size: 8 * s, color: _kMuted, spacing: 2),
+          ),
+          SizedBox(height: 8 * s),
+          Text(
+            'Teklifler',
+            style: _serif(size: 40 * s, weight: FontWeight.w600, color: _kInk),
+          ),
+          SizedBox(height: 6 * s),
+          Text(
+            '$count teklif görüntüleniyor',
+            style: _mono(size: 8 * s, color: _kTaupe, spacing: 0.5),
+          ),
+        ],
       ),
     );
   }
 }
 
-// ---------------------------------------------------------------------------
-// Accepted (simplified) card
-// ---------------------------------------------------------------------------
-
+// ─────────────────────────────────────────────────────────────────
+// ACCEPTED CARD — teklif zaten kabul edilip projeye dönüşmüşse gösterilir.
+// ─────────────────────────────────────────────────────────────────
 class _AcceptedCard extends StatelessWidget {
-  const _AcceptedCard({required this.brief, required this.project});
+  const _AcceptedCard({
+    required this.scale,
+    required this.brief,
+    required this.project,
+  });
 
+  final double scale;
   final BriefModel brief;
   final ProjectModel project;
 
@@ -106,47 +152,38 @@ class _AcceptedCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = scale;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.6),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFF2E7D32).withValues(alpha: 0.25)),
+        color: Colors.white,
+        border: Border.all(color: _kAccepted.withValues(alpha: 0.4)),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      padding: EdgeInsets.symmetric(horizontal: 18 * s, vertical: 16 * s),
       child: Row(
         children: [
           Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: const Color(0xFF2E7D32).withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Icon(Icons.check_circle_outline,
-                size: 18, color: Color(0xFF2E7D32)),
+            width: 36 * s,
+            height: 36 * s,
+            color: _kAccepted.withValues(alpha: 0.12),
+            alignment: Alignment.center,
+            child: Icon(Icons.check_circle_outline, size: 18 * s, color: _kAccepted),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12 * s),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   _displayTitle,
-                  style: AppTextStyles.body1.copyWith(
-                    color: Colors.black54,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: _mono(size: 11 * s, weight: FontWeight.w700, color: _kInk),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 if (_displaySubtitle.isNotEmpty) ...[
-                  const SizedBox(height: 2),
+                  SizedBox(height: 3 * s),
                   Text(
                     _displaySubtitle,
-                    style: AppTextStyles.caption.copyWith(
-                      color: Colors.black38,
-                      fontSize: 12,
-                    ),
+                    style: _mono(size: 9 * s, color: _kTaupe, spacing: 0.3),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -154,32 +191,25 @@ class _AcceptedCard extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8 * s),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
                 '${project.budget.toStringAsFixed(0)} ₺',
-                style: AppTextStyles.body1.copyWith(
-                  color: const Color(0xFF2E7D32),
-                  fontWeight: FontWeight.w700,
-                  fontSize: 14,
-                ),
+                style: _mono(size: 12 * s, weight: FontWeight.w700, color: _kAccepted),
               ),
-              const SizedBox(height: 3),
+              SizedBox(height: 4 * s),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF2E7D32).withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(8),
-                ),
+                padding: EdgeInsets.symmetric(horizontal: 8 * s, vertical: 3 * s),
+                color: _kAccepted.withValues(alpha: 0.12),
                 child: Text(
-                  'Kabul Edildi',
-                  style: AppTextStyles.caption.copyWith(
-                    color: const Color(0xFF2E7D32),
-                    fontWeight: FontWeight.w700,
-                    fontSize: 10,
-                  ),
+                  'KABUL EDİLDİ',
+                  style: _mono(
+                      size: 7 * s,
+                      weight: FontWeight.w700,
+                      color: _kAccepted,
+                      spacing: 0.6),
                 ),
               ),
             ],
@@ -190,144 +220,187 @@ class _AcceptedCard extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Offer card
-// ---------------------------------------------------------------------------
-
+// ─────────────────────────────────────────────────────────────────
+// OFFER CARD
+// ─────────────────────────────────────────────────────────────────
 class _OfferCard extends StatelessWidget {
-  const _OfferCard({required this.brief, required this.onReload});
+  const _OfferCard({
+    required this.scale,
+    required this.brief,
+    required this.onReload,
+  });
 
+  final double scale;
   final BriefModel brief;
   final Future<void> Function() onReload;
 
   String get _displayTitle =>
       brief.title.isNotEmpty ? brief.title : brief.category;
 
-  String get _displaySubtitle {
-    final shootingType = brief.answers.shootingType;
-    if (shootingType != null && shootingType.isNotEmpty) {
-      return shootingType;
+  IconData get _categoryIcon {
+    final cat = brief.category.toLowerCase();
+    if (cat.contains('video') || cat.contains('film')) {
+      return Icons.videocam_rounded;
+    } else if (cat.contains('fotoğraf') || cat.contains('photo')) {
+      return Icons.camera_alt_rounded;
+    } else if (cat.contains('ses') || cat.contains('müzik')) {
+      return Icons.music_note_rounded;
+    } else if (cat.contains('cgi') || cat.contains('vfx')) {
+      return Icons.auto_awesome_rounded;
     }
-    return brief.category;
+    return Icons.work_rounded;
   }
 
   @override
   Widget build(BuildContext context) {
+    final s = scale;
     return GestureDetector(
-      onTap: _openDetail,
+      onTap: () => _openDetail(context),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.9),
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.06),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          color: Colors.white,
+          border: Border.all(color: _kCardBorder),
         ),
-        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _displayTitle,
-                        style: AppTextStyles.heading3.copyWith(
-                          color: Colors.black87,
-                          fontSize: 16,
-                        ),
-                      ),
-                      const SizedBox(height: 3),
-                      if (_displaySubtitle.isNotEmpty)
-                        Text(
-                          _displaySubtitle,
-                          style: AppTextStyles.caption.copyWith(
-                            color: Colors.black45,
-                            fontSize: 12,
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE8B84B).withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    'Yeni',
-                    style: AppTextStyles.caption.copyWith(
-                      color: const Color(0xFFB8860B),
-                      fontWeight: FontWeight.w700,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            if (brief.answers.budget != null ||
-                brief.answers.dateRange != null) ...[
-              const SizedBox(height: 10),
-              Wrap(
-                spacing: 8,
-                runSpacing: 4,
+            // Durum satırı
+            Padding(
+              padding: EdgeInsets.fromLTRB(18 * s, 16 * s, 14 * s, 0),
+              child: Row(
                 children: [
-                  if (brief.answers.budget != null)
-                    _InfoChip(
-                      icon: Icons.monetization_on_outlined,
-                      label: brief.answers.budget!,
-                    ),
-                  if (brief.answers.dateRange != null)
-                    _InfoChip(
-                      icon: Icons.calendar_today_outlined,
-                      label: brief.answers.dateRange!,
-                    ),
-                  if (brief.answers.location != null)
-                    _InfoChip(
-                      icon: Icons.location_on_outlined,
-                      label: brief.answers.location!,
-                    ),
+                  Container(width: 8 * s, height: 8 * s, color: _kGold),
+                  SizedBox(width: 8 * s),
+                  Text(
+                    'YENİ TEKLİF',
+                    style: _mono(
+                        size: 8 * s,
+                        weight: FontWeight.w700,
+                        color: _kInk,
+                        spacing: 1.4),
+                  ),
                 ],
               ),
+            ),
+
+            // Kimlik satırı
+            Padding(
+              padding: EdgeInsets.fromLTRB(18 * s, 16 * s, 18 * s, 0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 48 * s,
+                    height: 48 * s,
+                    color: _kGold,
+                    child: Icon(_categoryIcon, size: 24 * s, color: Colors.white),
+                  ),
+                  SizedBox(width: 14 * s),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _displayTitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: _serif(
+                              size: 20 * s, weight: FontWeight.w600, color: _kInk),
+                        ),
+                        if (brief.category.isNotEmpty) ...[
+                          SizedBox(height: 3 * s),
+                          Text(
+                            brief.category,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: _mono(size: 8 * s, color: _kMuted, spacing: 1),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Meta satırı (bütçe / çekim / lokasyon)
+            if (brief.answers.budget != null ||
+                brief.answers.dateRange != null ||
+                brief.answers.location != null) ...[
+              SizedBox(height: 18 * s),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 18 * s),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (brief.answers.budget != null)
+                      Expanded(
+                        child: _MetaCell(
+                          scale: s,
+                          icon: Icons.payments_outlined,
+                          label: 'BÜTÇE',
+                          value: brief.answers.budget!,
+                        ),
+                      ),
+                    if (brief.answers.dateRange != null)
+                      Expanded(
+                        child: _MetaCell(
+                          scale: s,
+                          icon: Icons.calendar_today_rounded,
+                          label: 'ÇEKİM',
+                          value: brief.answers.dateRange!,
+                        ),
+                      ),
+                    if (brief.answers.location != null)
+                      Expanded(
+                        child: _MetaCell(
+                          scale: s,
+                          icon: Icons.location_on_outlined,
+                          label: 'LOKASYON',
+                          value: brief.answers.location!,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
             ],
+
+            // Açıklama
             if (brief.answers.notes != null &&
                 brief.answers.notes!.isNotEmpty) ...[
-              const SizedBox(height: 10),
-              Text(
-                brief.answers.notes!,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: AppTextStyles.body2.copyWith(
-                  color: Colors.black45,
-                  height: 1.5,
+              SizedBox(height: 14 * s),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 18 * s),
+                child: Text(
+                  brief.answers.notes!,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: _mono(size: 9 * s, color: _kInk, spacing: 0.2),
                 ),
               ),
             ],
-            const SizedBox(height: 14),
+
+            // İncele butonu
+            SizedBox(height: 18 * s),
             Container(
               width: double.infinity,
-              height: 44,
-              decoration: BoxDecoration(
-                color: Colors.black87,
-                borderRadius: BorderRadius.circular(12),
-              ),
+              height: 46 * s,
+              color: _kInk,
               alignment: Alignment.center,
-              child: Text(
-                'İncele  →',
-                style: AppTextStyles.button.copyWith(
-                  color: Colors.white,
-                  fontSize: 14,
-                ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'İNCELE',
+                    style: _mono(
+                        size: 10 * s,
+                        weight: FontWeight.w700,
+                        color: Colors.white,
+                        spacing: 1.4),
+                  ),
+                  SizedBox(width: 6 * s),
+                  Icon(Icons.arrow_forward_rounded, size: 14 * s, color: _kGold),
+                ],
               ),
             ),
           ],
@@ -336,7 +409,7 @@ class _OfferCard extends StatelessWidget {
     );
   }
 
-  Future<void> _openDetail() async {
+  Future<void> _openDetail(BuildContext context) async {
     final result = await Get.toNamed(
       AppRoutes.freelancerOfferDetail,
       arguments: {'brief': brief},
@@ -347,32 +420,42 @@ class _OfferCard extends StatelessWidget {
   }
 }
 
-class _InfoChip extends StatelessWidget {
-  const _InfoChip({required this.icon, required this.label});
+// ─── Meta hücresi ─────────────────────────────────────────────────
+class _MetaCell extends StatelessWidget {
+  const _MetaCell({
+    required this.scale,
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
 
+  final double scale;
   final IconData icon;
   final String label;
+  final String value;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF0E8DC),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
+    final s = scale;
+    return Padding(
+      padding: EdgeInsets.only(right: 8 * s),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 12, color: const Color(0xFF8D6E63)),
-          const SizedBox(width: 4),
+          Row(
+            children: [
+              Icon(icon, size: 11 * s, color: _kTaupe),
+              SizedBox(width: 4 * s),
+              Text(label, style: _mono(size: 7 * s, color: _kMuted, spacing: 1)),
+            ],
+          ),
+          SizedBox(height: 5 * s),
           Text(
-            label,
-            style: AppTextStyles.caption.copyWith(
-              color: Colors.black54,
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-            ),
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: _mono(
+                size: 10 * s, weight: FontWeight.w700, color: _kInk, spacing: 0.3),
           ),
         ],
       ),
@@ -380,41 +463,35 @@ class _InfoChip extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Empty state
-// ---------------------------------------------------------------------------
-
+// ─── Boş durum ────────────────────────────────────────────────────
 class _EmptyState extends StatelessWidget {
-  const _EmptyState();
+  const _EmptyState({required this.scale});
+  final double scale;
 
   @override
   Widget build(BuildContext context) {
+    final s = scale;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 72,
-            height: 72,
+            width: 68 * s,
+            height: 68 * s,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.7),
-              shape: BoxShape.circle,
+              border: Border.all(color: Colors.black.withValues(alpha: 0.10)),
             ),
-            child: const Icon(
-              Icons.inbox_outlined,
-              size: 34,
-              color: Colors.black26,
-            ),
+            child: Icon(Icons.inbox_outlined, size: 30 * s, color: _kMuted),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 18 * s),
           Text(
             'Henüz teklif yok',
-            style: AppTextStyles.heading3.copyWith(color: Colors.black45),
+            style: _serif(size: 22 * s, weight: FontWeight.w600, color: _kInk),
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: 6 * s),
           Text(
             'Müşteriler teklif gönderince burada görünür.',
-            style: AppTextStyles.body2.copyWith(color: Colors.black26),
+            style: _mono(size: 9 * s, color: _kTaupe, spacing: 0.3),
           ),
         ],
       ),
