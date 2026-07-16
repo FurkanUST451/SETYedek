@@ -12,8 +12,7 @@ import '../freelancer_home_controller.dart';
 const _kCream = Color(0xFFFEFDFB);
 const _kGold = Color(0xFFD9A84E);
 const _kInk = Color(0xFF35333F);
-const _kTaupe = Color(0xFF9B8E7B);
-const _kMuted = Color(0xFFB6AD9A);
+const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
 const _kDivider = Color(0x12000000);
 
 TextStyle _serif({
@@ -220,12 +219,12 @@ class _FreelancerProfileTabState extends State<FreelancerProfileTab>
 
   // ─── Üst başlık: SET / HESABIM + kimlik ─────────────────────────────────────
   Widget _buildHeader(UserController user, double s) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(26 * s, 22 * s, 26 * s, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.fromLTRB(26 * s, 22 * s, 26 * s, 14 * s),
+          child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               RichText(
@@ -250,11 +249,14 @@ class _FreelancerProfileTabState extends State<FreelancerProfileTab>
                   ),
                 ]),
               ),
-              Text('HESABIM', style: _mono(size: 8 * s, color: _kMuted, spacing: 2)),
+              Text('HESABIM', style: _mono(size: 8 * s, color: _kBlack, spacing: 2)),
             ],
           ),
-          SizedBox(height: 46 * s),
-          Obx(() {
+        ),
+        Container(height: 1, color: _kDivider),
+        Padding(
+          padding: EdgeInsets.fromLTRB(26 * s, 24 * s, 26 * s, 0),
+          child: Obx(() {
             final u = user.currentUser;
             final name = u?.name ?? 'Freelancer';
             final email = u?.email ?? '';
@@ -310,12 +312,12 @@ class _FreelancerProfileTabState extends State<FreelancerProfileTab>
                         email,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: _mono(size: 8 * s, color: _kTaupe, spacing: 0.2),
+                        style: _mono(size: 8 * s, color: _kBlack, spacing: 0.2),
                       ),
                       SizedBox(height: 10 * s),
                       Text(
                         '12 PROJE · 4.9 PUAN · 3Y DENEYİM',
-                        style: _mono(size: 7.5 * s, color: _kMuted, spacing: 1),
+                        style: _mono(size: 7.5 * s, color: _kBlack, spacing: 1),
                       ),
                     ],
                   ),
@@ -323,8 +325,8 @@ class _FreelancerProfileTabState extends State<FreelancerProfileTab>
               ],
             );
           }),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -344,12 +346,12 @@ class _FreelancerProfileTabState extends State<FreelancerProfileTab>
                 Text(
                   title,
                   style:
-                      _mono(size: 8 * s, weight: FontWeight.w700, color: _kInk, spacing: 1.8),
+                      _mono(size: 8 * s, weight: FontWeight.w700, color: _kBlack, spacing: 1.8),
                 ),
                 const Spacer(),
                 Text(
                   rows.length.toString().padLeft(2, '0'),
-                  style: _mono(size: 8 * s, color: _kMuted, spacing: 1),
+                  style: _mono(size: 8 * s, color: _kBlack, spacing: 1),
                 ),
               ],
             ),
@@ -462,7 +464,7 @@ class _SettingsRow extends StatelessWidget {
                   ),
                   if (sub != null) ...[
                     SizedBox(height: 3 * s),
-                    Text(sub!, style: _mono(size: 8 * s, color: _kTaupe, spacing: 0.2)),
+                    Text(sub!, style: _mono(size: 8 * s, color: _kBlack, spacing: 0.2)),
                   ],
                 ],
               ),

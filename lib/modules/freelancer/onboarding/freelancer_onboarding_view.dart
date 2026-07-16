@@ -11,7 +11,7 @@ const _kCream = Color(0xFFFEFDFB);
 const _kGold = Color(0xFFD9A84E);
 const _kInk = Color(0xFF35333F);
 const _kTaupe = Color(0xFF9B8E7B);
-const _kMuted = Color(0xFFB6AD9A);
+const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
 const _kDivider = Color(0x12000000);
 const _kCardBorder = Color(0x14000000);
 
@@ -225,7 +225,7 @@ class _LabeledField extends StatelessWidget {
         if (label.isNotEmpty) ...[
           Text(
             label.toUpperCase(),
-            style: _mono(size: 8 * s, weight: FontWeight.w700, color: _kMuted, spacing: 1.2),
+            style: _mono(size: 8 * s, weight: FontWeight.w700, color: _kBlack, spacing: 1.2),
           ),
           SizedBox(height: 7 * s),
         ],
@@ -236,13 +236,13 @@ class _LabeledField extends StatelessWidget {
           onTap: onTap,
           textInputAction: textInputAction,
           cursorColor: _kGold,
-          style: _mono(size: 11 * s, color: _kInk, spacing: 0.2, height: 1.3),
+          style: _mono(size: 11 * s, color: _kBlack, spacing: 0.2, height: 1.3),
           decoration: InputDecoration(
             isDense: true,
             filled: true,
             fillColor: Colors.white,
             hintText: hint,
-            hintStyle: _mono(size: 11 * s, color: _kMuted, spacing: 0.2),
+            hintStyle: _mono(size: 11 * s, color: _kBlack, spacing: 0.2),
             suffixIcon: suffixIcon,
             contentPadding: EdgeInsets.symmetric(horizontal: 14 * s, vertical: 12 * s),
             border: border(Colors.black.withValues(alpha: 0.12)),
@@ -448,10 +448,10 @@ class _PersonalInfoStep extends StatelessWidget {
                 controller: searchCtrl,
                 autofocus: true,
                 cursorColor: _kGold,
-                style: _mono(size: 11 * s, color: _kInk),
+                style: _mono(size: 11 * s, color: _kBlack),
                 decoration: InputDecoration(
                   hintText: 'Şehir ara...',
-                  hintStyle: _mono(size: 11 * s, color: _kMuted),
+                  hintStyle: _mono(size: 11 * s, color: _kBlack),
                   prefixIcon: Icon(Icons.search, size: 18 * s, color: _kTaupe),
                   filled: true,
                   fillColor: Colors.white,
@@ -531,7 +531,7 @@ class _PersonalInfoStep extends StatelessWidget {
                   (i) => Center(
                     child: Text(
                       i == 0 ? '0 yıl' : '$i yıl',
-                      style: _mono(size: 13 * s, color: _kInk, spacing: 0.2),
+                      style: _mono(size: 13 * s, color: _kBlack, spacing: 0.2),
                     ),
                   ),
                 ),
@@ -571,7 +571,7 @@ class _CategoryStep extends StatelessWidget {
           Text('Kategoriler', style: _serif(size: 22 * s, weight: FontWeight.w600, color: _kInk)),
           SizedBox(height: 4 * s),
           Text('Birden fazla seçebilirsin',
-              style: _mono(size: 9 * s, color: _kTaupe, spacing: 0.2)),
+              style: _mono(size: 9 * s, color: _kBlack, spacing: 0.2)),
           SizedBox(height: 20 * s),
           Expanded(
             child: SingleChildScrollView(
@@ -596,7 +596,7 @@ class _CategoryStep extends StatelessWidget {
                             style: _mono(
                               size: 10 * s,
                               weight: selected ? FontWeight.w700 : FontWeight.w400,
-                              color: selected ? _kGold : _kInk,
+                              color: selected ? _kGold : _kBlack,
                               spacing: 0.3,
                             ),
                           ),
@@ -668,12 +668,12 @@ class _PortfolioStep extends StatelessWidget {
           SizedBox(height: 4 * s),
           Text(
             'Bize daha önce yaptığın projelerden bahseder misin?',
-            style: _mono(size: 9 * s, color: _kTaupe, spacing: 0.2),
+            style: _mono(size: 9 * s, color: _kBlack, spacing: 0.2),
           ),
           SizedBox(height: 4 * s),
           Text(
             '(Profil kısmından projelerini eklemeye devam edebilirsin)',
-            style: _mono(size: 8 * s, color: _kMuted, spacing: 0.2),
+            style: _mono(size: 8 * s, color: _kBlack, spacing: 0.2),
           ),
           SizedBox(height: 20 * s),
 
@@ -757,7 +757,7 @@ class _ProjectCard extends StatelessWidget {
                 if (project.jobType.isNotEmpty) ...[
                   SizedBox(height: 2 * s),
                   Text(project.jobType,
-                      style: _mono(size: 8.5 * s, color: _kTaupe, spacing: 0.2)),
+                      style: _mono(size: 8.5 * s, color: _kBlack, spacing: 0.2)),
                 ],
                 if (project.description.isNotEmpty) ...[
                   SizedBox(height: 6 * s),
@@ -765,7 +765,7 @@ class _ProjectCard extends StatelessWidget {
                     project.description,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: _mono(size: 8.5 * s, color: _kMuted, spacing: 0.2),
+                    style: _mono(size: 8.5 * s, color: _kBlack, spacing: 0.2),
                   ),
                 ],
                 if (project.videoUrl != null && project.videoUrl!.isNotEmpty) ...[

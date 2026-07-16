@@ -31,4 +31,5 @@ class AppRoutes {
   static const String freelancerHome = '/freelancer/home';
   static const String freelancerOfferDetail = '/freelancer/offer-detail';
   static const String freelancerProjectDetail = '/freelancer/project-detail';
+  static const String freelancerUploadWork = '/freelancer/upload-work';
 }

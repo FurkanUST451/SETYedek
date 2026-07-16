@@ -11,6 +11,16 @@ const _kInk = Color(0xFF35333F);
 const _kMuted = Color(0xFFB6AD9A);
 const _kCardBorder = Color(0x14000000);
 
+const Map<String, String> _kCategoryIcons = {
+  'Video Çekim': 'assets/images/main_service_icons/video.png',
+  'Kurgu': 'assets/images/main_service_icons/kurgu.png',
+  'Ses Tasarımı': 'assets/images/main_service_icons/ses.png',
+  'CGI & VFX': 'assets/images/main_service_icons/cgi.png',
+  'Fotoğraf': 'assets/images/main_service_icons/foto.png',
+  'Grafik Tasarım': 'assets/images/main_service_icons/grafiktasarim.png',
+  'Sosyal Medya Yönetimi': 'assets/images/main_service_icons/sosyal medya.png',
+};
+
 TextStyle _serif({
   required double size,
   FontWeight weight = FontWeight.w500,
@@ -86,7 +96,7 @@ class CategoryPickerView extends GetView<CategoryPickerController> {
               SizedBox(height: 20 * s),
               Text('Hizmetini seç,',
                   style:
-                      _serif(size: 30 * s, weight: FontWeight.w600, color: _kInk)),
+                      _serif(size: 33 * s, weight: FontWeight.w600, color: _kInk)),
               Text('fikrini hayata geçirelim.',
                   style: _serif(
                       size: 22 * s,
@@ -95,7 +105,7 @@ class CategoryPickerView extends GetView<CategoryPickerController> {
                       italic: true)),
               SizedBox(height: 12 * s),
               Icon(Icons.keyboard_arrow_down_rounded,
-                  color: _kMuted, size: 26 * s),
+                  color: Colors.black, size: 26 * s),
               SizedBox(height: 12 * s),
               Expanded(
                 child: ListView.separated(
@@ -143,7 +153,7 @@ class _CategoryCard extends StatelessWidget {
         decoration: const BoxDecoration(
           color: Colors.white,
           border: Border(
-            left: BorderSide(color: _kGold, width: 3),
+            left: BorderSide(color: Colors.black, width: 3),
             top: BorderSide(color: _kCardBorder),
             right: BorderSide(color: _kCardBorder),
             bottom: BorderSide(color: _kCardBorder),
@@ -151,6 +161,15 @@ class _CategoryCard extends StatelessWidget {
         ),
         child: Row(
           children: [
+            SizedBox(
+              width: 32 * s,
+              height: 32 * s,
+              child: Image.asset(
+                _kCategoryIcons[label] ?? '',
+                fit: BoxFit.contain,
+              ),
+            ),
+            SizedBox(width: 16 * s),
             Expanded(
               child: Text(
                 label,

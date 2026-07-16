@@ -11,6 +11,7 @@ const _kGold = Color(0xFFD9A84E);
 const _kInk = Color(0xFF35333F);
 const _kTaupe = Color(0xFF9B8E7B);
 const _kMuted = Color(0xFFB6AD9A);
+const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
 const _kDivider = Color(0x12000000);
 const _kCardBorder = Color(0x14000000);
 const _kCompleted = Color(0xFF6B8F71);
@@ -270,7 +271,7 @@ class _FreelancerProjectDetailViewState
                                     '${project.shootingType ?? ''} · «${project.category ?? ''}»',
                                     style: _mono(
                                       size: 8 * s,
-                                      color: _kMuted,
+                                      color: _kBlack,
                                       spacing: 0.5,
                                     ),
                                   ),
@@ -310,7 +311,7 @@ class _FreelancerProjectDetailViewState
                               project.notes ?? project.description,
                               style: _mono(
                                 size: 10 * s,
-                                color: _kInk,
+                                color: _kBlack,
                                 spacing: 0.2,
                                 height: 1.6,
                               ),
@@ -512,7 +513,7 @@ class _FreelancerProjectDetailViewState
                               style: _mono(
                                 size: 16 * s,
                                 weight: FontWeight.w700,
-                                color: _kInk,
+                                color: _kBlack,
                               ),
                             ),
                           )
@@ -525,7 +526,7 @@ class _FreelancerProjectDetailViewState
                       style: _mono(
                         size: 11 * s,
                         weight: FontWeight.w600,
-                        color: _kInk,
+                        color: _kBlack,
                       ),
                     ),
                   ),
@@ -542,7 +543,7 @@ class _FreelancerProjectDetailViewState
                         style: _mono(
                           size: 9 * s,
                           weight: FontWeight.w700,
-                          color: _kInk,
+                          color: _kBlack,
                           spacing: 0.5,
                         ),
                       ),
@@ -623,7 +624,7 @@ class _FreelancerProjectDetailViewState
                     style: _mono(
                       size: 11 * s,
                       weight: FontWeight.w700,
-                      color: _kInk,
+                      color: _kBlack,
                       spacing: 0.2,
                     ),
                   ),
@@ -696,7 +697,7 @@ class _FreelancerProjectDetailViewState
                 style: _mono(
                   size: 8 * s,
                   weight: FontWeight.w700,
-                  color: _kMuted,
+                  color: _kBlack,
                   spacing: 1.2,
                 ),
               ),
@@ -712,7 +713,7 @@ class _FreelancerProjectDetailViewState
                 style: _mono(
                   size: 8 * s,
                   weight: FontWeight.w700,
-                  color: _kMuted,
+                  color: _kBlack,
                   spacing: 1.2,
                 ),
               ),
@@ -905,13 +906,13 @@ class _SheetField extends StatelessWidget {
       controller: controller,
       maxLines: maxLines,
       cursorColor: _kGold,
-      style: _mono(size: 11 * s, color: _kInk, spacing: 0.2),
+      style: _mono(size: 11 * s, color: _kBlack, spacing: 0.2),
       decoration: InputDecoration(
         isDense: true,
         filled: true,
         fillColor: Colors.white,
         hintText: hint,
-        hintStyle: _mono(size: 11 * s, color: _kMuted, spacing: 0.2),
+        hintStyle: _mono(size: 11 * s, color: _kBlack, spacing: 0.2),
         contentPadding: EdgeInsets.symmetric(
           horizontal: 14 * s,
           vertical: 12 * s,
@@ -963,7 +964,7 @@ class _Section extends StatelessWidget {
                   style: _mono(
                     size: 8 * s,
                     weight: FontWeight.w700,
-                    color: _kInk,
+                    color: _kBlack,
                     spacing: 1.4,
                   ),
                 ),
@@ -1025,7 +1026,7 @@ class _GridCell extends StatelessWidget {
                 item.label.toUpperCase(),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: _mono(size: 7 * s, color: _kMuted, spacing: 0.8),
+                style: _mono(size: 7 * s, color: _kBlack, spacing: 0.8),
               ),
             ),
           ],
@@ -1038,7 +1039,7 @@ class _GridCell extends StatelessWidget {
           style: _mono(
             size: 10 * s,
             weight: FontWeight.w700,
-            color: _kInk,
+            color: _kBlack,
             spacing: 0.2,
           ),
         ),
@@ -1067,7 +1068,7 @@ class _InfoRow extends StatelessWidget {
         Expanded(
           child: Text(
             label,
-            style: _mono(size: 9 * s, color: _kTaupe, spacing: 0.3),
+            style: _mono(size: 9 * s, color: _kBlack, spacing: 0.3),
           ),
         ),
         SizedBox(width: 10 * s),
@@ -1076,7 +1077,7 @@ class _InfoRow extends StatelessWidget {
           style: _mono(
             size: 9 * s,
             weight: FontWeight.w700,
-            color: _kInk,
+            color: _kBlack,
             spacing: 0.3,
           ),
         ),

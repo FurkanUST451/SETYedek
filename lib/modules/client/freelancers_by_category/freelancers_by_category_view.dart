@@ -14,6 +14,7 @@ const _kGold = Color(0xFFD9A84E);
 const _kInk = Color(0xFF35333F);
 const _kTaupe = Color(0xFF9B8E7B);
 const _kMuted = Color(0xFFB6AD9A);
+const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
 const _kCardBorder = Color(0x14000000);
 const _kThumbTop = Color(0xFF3A342E);
 const _kThumbBot = Color(0xFF211E1A);
@@ -85,7 +86,7 @@ class FreelancersByCategoryView
                           '5 kişiye ücretsiz teklif gönder. Fazlası için kredi gerekir.',
                           style: _mono(
                               size: 9 * s,
-                              color: _kTaupe,
+                              color: _kBlack,
                               spacing: 0.2,
                               height: 1.5),
                         ),
@@ -117,7 +118,7 @@ class FreelancersByCategoryView
                                     'Öne çıkan işlere bak, doğru ekibi seç',
                                     style: _mono(
                                         size: 8 * s,
-                                        color: _kTaupe,
+                                        color: _kBlack,
                                         spacing: 0.2),
                                   ),
                                 ],
@@ -138,7 +139,7 @@ class FreelancersByCategoryView
                         return Center(
                           child: Text(controller.errorMsg.value,
                               style: _mono(
-                                  size: 10 * s, color: _kTaupe, spacing: 0.2)),
+                                  size: 10 * s, color: _kBlack, spacing: 0.2)),
                         );
                       }
                       if (controller.freelancers.isEmpty) {
@@ -309,14 +310,14 @@ class _FreelancerCard extends StatelessWidget {
                       'Direktör · ${freelancer.categories.join(', ')}',
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: _mono(size: 8 * s, color: _kTaupe, spacing: 0.2),
+                      style: _mono(size: 8 * s, color: _kBlack, spacing: 0.2),
                     ),
                     SizedBox(height: 3 * s),
                     Text(
                       '${freelancer.location}, Türkiye · ${freelancer.experience} Yıl',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: _mono(size: 8 * s, color: _kMuted, spacing: 0.2),
+                      style: _mono(size: 8 * s, color: _kBlack, spacing: 0.2),
                     ),
                     SizedBox(height: 8 * s),
                     Wrap(
@@ -405,7 +406,7 @@ class _FreelancerCard extends StatelessWidget {
                         style: _mono(
                             size: 9 * s,
                             weight: FontWeight.w700,
-                            color: _kInk,
+                            color: _kBlack,
                             spacing: 1)),
                   ),
                 ),
@@ -465,7 +466,7 @@ class _Chip extends StatelessWidget {
       child: Text(
         label,
         style: _mono(
-            size: 8 * s, weight: FontWeight.w700, color: _kInk, spacing: 0.3),
+            size: 8 * s, weight: FontWeight.w700, color: _kBlack, spacing: 0.3),
       ),
     );
   }

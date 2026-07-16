@@ -91,7 +91,7 @@ class FreelancerOfferDetailController extends GetxController {
           'Bu teklifi reddetmek istediğinize emin misiniz?',
           style: GoogleFonts.spaceMono(
             fontSize: 12,
-            color: const Color(0xFF9B8E7B),
+            color: const Color(0xFF000000),
             height: 1.4,
           ),
         ),
@@ -103,7 +103,7 @@ class FreelancerOfferDetailController extends GetxController {
               style: GoogleFonts.spaceMono(
                 fontSize: 10,
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFF9B8E7B),
+                color: const Color(0xFF000000),
                 letterSpacing: 1,
               ),
             ),

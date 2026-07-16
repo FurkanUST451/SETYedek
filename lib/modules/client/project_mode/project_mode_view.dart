@@ -11,6 +11,7 @@ const _kInk = Color(0xFF23212B);
 const _kTextInk = Color(0xFF35333F);
 const _kTaupe = Color(0xFF9B8E7B);
 const _kMuted = Color(0xFFB6AD9A);
+const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
 const _kCardBorder = Color(0x14000000);
 
 TextStyle _serif({
@@ -122,7 +123,7 @@ class _ProjectModeViewState extends State<ProjectModeView> {
                     children: [
                       Text('Projene en uygun üretim sürecini seç.',
                           style:
-                              _mono(size: 9 * s, color: _kTaupe, spacing: 0.3)),
+                              _mono(size: 9 * s, color: _kBlack, spacing: 0.3)),
                       SizedBox(height: 8 * s),
                       Text('Nasıl\nilerleyelim?',
                           style: _serif(
@@ -187,7 +188,7 @@ class _ProjectModeViewState extends State<ProjectModeView> {
                           SizedBox(width: 5 * s),
                           Text('Seçimin daha sonra değiştirilebilir.',
                               style: _mono(
-                                  size: 8 * s, color: _kMuted, spacing: 0.3)),
+                                  size: 8 * s, color: _kBlack, spacing: 0.3)),
                         ],
                       ),
                     ],
@@ -274,7 +275,7 @@ class _FreelancerCard extends StatelessWidget {
                   height: 1.05)),
           SizedBox(height: 6 * s),
           Text("Kendi freelancer'ını bul, projeni sen yönet.",
-              style: _mono(size: 8 * s, color: _kTaupe, spacing: 0.2)),
+              style: _mono(size: 8 * s, color: _kBlack, spacing: 0.2)),
           SizedBox(height: 14 * s),
           ...freelancers.map((f) => Padding(
                 padding: EdgeInsets.only(bottom: 6 * s),
@@ -293,13 +294,13 @@ class _FreelancerCard extends StatelessWidget {
                             style: _mono(
                                 size: 8 * s,
                                 weight: FontWeight.w700,
-                                color: _kTextInk,
+                                color: _kBlack,
                                 spacing: 0.2)),
                       ),
                       Icon(Icons.star_rounded, size: 10 * s, color: _kGold),
                       Text(' ${f.$2}',
                           style: _mono(
-                              size: 8 * s, color: _kTaupe, spacing: 0.2)),
+                              size: 8 * s, color: _kBlack, spacing: 0.2)),
                     ],
                   ),
                 ),
@@ -318,7 +319,7 @@ class _FreelancerCard extends StatelessWidget {
                     Expanded(
                         child: Text(b,
                             style: _mono(
-                                size: 8 * s, color: _kTaupe, spacing: 0.2))),
+                                size: 8 * s, color: _kBlack, spacing: 0.2))),
                   ],
                 ),
               )),

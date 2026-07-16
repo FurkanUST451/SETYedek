@@ -8,7 +8,7 @@ import '../../../routes/app_routes.dart';
 // ─── Palet ────────────────────────────────────────────────────────────────────
 const _kCream = Color(0xFFFEFDFB);
 const _kInk = Color(0xFF35333F);
-const _kTaupe = Color(0xFF9B8E7B);
+const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
 
 TextStyle _serif({
   required double size,
@@ -95,7 +95,7 @@ class ChooseAuthView extends StatelessWidget {
                     style: _mono(
                       size: 9 * s,
                       weight: FontWeight.w600,
-                      color: _kTaupe,
+                      color: _kBlack,
                       spacing: 1,
                     ),
                   ),
@@ -149,7 +149,7 @@ class _AuthButton extends StatelessWidget {
               style: _mono(
                 size: 10.5 * s,
                 weight: FontWeight.w700,
-                color: dark ? Colors.white : _kInk,
+                color: dark ? Colors.white : _kBlack,
                 spacing: 0.5,
               ),
             ),

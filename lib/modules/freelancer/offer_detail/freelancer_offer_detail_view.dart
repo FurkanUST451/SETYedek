@@ -9,7 +9,7 @@ const _kCream = Color(0xFFFEFDFB);
 const _kGold = Color(0xFFD9A84E);
 const _kInk = Color(0xFF35333F);
 const _kTaupe = Color(0xFF9B8E7B);
-const _kMuted = Color(0xFFB6AD9A);
+const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
 const _kDivider = Color(0x12000000);
 const _kCardBorder = Color(0x14000000);
 const _kDanger = Color(0xFFBE6A5A);
@@ -141,7 +141,7 @@ class FreelancerOfferDetailView
                               a.notes!,
                               style: _mono(
                                   size: 10 * s,
-                                  color: _kInk,
+                                  color: _kBlack,
                                   spacing: 0.2,
                                   height: 1.6),
                             ),
@@ -232,7 +232,7 @@ class FreelancerOfferDetailView
                 SizedBox(height: 2 * s),
                 Text(
                   category,
-                  style: _mono(size: 8 * s, color: _kMuted, spacing: 0.5),
+                  style: _mono(size: 8 * s, color: _kBlack, spacing: 0.5),
                 ),
               ],
             ),
@@ -449,7 +449,7 @@ class _Section extends StatelessWidget {
                   style: _mono(
                       size: 8 * s,
                       weight: FontWeight.w700,
-                      color: _kInk,
+                      color: _kBlack,
                       spacing: 1.4),
                 ),
               ),
@@ -495,7 +495,7 @@ class _GridCell extends StatelessWidget {
                 item.label.toUpperCase(),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: _mono(size: 7 * s, color: _kMuted, spacing: 0.8),
+                style: _mono(size: 7 * s, color: _kBlack, spacing: 0.8),
               ),
             ),
           ],
@@ -506,7 +506,7 @@ class _GridCell extends StatelessWidget {
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: _mono(
-              size: 10 * s, weight: FontWeight.w700, color: _kInk, spacing: 0.2),
+              size: 10 * s, weight: FontWeight.w700, color: _kBlack, spacing: 0.2),
         ),
       ],
     );
@@ -530,14 +530,14 @@ class _InfoRow extends StatelessWidget {
         Expanded(
           child: Text(
             label,
-            style: _mono(size: 9 * s, color: _kTaupe, spacing: 0.3),
+            style: _mono(size: 9 * s, color: _kBlack, spacing: 0.3),
           ),
         ),
         SizedBox(width: 10 * s),
         Text(
           value,
           style: _mono(
-              size: 9 * s, weight: FontWeight.w700, color: _kInk, spacing: 0.3),
+              size: 9 * s, weight: FontWeight.w700, color: _kBlack, spacing: 0.3),
         ),
       ],
     );

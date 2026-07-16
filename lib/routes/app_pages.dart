@@ -32,6 +32,8 @@ import '../modules/freelancer/project_detail/project_detail_binding.dart';
 import '../modules/freelancer/onboarding/freelancer_onboarding_binding.dart';
 import '../modules/freelancer/onboarding/freelancer_onboarding_view.dart';
 import '../modules/freelancer/project_detail/freelancer_project_detail_view.dart';
+import '../modules/freelancer/upload_work/freelancer_upload_work_binding.dart';
+import '../modules/freelancer/upload_work/freelancer_upload_work_view.dart';
 import '../modules/onboarding/onboarding_binding.dart';
 import '../modules/onboarding/onboarding_view.dart';
 import '../modules/role_selection/role_selection_binding.dart';
@@ -148,6 +150,11 @@ class AppPages {
       name: AppRoutes.freelancerProjectDetail,
       page: () => const FreelancerProjectDetailView(),
       binding: FreelancerProjectDetailBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.freelancerUploadWork,
+      page: () => const FreelancerUploadWorkView(),
+      binding: FreelancerUploadWorkBinding(),
     ),
   ];
 }

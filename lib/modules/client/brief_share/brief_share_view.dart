@@ -8,8 +8,8 @@ import 'brief_share_controller.dart';
 const _kCream = Color(0xFFFEFDFB);
 const _kGold = Color(0xFFD9A84E);
 const _kInk = Color(0xFF35333F);
-const _kTaupe = Color(0xFF9B8E7B);
 const _kMuted = Color(0xFFB6AD9A);
+const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
 const _kFieldBg = Color(0xFFF3EEE2);
 const _kCardBorder = Color(0x14000000);
 
@@ -107,7 +107,7 @@ class BriefShareView extends GetView<BriefShareController> {
                                 ? controller.category
                                 : 'Video Çekim')
                             .toUpperCase(),
-                        style: _mono(size: 8 * s, color: _kMuted, spacing: 1.5),
+                        style: _mono(size: 8 * s, color: _kBlack, spacing: 1.5),
                       ),
                       SizedBox(height: 8 * s),
                       Text(
@@ -124,7 +124,7 @@ class BriefShareView extends GetView<BriefShareController> {
                             : 'Fikrini, referanslarını ve tüm detayları bizimle paylaş ki en doğru ekibi bulalım.',
                         style: _mono(
                             size: 9 * s,
-                            color: _kTaupe,
+                            color: _kBlack,
                             spacing: 0.2,
                             height: 1.5),
                       ),
@@ -148,14 +148,14 @@ class BriefShareView extends GetView<BriefShareController> {
                                 cursorColor: _kGold,
                                 style: _mono(
                                     size: 10 * s,
-                                    color: _kInk,
+                                    color: _kBlack,
                                     spacing: 0.2,
                                     height: 1.5),
                                 decoration: InputDecoration(
                                   hintText: "Brief'ini buraya yaz...",
                                   hintStyle: _mono(
                                       size: 10 * s,
-                                      color: _kMuted,
+                                      color: _kBlack,
                                       spacing: 0.2),
                                   filled: true,
                                   fillColor: _kFieldBg,
@@ -171,7 +171,7 @@ class BriefShareView extends GetView<BriefShareController> {
                             SizedBox(height: 6 * s),
                             Obx(() => Text('${controller.charCount.value} / 2000',
                                 style: _mono(
-                                    size: 8 * s, color: _kMuted, spacing: 0.5))),
+                                    size: 8 * s, color: _kBlack, spacing: 0.5))),
                           ],
                         ),
                       ),
@@ -222,7 +222,7 @@ class BriefShareView extends GetView<BriefShareController> {
                           child: Text(
                             'Tüm dosyalar gizlidir ve sadece seçilen ekiplerle paylaşılır.',
                             style: _mono(
-                                size: 8 * s, color: _kMuted, spacing: 0.2),
+                                size: 8 * s, color: _kBlack, spacing: 0.2),
                           ),
                         ),
                       ],
@@ -292,7 +292,7 @@ class _SectionCard extends StatelessWidget {
                     Text(subtitle,
                         style: _mono(
                             size: 8 * s,
-                            color: _kTaupe,
+                            color: _kBlack,
                             spacing: 0.2,
                             height: 1.4)),
                   ],

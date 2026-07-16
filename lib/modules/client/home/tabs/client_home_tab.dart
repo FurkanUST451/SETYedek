@@ -9,8 +9,7 @@ import '../../../../routes/app_routes.dart';
 const _kCream = Color(0xFFFEFDFB);
 const _kGold = Color(0xFFD9A84E);
 const _kInk = Color(0xFF35333F);
-const _kTaupe = Color(0xFF9B8E7B);
-const _kMuted = Color(0xFFB6AD9A);
+const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
 
 TextStyle _serif({
   required double size,
@@ -83,7 +82,7 @@ class _ClientHomeTabState extends State<ClientHomeTab> {
                 Text(
                   'SET · ÜRETİM',
                   textAlign: TextAlign.center,
-                  style: _mono(size: 8 * s, color: _kMuted, spacing: 2),
+                  style: _mono(size: 8 * s, color: _kBlack, spacing: 2),
                 ),
                 const Spacer(),
                 // Başlık
@@ -152,7 +151,7 @@ class _ClientHomeTabState extends State<ClientHomeTab> {
                   child: Text(
                     'Danışmanlarınla iletişim kur,\nhız, güven ve yaratıcılıkla\nprojeni hayata geçir.',
                     textAlign: TextAlign.center,
-                    style: _mono(size: 9 * s, color: _kTaupe, spacing: 0.3),
+                    style: _mono(size: 9 * s, color: _kBlack, spacing: 0.3),
                   ),
                 ),
                 const Spacer(),

@@ -13,7 +13,9 @@ const _kGold = Color(0xFFD9A84E);
 const _kInk = Color(0xFF35333F);
 const _kTaupe = Color(0xFF9B8E7B);
 const _kMuted = Color(0xFFB6AD9A);
+const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
 const _kCardBorder = Color(0x0F000000);
+const _kDivider = Color(0x12000000);
 const _kAccepted = Color(0xFF6B8F71);
 
 // ─── Tipografi yardımcıları ───────────────────────────────────────────────────
@@ -51,6 +53,8 @@ class FreelancerJobOffersTab extends GetView<FreelancerJobOffersController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              _buildTopStrip(s),
+              SizedBox(height: 18 * s),
               Obx(() => _buildHeader(s, controller.offers.length)),
               SizedBox(height: 12 * s),
               Expanded(
@@ -99,17 +103,28 @@ class FreelancerJobOffersTab extends GetView<FreelancerJobOffersController> {
     );
   }
 
+  Widget _buildTopStrip(double s) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.fromLTRB(26 * s, 6 * s, 26 * s, 12 * s),
+          child: Text(
+            'SET · GELEN İŞLER',
+            style: _mono(size: 8 * s, color: _kBlack, spacing: 2),
+          ),
+        ),
+        Container(height: 1, color: _kDivider),
+      ],
+    );
+  }
+
   Widget _buildHeader(double s, int count) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(26 * s, 22 * s, 18 * s, 0),
+      padding: EdgeInsets.fromLTRB(26 * s, 0, 18 * s, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'SET · GELEN İŞLER',
-            style: _mono(size: 8 * s, color: _kMuted, spacing: 2),
-          ),
-          SizedBox(height: 8 * s),
           Text(
             'Teklifler',
             style: _serif(size: 40 * s, weight: FontWeight.w600, color: _kInk),
@@ -117,7 +132,7 @@ class FreelancerJobOffersTab extends GetView<FreelancerJobOffersController> {
           SizedBox(height: 6 * s),
           Text(
             '$count teklif görüntüleniyor',
-            style: _mono(size: 8 * s, color: _kTaupe, spacing: 0.5),
+            style: _mono(size: 8 * s, color: _kBlack, spacing: 0.5),
           ),
         ],
       ),
@@ -175,7 +190,7 @@ class _AcceptedCard extends StatelessWidget {
               children: [
                 Text(
                   _displayTitle,
-                  style: _mono(size: 11 * s, weight: FontWeight.w700, color: _kInk),
+                  style: _mono(size: 11 * s, weight: FontWeight.w700, color: _kBlack),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -183,7 +198,7 @@ class _AcceptedCard extends StatelessWidget {
                   SizedBox(height: 3 * s),
                   Text(
                     _displaySubtitle,
-                    style: _mono(size: 9 * s, color: _kTaupe, spacing: 0.3),
+                    style: _mono(size: 9 * s, color: _kBlack, spacing: 0.3),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -276,7 +291,7 @@ class _OfferCard extends StatelessWidget {
                     style: _mono(
                         size: 8 * s,
                         weight: FontWeight.w700,
-                        color: _kInk,
+                        color: _kBlack,
                         spacing: 1.4),
                   ),
                 ],
@@ -313,7 +328,7 @@ class _OfferCard extends StatelessWidget {
                             brief.category,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: _mono(size: 8 * s, color: _kMuted, spacing: 1),
+                            style: _mono(size: 8 * s, color: _kBlack, spacing: 1),
                           ),
                         ],
                       ],
@@ -375,7 +390,7 @@ class _OfferCard extends StatelessWidget {
                   brief.answers.notes!,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: _mono(size: 9 * s, color: _kInk, spacing: 0.2),
+                  style: _mono(size: 9 * s, color: _kBlack, spacing: 0.2),
                 ),
               ),
             ],
@@ -446,7 +461,7 @@ class _MetaCell extends StatelessWidget {
             children: [
               Icon(icon, size: 11 * s, color: _kTaupe),
               SizedBox(width: 4 * s),
-              Text(label, style: _mono(size: 7 * s, color: _kMuted, spacing: 1)),
+              Text(label, style: _mono(size: 7 * s, color: _kBlack, spacing: 1)),
             ],
           ),
           SizedBox(height: 5 * s),
@@ -455,7 +470,7 @@ class _MetaCell extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: _mono(
-                size: 10 * s, weight: FontWeight.w700, color: _kInk, spacing: 0.3),
+                size: 10 * s, weight: FontWeight.w700, color: _kBlack, spacing: 0.3),
           ),
         ],
       ),
@@ -491,7 +506,7 @@ class _EmptyState extends StatelessWidget {
           SizedBox(height: 6 * s),
           Text(
             'Müşteriler teklif gönderince burada görünür.',
-            style: _mono(size: 9 * s, color: _kTaupe, spacing: 0.3),
+            style: _mono(size: 9 * s, color: _kBlack, spacing: 0.3),
           ),
         ],
       ),

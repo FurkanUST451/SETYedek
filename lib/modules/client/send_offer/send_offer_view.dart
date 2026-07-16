@@ -10,6 +10,7 @@ const _kGold = Color(0xFFD9A84E);
 const _kInk = Color(0xFF35333F);
 const _kTaupe = Color(0xFF9B8E7B);
 const _kMuted = Color(0xFFB6AD9A);
+const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
 const _kCardBorder = Color(0x14000000);
 const _kDivider = Color(0x0F000000);
 
@@ -103,7 +104,7 @@ class SendOfferView extends GetView<SendOfferController> {
                                 ? controller.category
                                 : 'Video Çekim')
                             .toUpperCase(),
-                        style: _mono(size: 8 * s, color: _kMuted, spacing: 1.5),
+                        style: _mono(size: 8 * s, color: _kBlack, spacing: 1.5),
                       ),
                       SizedBox(height: 8 * s),
                       Text(
@@ -119,7 +120,7 @@ class SendOfferView extends GetView<SendOfferController> {
                       SizedBox(height: 8 * s),
                       Text('Projene en uygun kreatif ekibi eşleştirelim.',
                           style:
-                              _mono(size: 9 * s, color: _kTaupe, spacing: 0.2)),
+                              _mono(size: 9 * s, color: _kBlack, spacing: 0.2)),
                       SizedBox(height: 24 * s),
 
                       _ShootingTypeRow(scale: s, controller: controller),
@@ -215,7 +216,7 @@ class SendOfferView extends GetView<SendOfferController> {
                             child: Text(
                               'Tüm bilgilerin güvenliği SET güvencesiyle korunur.',
                               style: _mono(
-                                  size: 8 * s, color: _kMuted, spacing: 0.2),
+                                  size: 8 * s, color: _kBlack, spacing: 0.2),
                             ),
                           ),
                         ],
@@ -335,7 +336,7 @@ class _ShootingTypeRow extends StatelessWidget {
                         Icon(Icons.movie_creation_outlined, size: 18 * s, color: _kTaupe),
                         SizedBox(width: 12 * s),
                         Text('ÇEKİM TÜRÜ',
-                            style: _mono(size: 8 * s, color: _kMuted, spacing: 1.2)),
+                            style: _mono(size: 8 * s, color: _kBlack, spacing: 1.2)),
                         const Spacer(),
                         Icon(
                           expanded
@@ -535,7 +536,7 @@ class _BriefRow extends StatelessWidget {
                 Icon(icon, size: 18 * s, color: _kTaupe),
                 SizedBox(width: 12 * s),
                 Text(label.toUpperCase(),
-                    style: _mono(size: 8 * s, color: _kMuted, spacing: 1.2)),
+                    style: _mono(size: 8 * s, color: _kBlack, spacing: 1.2)),
                 const Spacer(),
                 Icon(Icons.chevron_right, color: _kMuted, size: 18 * s),
               ],

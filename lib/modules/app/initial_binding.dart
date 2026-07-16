@@ -7,12 +7,14 @@ import '../../data/repositories/freelancer_repository.dart';
 import '../../data/repositories/offer_repository.dart';
 import '../../data/repositories/project_repository.dart';
 import '../../data/repositories/user_repository.dart';
+import '../../data/repositories/work_repository.dart';
 import '../../data/services/notification_service.dart';
 import '../client/home/client_chats_controller.dart';
 import '../freelancer/home/freelancer_chats_controller.dart';
 import 'auth_controller.dart';
 import 'theme_controller.dart';
 import 'user_controller.dart';
+import 'works_controller.dart';
 
 /// Uygulama başlarken global olarak ayağa kaldırılan controller'lar
 /// ve repository'ler. `permanent: true` ile bellekte kalırlar.
@@ -36,6 +38,7 @@ class InitialBinding extends Bindings {
       ),
       permanent: true,
     );
+    Get.put<WorkRepository>(WorkRepository(), permanent: true);
 
     // Services
     Get.put<NotificationService>(NotificationService(), permanent: true);
@@ -48,5 +51,8 @@ class InitialBinding extends Bindings {
     // Chat controllers — permanent so Get.offAllNamed never disposes them
     Get.put<ClientChatsController>(ClientChatsController(), permanent: true);
     Get.put<FreelancerChatsController>(FreelancerChatsController(), permanent: true);
+
+    // Keşfet akışı — hem client hem freelancer aynı controller'ı paylaşır
+    Get.put<WorksController>(WorksController(), permanent: true);
   }
 }

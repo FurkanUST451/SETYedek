@@ -61,4 +61,5 @@ flutter:
     - assets/images/splash_screens/
     - assets/images/welcome_pages/
     - assets/images/login_pages/
+    - assets/images/main_service_icons/
     - assets/animations/

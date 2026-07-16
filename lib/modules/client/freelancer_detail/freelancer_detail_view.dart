@@ -12,7 +12,7 @@ const _kCream = Color(0xFFFEFDFB);
 const _kGold = Color(0xFFD9A84E);
 const _kInk = Color(0xFF35333F);
 const _kTaupe = Color(0xFF9B8E7B);
-const _kMuted = Color(0xFFB6AD9A);
+const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
 const _kDivider = Color(0x12000000);
 const _kCardBorder = Color(0x14000000);
 const _kThumbTop = Color(0xFF3A342E);
@@ -161,24 +161,24 @@ class FreelancerDetailView extends GetView<FreelancerDetailController> {
                                 'DİREKTÖR · ${(f?.categories.join(', ') ?? '').toUpperCase()}',
                                 textAlign: TextAlign.center,
                                 style: _mono(
-                                    size: 8 * s, color: _kTaupe, spacing: 1),
+                                    size: 8 * s, color: _kBlack, spacing: 1),
                               ),
                               SizedBox(height: 12 * s),
                               Text(
                                 '★ ${f?.rating.toStringAsFixed(1) ?? '4.9'} ($reviewCount)  ·  ${(f?.experience ?? 3) * 8 + 20} yaş',
                                 style: _mono(
-                                    size: 9 * s, color: _kInk, spacing: 0.3),
+                                    size: 9 * s, color: _kBlack, spacing: 0.3),
                               ),
                               SizedBox(height: 4 * s),
                               Text(
                                 '${f?.location ?? 'İstanbul'}, Türkiye  ·  $jobCount İş',
                                 style: _mono(
-                                    size: 9 * s, color: _kTaupe, spacing: 0.3),
+                                    size: 9 * s, color: _kBlack, spacing: 0.3),
                               ),
                               SizedBox(height: 2 * s),
                               Text('${f?.experience ?? 3} Yıl Deneyim',
                                   style: _mono(
-                                      size: 9 * s, color: _kTaupe, spacing: 0.3)),
+                                      size: 9 * s, color: _kBlack, spacing: 0.3)),
                               SizedBox(height: 20 * s),
                               Row(
                                 children: [
@@ -250,12 +250,12 @@ class FreelancerDetailView extends GetView<FreelancerDetailController> {
                             labelStyle: _mono(
                                 size: 10 * s,
                                 weight: FontWeight.w700,
-                                color: _kInk,
+                                color: _kBlack,
                                 spacing: 1),
                             unselectedLabelStyle:
-                                _mono(size: 10 * s, color: _kMuted, spacing: 1),
-                            labelColor: _kInk,
-                            unselectedLabelColor: _kMuted,
+                                _mono(size: 10 * s, color: _kBlack, spacing: 1),
+                            labelColor: _kBlack,
+                            unselectedLabelColor: _kBlack,
                             indicatorColor: _kGold,
                             indicatorWeight: 2,
                             dividerColor: _kDivider,
@@ -370,7 +370,7 @@ class _IslerTab extends StatelessWidget {
             decoration:
                 const BoxDecoration(border: Border.fromBorderSide(BorderSide(color: _kCardBorder))),
             child: Text('Henüz proje eklenmemiş',
-                style: _mono(size: 9 * s, color: _kMuted, spacing: 0.2)),
+                style: _mono(size: 9 * s, color: _kBlack, spacing: 0.2)),
           )
         else
           SizedBox(
@@ -538,12 +538,12 @@ class _HakkindaTab extends StatelessWidget {
           ),
         ),
         SizedBox(height: 20 * s),
-        Text('BİYOGRAFİ', style: _mono(size: 8 * s, color: _kMuted, spacing: 1.5)),
+        Text('BİYOGRAFİ', style: _mono(size: 8 * s, color: _kBlack, spacing: 1.5)),
         SizedBox(height: 8 * s),
         Text(bio.isNotEmpty ? bio : 'Henüz biyografi eklenmemiş.',
-            style: _mono(size: 10 * s, color: _kInk, spacing: 0.2, height: 1.7)),
+            style: _mono(size: 10 * s, color: _kBlack, spacing: 0.2, height: 1.7)),
         SizedBox(height: 24 * s),
-        Text('UZMANLIK', style: _mono(size: 8 * s, color: _kMuted, spacing: 1.5)),
+        Text('UZMANLIK', style: _mono(size: 8 * s, color: _kBlack, spacing: 1.5)),
         SizedBox(height: 10 * s),
         Wrap(
           spacing: 8 * s,
@@ -560,7 +560,7 @@ class _HakkindaTab extends StatelessWidget {
                         color: Colors.white,
                         border: Border.all(color: Colors.black12)),
                     child: Text(x,
-                        style: _mono(size: 9 * s, color: _kInk, spacing: 0.2)),
+                        style: _mono(size: 9 * s, color: _kBlack, spacing: 0.2)),
                   ))
               .toList(),
         ),
@@ -643,7 +643,7 @@ class _ReviewItem extends StatelessWidget {
                 style: _mono(
                     size: 12 * s,
                     weight: FontWeight.w700,
-                    color: _kInk,
+                    color: _kBlack,
                     spacing: 0.5)),
           ),
           SizedBox(width: 12 * s),
@@ -658,7 +658,7 @@ class _ReviewItem extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: _mono(
-                              size: 8 * s, color: _kTaupe, spacing: 0.3)),
+                              size: 8 * s, color: _kBlack, spacing: 0.3)),
                     ),
                     const Spacer(),
                     Row(
@@ -676,7 +676,7 @@ class _ReviewItem extends StatelessWidget {
                         style: _mono(
                             size: 8 * s,
                             weight: FontWeight.w700,
-                            color: _kInk,
+                            color: _kBlack,
                             spacing: 0.3)),
                   ],
                 ),

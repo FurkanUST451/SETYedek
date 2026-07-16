@@ -10,8 +10,8 @@ import '../freelancer_chats_controller.dart';
 const _kCream = Color(0xFFFEFDFB);
 const _kGold = Color(0xFFD9A84E);
 const _kInk = Color(0xFF35333F);
-const _kTaupe = Color(0xFF9B8E7B);
 const _kMuted = Color(0xFFB6AD9A);
+const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
 const _kDivider = Color(0x12000000);
 const _kAvatarBg = Color(0xFFEADCBB);
 
@@ -80,6 +80,8 @@ class _FreelancerChatTabState extends State<FreelancerChatTab> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              _buildTopStrip(s),
+              SizedBox(height: 18 * s),
               _buildHeader(s),
               SizedBox(height: 16 * s),
               _buildSearch(s),
@@ -94,7 +96,7 @@ class _FreelancerChatTabState extends State<FreelancerChatTab> {
                         style: _mono(
                             size: 8 * s,
                             weight: FontWeight.w700,
-                            color: _kInk,
+                            color: _kBlack,
                             spacing: 1.8)),
                   ],
                 ),
@@ -156,15 +158,26 @@ class _FreelancerChatTabState extends State<FreelancerChatTab> {
     );
   }
 
+  Widget _buildTopStrip(double s) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.fromLTRB(26 * s, 6 * s, 26 * s, 12 * s),
+          child: Text('SET · MESAJLAR',
+              style: _mono(size: 8 * s, color: _kBlack, spacing: 2)),
+        ),
+        Container(height: 1, color: _kDivider),
+      ],
+    );
+  }
+
   Widget _buildHeader(double s) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(26 * s, 22 * s, 18 * s, 0),
+      padding: EdgeInsets.fromLTRB(26 * s, 0, 18 * s, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('SET · MESAJLAR',
-              style: _mono(size: 8 * s, color: _kMuted, spacing: 2)),
-          SizedBox(height: 8 * s),
           Text('Sohbetler',
               style: _serif(size: 40 * s, weight: FontWeight.w600, color: _kInk)),
         ],
@@ -191,7 +204,7 @@ class _FreelancerChatTabState extends State<FreelancerChatTab> {
                 controller: _searchCtrl,
                 onChanged: (v) => setState(() => _query = v),
                 cursorColor: _kGold,
-                style: _mono(size: 10 * s, color: _kInk, spacing: 0.2),
+                style: _mono(size: 10 * s, color: _kBlack, spacing: 0.2),
                 decoration: InputDecoration(
                   isCollapsed: true,
                   filled: false,
@@ -201,7 +214,7 @@ class _FreelancerChatTabState extends State<FreelancerChatTab> {
                   focusedBorder: InputBorder.none,
                   disabledBorder: InputBorder.none,
                   hintText: 'Sohbet veya kişi ara',
-                  hintStyle: _mono(size: 10 * s, color: _kMuted, spacing: 0.2),
+                  hintStyle: _mono(size: 10 * s, color: _kBlack, spacing: 0.2),
                 ),
               ),
             ),
@@ -256,12 +269,15 @@ class _ChatRow extends StatelessWidget {
             Container(
               width: 46 * s,
               height: 46 * s,
-              color: _kAvatarBg,
+              decoration: const BoxDecoration(
+                color: _kAvatarBg,
+                shape: BoxShape.circle,
+              ),
               alignment: Alignment.center,
               child: Text(
                 _initialsOf(name),
                 style: _mono(
-                    size: 12 * s, weight: FontWeight.w700, color: _kInk, spacing: 0.5),
+                    size: 12 * s, weight: FontWeight.w700, color: _kBlack, spacing: 0.5),
               ),
             ),
             SizedBox(width: 14 * s),
@@ -281,7 +297,7 @@ class _ChatRow extends StatelessWidget {
                         ),
                       ),
                       SizedBox(width: 8 * s),
-                      Text(time, style: _mono(size: 8 * s, color: _kMuted, spacing: 0.5)),
+                      Text(time, style: _mono(size: 8 * s, color: _kBlack, spacing: 0.5)),
                     ],
                   ),
                   SizedBox(height: 4 * s),
@@ -289,7 +305,7 @@ class _ChatRow extends StatelessWidget {
                     snippet,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: _mono(size: 9.5 * s, color: _kTaupe, spacing: 0.2),
+                    style: _mono(size: 9.5 * s, color: _kBlack, spacing: 0.2),
                   ),
                   if (eyebrow.isNotEmpty) ...[
                     SizedBox(height: 5 * s),
@@ -297,7 +313,7 @@ class _ChatRow extends StatelessWidget {
                       eyebrow.toUpperCase(),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: _mono(size: 7 * s, color: _kMuted, spacing: 1.2),
+                      style: _mono(size: 7 * s, color: _kBlack, spacing: 1.2),
                     ),
                   ],
                 ],
@@ -344,7 +360,7 @@ class _EmptyState extends StatelessWidget {
                   ? 'Farklı bir arama dene.'
                   : 'Bir teklifi kabul ettiğinde sohbet burada başlar.',
               textAlign: TextAlign.center,
-              style: _mono(size: 9 * s, color: _kTaupe, spacing: 0.2),
+              style: _mono(size: 9 * s, color: _kBlack, spacing: 0.2),
             ),
           ],
         ),

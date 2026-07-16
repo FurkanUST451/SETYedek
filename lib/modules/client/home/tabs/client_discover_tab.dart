@@ -1,10 +1,13 @@
 import 'dart:math' as math;
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../data/dummy/dummy_data.dart';
 import '../../../../data/models/work_model.dart';
+import '../../../app/works_controller.dart';
 
 // ─── Palet ────────────────────────────────────────────────────────────────────
 const _kCream = Color(0xFFFEFDFB); // arka plan
@@ -12,6 +15,7 @@ const _kGold = Color(0xFFD9A84E); // kritik / vurgu altın tonu
 const _kInk = Color(0xFF35333F);
 const _kTaupe = Color(0xFF9B8E7B);
 const _kMuted = Color(0xFFB6AD9A);
+const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
 const _kDivider = Color(0x12000000);
 const _kThumbTop = Color(0xFF262430);
 const _kThumbBot = Color(0xFF141219);
@@ -54,14 +58,15 @@ const _kDurations = ['01:42', '00:58', '02:15', '01:10', '03:04', '01:33'];
 String _formatFor(WorkType t) {
   switch (t) {
     case WorkType.video:
-    case WorkType.vfx:
       return 'PRORES';
     case WorkType.photo:
       return 'RAW';
-    case WorkType.cgi:
+    case WorkType.cgiVfx:
       return 'EXR';
-    case WorkType.ai:
-      return 'MP4';
+    case WorkType.graphic:
+      return 'PSD';
+    case WorkType.sound:
+      return 'WAV';
   }
 }
 
@@ -77,9 +82,30 @@ class _ClientDiscoverTabState extends State<ClientDiscoverTab> {
   WorkType? _filter;
   bool _promoVisible = true;
 
-  List<WorkModel> get _works {
-    if (_filter == null) return DummyData.works;
-    return DummyData.works.where((w) => w.type == _filter).toList();
+  final WorksController _worksController = Get.find<WorksController>();
+
+  List<WorkModel> _filtered(List<WorkModel> all) {
+    if (_filter == null) return all;
+    return all.where((w) => w.type == _filter).toList();
+  }
+
+  String _timeAgoFor(WorkModel work) {
+    final createdAt = work.createdAt;
+    if (createdAt != null) {
+      final diff = DateTime.now().difference(createdAt);
+      if (diff.inHours < 1) return '${diff.inMinutes < 1 ? 1 : diff.inMinutes}DK ÖNCE';
+      if (diff.inDays < 1) return '${diff.inHours}S ÖNCE';
+      if (diff.inDays < 7) return '${diff.inDays}G ÖNCE';
+      return '${(diff.inDays / 7).floor()}H ÖNCE';
+    }
+    final idx = DummyData.works.indexWhere((w) => w.id == work.id);
+    return _kTimeAgo[(idx < 0 ? 0 : idx) % _kTimeAgo.length];
+  }
+
+  String _durationFor(WorkModel work) {
+    if (work.createdAt != null) return '';
+    final idx = DummyData.works.indexWhere((w) => w.id == work.id);
+    return _kDurations[(idx < 0 ? 0 : idx) % _kDurations.length];
   }
 
   @override
@@ -92,49 +118,50 @@ class _ClientDiscoverTabState extends State<ClientDiscoverTab> {
       child: MediaQuery.withNoTextScaling(
         child: SafeArea(
           bottom: false,
-          child: CustomScrollView(
-            slivers: [
-              SliverToBoxAdapter(
-                child: _Header(
-                  scale: s,
-                  promoVisible: _promoVisible,
-                  onDismissPromo: () =>
-                      setState(() => _promoVisible = false),
+          child: Obx(() {
+            final works = _filtered(_worksController.works);
+            return CustomScrollView(
+              slivers: [
+                SliverToBoxAdapter(
+                  child: _Header(
+                    scale: s,
+                    promoVisible: _promoVisible,
+                    onDismissPromo: () =>
+                        setState(() => _promoVisible = false),
+                  ),
                 ),
-              ),
-              SliverToBoxAdapter(
-                child: _FilterBar(
-                  scale: s,
-                  selected: _filter,
-                  onSelect: (t) => setState(() => _filter = t),
+                SliverToBoxAdapter(
+                  child: _FilterBar(
+                    scale: s,
+                    selected: _filter,
+                    onSelect: (t) => setState(() => _filter = t),
+                  ),
                 ),
-              ),
-              SliverToBoxAdapter(
-                child: Divider(
-                    height: 1, thickness: 1, color: _kDivider),
-              ),
-              SliverPadding(
-                padding: EdgeInsets.fromLTRB(26 * s, 10 * s, 26 * s, 130 * s),
-                sliver: SliverList.separated(
-                  itemCount: _works.length,
-                  separatorBuilder: (_, _) => const Divider(
+                SliverToBoxAdapter(
+                  child: Divider(
                       height: 1, thickness: 1, color: _kDivider),
-                  itemBuilder: (_, i) {
-                    final work = _works[i];
-                    // Orijinal listedeki index'e göre sabit meta türet.
-                    final baseIndex = DummyData.works.indexOf(work);
-                    return _WorkCard(
-                      scale: s,
-                      work: work,
-                      timeAgo: _kTimeAgo[baseIndex % _kTimeAgo.length],
-                      duration: _kDurations[baseIndex % _kDurations.length],
-                      format: _formatFor(work.type),
-                    );
-                  },
                 ),
-              ),
-            ],
-          ),
+                SliverPadding(
+                  padding: EdgeInsets.fromLTRB(26 * s, 10 * s, 26 * s, 130 * s),
+                  sliver: SliverList.separated(
+                    itemCount: works.length,
+                    separatorBuilder: (_, _) => const Divider(
+                        height: 1, thickness: 1, color: _kDivider),
+                    itemBuilder: (_, i) {
+                      final work = works[i];
+                      return _WorkCard(
+                        scale: s,
+                        work: work,
+                        timeAgo: _timeAgoFor(work),
+                        duration: _durationFor(work),
+                        format: _formatFor(work.type),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            );
+          }),
         ),
       ),
     );
@@ -174,7 +201,7 @@ class _Header extends StatelessWidget {
                       Text(
                         'Yeni bir işi mi bitirdin?',
                         style: _mono(
-                            size: 8 * s, color: _kTaupe, spacing: 0.3),
+                            size: 8 * s, color: _kBlack, spacing: 0.3),
                       ),
                       SizedBox(height: 4 * s),
                       Text.rich(
@@ -182,7 +209,7 @@ class _Header extends StatelessWidget {
                           TextSpan(
                             text: 'Kadraja al, ',
                             style: _mono(
-                                size: 8 * s, color: _kTaupe, spacing: 0.3),
+                                size: 8 * s, color: _kBlack, spacing: 0.3),
                           ),
                           TextSpan(
                             text: 'buraya bırak.',
@@ -244,7 +271,7 @@ class _Header extends StatelessWidget {
           SizedBox(height: 20 * s),
           Text(
             'SETTEKİLERİN SON İŞLERİ',
-            style: _mono(size: 8 * s, color: _kMuted, spacing: 2),
+            style: _mono(size: 8 * s, color: _kBlack, spacing: 2),
           ),
         ],
       ),
@@ -315,13 +342,16 @@ class _FilterTab extends StatelessWidget {
       child: Padding(
         padding: EdgeInsets.only(right: 26 * s),
         child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             if (selected) ...[
               Container(
-                width: 5 * s,
-                height: 5 * s,
-                decoration:
-                    const BoxDecoration(color: _kGold, shape: BoxShape.circle),
+                width: 4 * s,
+                height: 4 * s,
+                decoration: const BoxDecoration(
+                  color: Colors.black,
+                  shape: BoxShape.circle,
+                ),
               ),
               SizedBox(width: 6 * s),
             ],
@@ -330,7 +360,7 @@ class _FilterTab extends StatelessWidget {
               style: _mono(
                 size: 9 * s,
                 weight: selected ? FontWeight.w700 : FontWeight.w400,
-                color: selected ? _kInk : _kMuted,
+                color: _kBlack,
                 spacing: 1.2,
               ),
             ),
@@ -394,7 +424,7 @@ class _WorkCard extends StatelessWidget {
                   style: _mono(
                       size: 9 * s,
                       weight: FontWeight.w700,
-                      color: _kInk,
+                      color: _kBlack,
                       spacing: 0.5),
                 ),
               ),
@@ -427,7 +457,7 @@ class _WorkCard extends StatelessWidget {
                         TextSpan(
                           text: '  ·  «${work.title.toUpperCase()}»',
                           style: _mono(
-                              size: 8 * s, color: _kMuted, spacing: 1),
+                              size: 8 * s, color: _kBlack, spacing: 1),
                         ),
                       ]),
                       maxLines: 1,
@@ -439,13 +469,19 @@ class _WorkCard extends StatelessWidget {
               SizedBox(width: 12 * s),
               Text(
                 timeAgo,
-                style: _mono(size: 8 * s, color: _kMuted, spacing: 1),
+                style: _mono(size: 8 * s, color: _kBlack, spacing: 1),
               ),
             ],
           ),
           SizedBox(height: 20 * s),
           // Kapak
-          _CoverPlaceholder(scale: s, type: work.type, coverImage: work.coverImage),
+          _CoverPlaceholder(
+            scale: s,
+            type: work.type,
+            coverImage: work.coverImage,
+            mediaUrl: work.mediaUrl,
+            isVideo: work.isVideo,
+          ),
           SizedBox(height: 18 * s),
           // Alt bilgi: başlık + süre·format
           Row(
@@ -465,11 +501,20 @@ class _WorkCard extends StatelessWidget {
               ),
               SizedBox(width: 12 * s),
               Text(
-                '$duration · $format',
-                style: _mono(size: 8 * s, color: _kMuted, spacing: 1),
+                duration.isEmpty ? format : '$duration · $format',
+                style: _mono(size: 8 * s, color: _kBlack, spacing: 1),
               ),
             ],
           ),
+          if (work.description != null && work.description!.isNotEmpty) ...[
+            SizedBox(height: 8 * s),
+            Text(
+              work.description!,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: _mono(size: 9 * s, color: _kTaupe, spacing: 0.2),
+            ),
+          ],
           SizedBox(height: 18 * s),
           // Aksiyonlar
           Row(
@@ -496,23 +541,39 @@ class _WorkCard extends StatelessWidget {
   }
 }
 
+const _kThumbGradient = DecoratedBox(
+  decoration: BoxDecoration(
+    gradient: LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [_kThumbTop, _kThumbBot],
+    ),
+  ),
+);
+
 class _CoverPlaceholder extends StatelessWidget {
   const _CoverPlaceholder({
     required this.scale,
     required this.type,
     required this.coverImage,
+    this.mediaUrl,
+    this.isVideo = false,
   });
 
   final double scale;
   final WorkType type;
   final String? coverImage;
+  final String? mediaUrl;
+  final bool isVideo;
 
   @override
   Widget build(BuildContext context) {
     final s = scale;
-    final isMotion = type == WorkType.video ||
-        type == WorkType.vfx ||
-        type == WorkType.cgi;
+    final isMotion = isVideo ||
+        type == WorkType.video ||
+        type == WorkType.cgiVfx;
+    final hasNetworkImage = !isVideo && (mediaUrl?.isNotEmpty ?? false);
+    final hasAsset = coverImage != null;
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(14 * s),
@@ -521,19 +582,18 @@ class _CoverPlaceholder extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            if (coverImage != null)
+            if (hasNetworkImage)
+              CachedNetworkImage(
+                imageUrl: mediaUrl!,
+                fit: BoxFit.cover,
+                placeholder: (_, _) => _kThumbGradient,
+                errorWidget: (_, _, _) => _kThumbGradient,
+              )
+            else if (hasAsset)
               Image.asset(coverImage!, fit: BoxFit.cover)
             else
-              const DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [_kThumbTop, _kThumbBot],
-                  ),
-                ),
-              ),
-            if (coverImage == null)
+              _kThumbGradient,
+            if (!hasNetworkImage && !hasAsset)
               Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -605,7 +665,7 @@ class _IconCount extends StatelessWidget {
         SizedBox(width: 7 * s),
         Text(
           _format(count),
-          style: _mono(size: 9 * s, color: _kTaupe, spacing: 0.5),
+          style: _mono(size: 9 * s, color: _kBlack, spacing: 0.5),
         ),
       ],
     );

@@ -1,9 +1,9 @@
 enum WorkType {
   video,
   photo,
-  cgi,
-  vfx,
-  ai;
+  cgiVfx,
+  graphic,
+  sound;
 
   String get label {
     switch (this) {
@@ -11,12 +11,12 @@ enum WorkType {
         return 'Video';
       case WorkType.photo:
         return 'Foto';
-      case WorkType.cgi:
-        return 'CGI';
-      case WorkType.vfx:
-        return 'VFX';
-      case WorkType.ai:
-        return 'AI';
+      case WorkType.cgiVfx:
+        return 'CGI&VFX';
+      case WorkType.graphic:
+        return 'Grafik';
+      case WorkType.sound:
+        return 'Ses';
     }
   }
 
@@ -37,6 +37,11 @@ class WorkModel {
     this.likes = 0,
     this.comments = 0,
     this.coverImage,
+    this.freelancerId,
+    this.description,
+    this.mediaUrl,
+    this.isVideo = false,
+    this.createdAt,
   });
 
   final String id;
@@ -46,4 +51,45 @@ class WorkModel {
   final int likes;
   final int comments;
   final String? coverImage;
+
+  // Gerçek (Firestore'a yüklenmiş) işler için ek alanlar
+  final String? freelancerId;
+  final String? description;
+  final String? mediaUrl;
+  final bool isVideo;
+  final DateTime? createdAt;
+
+  factory WorkModel.fromJson(Map<String, dynamic> json) {
+    return WorkModel(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      studio: json['studio'] as String,
+      type: WorkType.fromName(json['type'] as String?),
+      likes: (json['likes'] as num?)?.toInt() ?? 0,
+      comments: (json['comments'] as num?)?.toInt() ?? 0,
+      coverImage: json['coverImage'] as String?,
+      freelancerId: json['freelancerId'] as String?,
+      description: json['description'] as String?,
+      mediaUrl: json['mediaUrl'] as String?,
+      isVideo: json['isVideo'] as bool? ?? false,
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'] as String)
+          : null,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'title': title,
+        'studio': studio,
+        'type': type.name,
+        'likes': likes,
+        'comments': comments,
+        'coverImage': coverImage,
+        'freelancerId': freelancerId,
+        'description': description,
+        'mediaUrl': mediaUrl,
+        'isVideo': isVideo,
+        'createdAt': createdAt?.toIso8601String(),
+      };
 }

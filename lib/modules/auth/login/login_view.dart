@@ -12,7 +12,7 @@ const _kCream = Color(0xFFFEFDFB);
 const _kGold = Color(0xFFD9A84E);
 const _kInk = Color(0xFF35333F);
 const _kTaupe = Color(0xFF9B8E7B);
-const _kMuted = Color(0xFFB6AD9A);
+const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
 const _kDanger = Color(0xFFBE6A5A);
 
 TextStyle _serif({
@@ -90,7 +90,7 @@ class LoginView extends GetView<LoginController> {
                   SizedBox(height: 44 * s),
                   Text(
                     'WELCOME BACK',
-                    style: _mono(size: 8 * s, color: _kMuted, spacing: 2),
+                    style: _mono(size: 8 * s, color: _kBlack, spacing: 2),
                   ),
                   SizedBox(height: 8 * s),
                   Text(
@@ -104,7 +104,7 @@ class LoginView extends GetView<LoginController> {
                   SizedBox(height: 8 * s),
                   Text(
                     'Hesabına giriş yap, üretmeye devam et.',
-                    style: _mono(size: 9 * s, color: _kTaupe, spacing: 0.3),
+                    style: _mono(size: 9 * s, color: _kBlack, spacing: 0.3),
                   ),
                   SizedBox(height: 36 * s),
                   Form(
@@ -117,7 +117,7 @@ class LoginView extends GetView<LoginController> {
                           style: _mono(
                             size: 8 * s,
                             weight: FontWeight.w700,
-                            color: _kMuted,
+                            color: _kBlack,
                             spacing: 1.2,
                           ),
                         ),
@@ -130,7 +130,7 @@ class LoginView extends GetView<LoginController> {
                           cursorColor: _kGold,
                           style: _mono(
                             size: 11 * s,
-                            color: _kInk,
+                            color: _kBlack,
                             spacing: 0.2,
                           ),
                           decoration: InputDecoration(
@@ -140,7 +140,7 @@ class LoginView extends GetView<LoginController> {
                             hintText: 'ornek@set.app',
                             hintStyle: _mono(
                               size: 11 * s,
-                              color: _kMuted,
+                              color: _kBlack,
                               spacing: 0.2,
                             ),
                             contentPadding: EdgeInsets.symmetric(
@@ -164,7 +164,7 @@ class LoginView extends GetView<LoginController> {
                           style: _mono(
                             size: 8 * s,
                             weight: FontWeight.w700,
-                            color: _kMuted,
+                            color: _kBlack,
                             spacing: 1.2,
                           ),
                         ),
@@ -178,7 +178,7 @@ class LoginView extends GetView<LoginController> {
                             cursorColor: _kGold,
                             style: _mono(
                               size: 11 * s,
-                              color: _kInk,
+                              color: _kBlack,
                               spacing: 0.2,
                             ),
                             onFieldSubmitted: (_) => controller.submit(),
@@ -189,7 +189,7 @@ class LoginView extends GetView<LoginController> {
                               hintText: '••••••',
                               hintStyle: _mono(
                                 size: 11 * s,
-                                color: _kMuted,
+                                color: _kBlack,
                                 spacing: 0.2,
                               ),
                               contentPadding: EdgeInsets.symmetric(
@@ -277,7 +277,7 @@ class LoginView extends GetView<LoginController> {
                     children: [
                       Text(
                         AppStrings.dontHaveAccount,
-                        style: _mono(size: 9 * s, color: _kTaupe, spacing: 0.3),
+                        style: _mono(size: 9 * s, color: _kBlack, spacing: 0.3),
                       ),
                       GestureDetector(
                         onTap: controller.goToRegister,

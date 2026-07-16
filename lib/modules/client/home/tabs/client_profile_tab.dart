@@ -20,8 +20,7 @@ import 'profile_screens.dart';
 const _kCream = Color(0xFFFEFDFB); // arka plan
 const _kGold = Color(0xFFD9A84E); // kritik / vurgu altın tonu
 const _kInk = Color(0xFF35333F);
-const _kTaupe = Color(0xFF9B8E7B);
-const _kMuted = Color(0xFFB6AD9A);
+const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
 const _kDanger = Color(0xFFBE6A5A);
 const _kDivider = Color(0x12000000);
 
@@ -293,7 +292,7 @@ class _ClientProfileTabState extends State<ClientProfileTab>
                         child: Center(
                           child: Text(
                             'SET · v1.0.0',
-                            style: _mono(size: 8 * s, color: _kMuted, spacing: 2),
+                            style: _mono(size: 8 * s, color: _kBlack, spacing: 2),
                           ),
                         ),
                       ),
@@ -310,12 +309,12 @@ class _ClientProfileTabState extends State<ClientProfileTab>
 
   // ─── Üst başlık: SET / HESABIM + kimlik ─────────────────────────────────────
   Widget _buildHeader(UserController user, double s) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(26 * s, 22 * s, 26 * s, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.fromLTRB(26 * s, 22 * s, 26 * s, 14 * s),
+          child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               RichText(
@@ -342,12 +341,15 @@ class _ClientProfileTabState extends State<ClientProfileTab>
               ),
               Text(
                 'HESABIM',
-                style: _mono(size: 8 * s, color: _kMuted, spacing: 2),
+                style: _mono(size: 8 * s, color: _kBlack, spacing: 2),
               ),
             ],
           ),
-          SizedBox(height: 46 * s),
-          Obx(() {
+        ),
+        Container(height: 1, color: _kDivider),
+        Padding(
+          padding: EdgeInsets.fromLTRB(26 * s, 24 * s, 26 * s, 0),
+          child: Obx(() {
             final u = user.currentUser;
             final name = u?.name ?? 'Misafir';
             final email = u?.email ?? '';
@@ -464,7 +466,7 @@ class _ClientProfileTabState extends State<ClientProfileTab>
                         email,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: _mono(size: 8 * s, color: _kTaupe, spacing: 0.2),
+                        style: _mono(size: 8 * s, color: _kBlack, spacing: 0.2),
                       ),
                     ],
                   ),
@@ -472,8 +474,8 @@ class _ClientProfileTabState extends State<ClientProfileTab>
               ],
             );
           }),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -495,7 +497,7 @@ class _ClientProfileTabState extends State<ClientProfileTab>
                   style: _mono(
                       size: 8 * s,
                       weight: FontWeight.w700,
-                      color: _kInk,
+                      color: _kBlack,
                       spacing: 1.8),
                 ),
               ],
@@ -550,13 +552,13 @@ class _ClientProfileTabState extends State<ClientProfileTab>
                   style: _mono(
                       size: 8 * s,
                       weight: FontWeight.w700,
-                      color: _kInk,
+                      color: _kBlack,
                       spacing: 1.8),
                 ),
                 const Spacer(),
                 Text(
                   rows.length.toString().padLeft(2, '0'),
-                  style: _mono(size: 8 * s, color: _kMuted, spacing: 1),
+                  style: _mono(size: 8 * s, color: _kBlack, spacing: 1),
                 ),
               ],
             ),
@@ -599,7 +601,7 @@ class _StatTile extends StatelessWidget {
           Text(
             label,
             textAlign: TextAlign.center,
-            style: _mono(size: 7 * s, color: _kTaupe, spacing: 0.8),
+            style: _mono(size: 7 * s, color: _kBlack, spacing: 0.8),
           ),
         ],
       ),
@@ -709,7 +711,7 @@ class _SettingsRow extends StatelessWidget {
                     SizedBox(height: 3 * s),
                     Text(
                       sub!,
-                      style: _mono(size: 8 * s, color: _kTaupe, spacing: 0.2),
+                      style: _mono(size: 8 * s, color: _kBlack, spacing: 0.2),
                     ),
                   ],
                 ],

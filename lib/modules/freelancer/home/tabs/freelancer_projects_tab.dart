@@ -12,6 +12,7 @@ const _kGold = Color(0xFFD9A84E);
 const _kInk = Color(0xFF35333F);
 const _kTaupe = Color(0xFF9B8E7B);
 const _kMuted = Color(0xFFB6AD9A);
+const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
 const _kDivider = Color(0x12000000);
 const _kCardBorder = Color(0x0F000000);
 
@@ -107,6 +108,8 @@ class _FreelancerProjectsTabState extends State<FreelancerProjectsTab> {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                _buildTopStrip(s),
+                SizedBox(height: 18 * s),
                 _buildHeader(s, list.length),
                 SizedBox(height: 20 * s),
                 _buildFilterBar(s),
@@ -145,10 +148,27 @@ class _FreelancerProjectsTabState extends State<FreelancerProjectsTab> {
     );
   }
 
+  // ── Sayfa tepesi — SET · ÜRETİM + tam genişlik ayraç ──────────────
+  Widget _buildTopStrip(double s) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.fromLTRB(26 * s, 6 * s, 26 * s, 12 * s),
+          child: Text(
+            'SET · ÜRETİM',
+            style: _mono(size: 8 * s, color: _kBlack, spacing: 2),
+          ),
+        ),
+        Container(height: 1, color: _kDivider),
+      ],
+    );
+  }
+
   // ── Header ──────────────────────────────────────────────────────
   Widget _buildHeader(double s, int count) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(26 * s, 22 * s, 18 * s, 0),
+      padding: EdgeInsets.fromLTRB(26 * s, 0, 18 * s, 0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -156,11 +176,6 @@ class _FreelancerProjectsTabState extends State<FreelancerProjectsTab> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'SET · ÜRETİM',
-                  style: _mono(size: 8 * s, color: _kMuted, spacing: 2),
-                ),
-                SizedBox(height: 8 * s),
                 Text(
                   'Projelerim',
                   style: _serif(
@@ -172,7 +187,7 @@ class _FreelancerProjectsTabState extends State<FreelancerProjectsTab> {
                 SizedBox(height: 6 * s),
                 Text(
                   '$count proje görüntüleniyor',
-                  style: _mono(size: 8 * s, color: _kTaupe, spacing: 0.5),
+                  style: _mono(size: 8 * s, color: _kBlack, spacing: 0.5),
                 ),
               ],
             ),
@@ -191,42 +206,48 @@ class _FreelancerProjectsTabState extends State<FreelancerProjectsTab> {
     );
   }
 
-  // ── Filtre pilleri ──────────────────────────────────────────────
+  // ── Filtre sekmeleri (Keşfet ekranındaki widget ile aynı tasarım) ─
   Widget _buildFilterBar(double s) {
     return SizedBox(
       height: 40 * s,
-      child: ListView.separated(
+      child: ListView(
         scrollDirection: Axis.horizontal,
         padding: EdgeInsets.symmetric(horizontal: 24 * s),
-        itemCount: _filterLabels.length,
-        separatorBuilder: (_, _) => SizedBox(width: 10 * s),
-        itemBuilder: (_, i) {
-          final active = i == _filterIndex;
+        children: List.generate(_filterLabels.length, (i) {
+          final selected = i == _filterIndex;
           return GestureDetector(
             onTap: () => setState(() => _filterIndex = i),
             behavior: HitTestBehavior.opaque,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              alignment: Alignment.center,
-              padding: EdgeInsets.symmetric(horizontal: 16 * s),
-              decoration: BoxDecoration(
-                color: active ? _kInk : Colors.transparent,
-                border: Border.all(
-                  color: active ? _kInk : Colors.black.withValues(alpha: 0.14),
-                ),
-              ),
-              child: Text(
-                _filterLabels[i],
-                style: _mono(
-                  size: 9 * s,
-                  weight: active ? FontWeight.w700 : FontWeight.w400,
-                  color: active ? Colors.white : _kTaupe,
-                  spacing: 1,
-                ),
+            child: Padding(
+              padding: EdgeInsets.only(right: 26 * s),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (selected) ...[
+                    Container(
+                      width: 4 * s,
+                      height: 4 * s,
+                      decoration: const BoxDecoration(
+                        color: Colors.black,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    SizedBox(width: 6 * s),
+                  ],
+                  Text(
+                    _filterLabels[i],
+                    style: _mono(
+                      size: 9 * s,
+                      weight: selected ? FontWeight.w700 : FontWeight.w400,
+                      color: _kBlack,
+                      spacing: 1,
+                    ),
+                  ),
+                ],
               ),
             ),
           );
-        },
+        }),
       ),
     );
   }
@@ -317,7 +338,7 @@ class _ProjectCard extends StatelessWidget {
                     style: _mono(
                       size: 8 * s,
                       weight: FontWeight.w700,
-                      color: _kInk,
+                      color: _kBlack,
                       spacing: 1.4,
                     ),
                   ),
@@ -361,7 +382,7 @@ class _ProjectCard extends StatelessWidget {
                           '${project.shootingType ?? ''} · «${project.title}»',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: _mono(size: 8 * s, color: _kMuted, spacing: 1),
+                          style: _mono(size: 8 * s, color: _kBlack, spacing: 1),
                         ),
                       ],
                     ),
@@ -428,7 +449,7 @@ class _ProjectCard extends StatelessWidget {
                           : '—',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: _mono(size: 9 * s, color: _kTaupe, spacing: 0.5),
+                      style: _mono(size: 9 * s, color: _kBlack, spacing: 0.5),
                     ),
                   ),
                 ],
@@ -443,7 +464,7 @@ class _ProjectCard extends StatelessWidget {
                 (project.notes ?? project.description),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: _mono(size: 9 * s, color: _kInk, spacing: 0.2),
+                style: _mono(size: 9 * s, color: _kBlack, spacing: 0.2),
               ),
             ),
 
@@ -460,7 +481,7 @@ class _ProjectCard extends StatelessWidget {
                     clientName != null
                         ? 'HİZMET ALAN · ${clientName!.toUpperCase()}'
                         : 'OLUŞTURULMA · ${_formatDate(project.createdAt).toUpperCase()}',
-                    style: _mono(size: 8 * s, color: _kMuted, spacing: 0.8),
+                    style: _mono(size: 8 * s, color: _kBlack, spacing: 0.8),
                   ),
                   const Spacer(),
                   Icon(Icons.chevron_right, size: 16 * s, color: _kGold),
@@ -500,7 +521,7 @@ class _MetaCell extends StatelessWidget {
             SizedBox(width: 4 * s),
             Text(
               label,
-              style: _mono(size: 7 * s, color: _kMuted, spacing: 1),
+              style: _mono(size: 7 * s, color: _kBlack, spacing: 1),
             ),
           ],
         ),
@@ -512,7 +533,7 @@ class _MetaCell extends StatelessWidget {
           style: _mono(
             size: 10 * s,
             weight: FontWeight.w700,
-            color: _kInk,
+            color: _kBlack,
             spacing: 0.3,
           ),
         ),
@@ -597,7 +618,7 @@ class _EmptyState extends StatelessWidget {
           SizedBox(height: 6 * s),
           Text(
             'Kabul ettiğin işler burada görünecek.',
-            style: _mono(size: 9 * s, color: _kTaupe, spacing: 0.3),
+            style: _mono(size: 9 * s, color: _kBlack, spacing: 0.3),
           ),
         ],
       ),

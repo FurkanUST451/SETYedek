@@ -11,6 +11,7 @@ const _kInk = Color(0xFF35333F);
 const _kDark = Color(0xFF23212B);
 const _kTaupe = Color(0xFF9B8E7B);
 const _kMuted = Color(0xFFB6AD9A);
+const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
 const _kCardBorder = Color(0x14000000);
 const _kDivider = Color(0x12000000);
 const _kTile = Color(0xFFF3EEE2);
@@ -110,14 +111,14 @@ class SetProjectsView extends StatelessWidget {
                               style: _mono(
                                   size: 9 * s,
                                   weight: FontWeight.w700,
-                                  color: _kInk,
+                                  color: _kBlack,
                                   spacing: 1.4)),
                         ],
                       ),
                       SizedBox(height: 6 * s),
                       Text('Projen SET ekibi tarafından yönetiliyor.',
                           style:
-                              _mono(size: 9 * s, color: _kTaupe, spacing: 0.3)),
+                              _mono(size: 9 * s, color: _kBlack, spacing: 0.3)),
 
                       SizedBox(height: 32 * s),
                       _StepperCard(scale: s),
@@ -300,8 +301,8 @@ class _StepperCard extends StatelessWidget {
                                         ? FontWeight.w700
                                         : FontWeight.w400,
                                     color: st.state == _StepState.pending
-                                        ? _kMuted
-                                        : _kInk,
+                                        ? _kBlack
+                                        : _kBlack,
                                     spacing: 0.2,
                                     height: 1.25)),
                             SizedBox(height: 3 * s),
@@ -311,7 +312,7 @@ class _StepperCard extends StatelessWidget {
                                     size: 7 * s,
                                     color: st.state == _StepState.active
                                         ? _kGold
-                                        : _kMuted,
+                                        : _kBlack,
                                     spacing: 0.2)),
                           ],
                         ),
@@ -395,7 +396,7 @@ class _UpdateCard extends StatelessWidget {
                             color: _kInk)),
                     const Spacer(),
                     Text('2 saat önce',
-                        style: _mono(size: 7 * s, color: _kMuted, spacing: 0.3)),
+                        style: _mono(size: 7 * s, color: _kBlack, spacing: 0.3)),
                   ],
                 ),
                 SizedBox(height: 6 * s),
@@ -403,7 +404,7 @@ class _UpdateCard extends StatelessWidget {
                     "Videographer shortlist tamamlandı. Bugün saat 18.00'e kadar ekip kesinleşecek.",
                     style: _mono(
                         size: 9 * s,
-                        color: _kTaupe,
+                        color: _kBlack,
                         spacing: 0.2,
                         height: 1.55)),
               ],
@@ -444,7 +445,7 @@ class _ManagerCard extends StatelessWidget {
                         size: 18 * s, weight: FontWeight.w600, color: _kInk)),
                 SizedBox(height: 2 * s),
                 Text('SET Project Manager',
-                    style: _mono(size: 8 * s, color: _kTaupe, spacing: 0.3)),
+                    style: _mono(size: 8 * s, color: _kBlack, spacing: 0.3)),
                 SizedBox(height: 5 * s),
                 Row(
                   children: [
@@ -527,7 +528,7 @@ class _TeamRow extends StatelessWidget {
                     style: _mono(
                         size: 7.5 * s,
                         weight: FontWeight.w700,
-                        color: _kInk,
+                        color: _kBlack,
                         spacing: 0.2)),
                 SizedBox(height: 4 * s),
                 Row(
@@ -594,7 +595,7 @@ class _MetaCard extends StatelessWidget {
                     SizedBox(height: 8 * s),
                     Text(cells[i].$2,
                         style:
-                            _mono(size: 7 * s, color: _kMuted, spacing: 0.8)),
+                            _mono(size: 7 * s, color: _kBlack, spacing: 0.8)),
                     SizedBox(height: 4 * s),
                     Text(cells[i].$3,
                         maxLines: 1,
@@ -665,11 +666,11 @@ class _FilesRow extends StatelessWidget {
                     style: _mono(
                         size: 8 * s,
                         weight: FontWeight.w700,
-                        color: _kInk,
+                        color: _kBlack,
                         spacing: 0.2)),
                 SizedBox(height: 2 * s),
                 Text(f.$3,
-                    style: _mono(size: 7 * s, color: _kMuted, spacing: 0.3)),
+                    style: _mono(size: 7 * s, color: _kBlack, spacing: 0.3)),
               ],
             ),
           );
@@ -710,7 +711,7 @@ class _NextStepCard extends StatelessWidget {
                 Text('YAKLAŞAN ADIM',
                     style: _mono(
                         size: 7 * s,
-                        color: _kInk.withValues(alpha: 0.55),
+                        color: _kBlack.withValues(alpha: 0.55),
                         spacing: 1.4)),
                 SizedBox(height: 4 * s),
                 Text('Çekim Planlaması',
@@ -718,7 +719,7 @@ class _NextStepCard extends StatelessWidget {
                         size: 20 * s, weight: FontWeight.w600, color: _kInk)),
                 SizedBox(height: 2 * s),
                 Text('29 Mayıs 2024',
-                    style: _mono(size: 8 * s, color: _kInk, spacing: 0.3)),
+                    style: _mono(size: 8 * s, color: _kBlack, spacing: 0.3)),
               ],
             ),
           ),
@@ -752,7 +753,7 @@ class _SectionHeader extends StatelessWidget {
                 _serif(size: 22 * s, weight: FontWeight.w600, color: _kInk)),
         const Spacer(),
         Text('Tümünü Gör',
-            style: _mono(size: 8 * s, color: _kTaupe, spacing: 0.5)),
+            style: _mono(size: 8 * s, color: _kBlack, spacing: 0.5)),
         SizedBox(width: 4 * s),
         Icon(Icons.chevron_right, size: 15 * s, color: _kGold),
       ],

@@ -15,6 +15,7 @@ const _kInk = Color(0xFF35333F);
 const _kBubbleMe = Color(0xFF23212B); // giden balon (koyu)
 const _kTaupe = Color(0xFF9B8E7B);
 const _kMuted = Color(0xFFB6AD9A);
+const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
 const _kAvatarBg = Color(0xFFEADCBB);
 const _kAccepted = Color(0xFF6B8F71);
 const _kDanger = Color(0xFFBE6A5A);
@@ -171,9 +172,9 @@ class ChatDetailView extends GetView<ChatDetailController> {
                 Container(
                   width: 40 * s,
                   height: 40 * s,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: _kAvatarBg,
-                    borderRadius: BorderRadius.zero,
+                    shape: BoxShape.circle,
                   ),
                   alignment: Alignment.center,
                   child: Text(
@@ -181,7 +182,7 @@ class ChatDetailView extends GetView<ChatDetailController> {
                     style: _mono(
                         size: 11 * s,
                         weight: FontWeight.w700,
-                        color: _kInk,
+                        color: _kBlack,
                         spacing: 0.5),
                   ),
                 ),
@@ -215,7 +216,7 @@ class ChatDetailView extends GetView<ChatDetailController> {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style:
-                                  _mono(size: 7.5 * s, color: _kTaupe, spacing: 1),
+                                  _mono(size: 7.5 * s, color: _kBlack, spacing: 1),
                             ),
                           ),
                         ],
@@ -310,7 +311,7 @@ class _BriefCard extends StatelessWidget {
                       SizedBox(height: 2 * s),
                       Text(
                         shootingType,
-                        style: _mono(size: 8 * s, color: _kTaupe, spacing: 0.3),
+                        style: _mono(size: 8 * s, color: _kBlack, spacing: 0.3),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -377,7 +378,7 @@ class _BriefDetailSheet extends StatelessWidget {
               SizedBox(height: 2 * s),
               Text(
                 a.shootingType!,
-                style: _mono(size: 9 * s, color: _kTaupe, spacing: 0.3),
+                style: _mono(size: 9 * s, color: _kBlack, spacing: 0.3),
               ),
             ],
             SizedBox(height: 18 * s),
@@ -398,12 +399,12 @@ class _BriefDetailSheet extends StatelessWidget {
               SizedBox(height: 18 * s),
               Text(
                 'İŞ TARİFİ',
-                style: _mono(size: 8 * s, weight: FontWeight.w700, color: _kMuted, spacing: 1.2),
+                style: _mono(size: 8 * s, weight: FontWeight.w700, color: _kBlack, spacing: 1.2),
               ),
               SizedBox(height: 8 * s),
               Text(
                 a.notes!,
-                style: _mono(size: 10 * s, color: _kInk, height: 1.6, spacing: 0.2),
+                style: _mono(size: 10 * s, color: _kBlack, height: 1.6, spacing: 0.2),
               ),
             ],
           ],
@@ -442,13 +443,13 @@ class _DetailChip extends StatelessWidget {
             children: [
               Icon(icon, size: 12 * s, color: _kTaupe),
               SizedBox(width: 4 * s),
-              Text(label, style: _mono(size: 7 * s, color: _kMuted, spacing: 0.5)),
+              Text(label, style: _mono(size: 7 * s, color: _kBlack, spacing: 0.5)),
             ],
           ),
           SizedBox(height: 4 * s),
           Text(
             value,
-            style: _mono(size: 10 * s, weight: FontWeight.w700, color: _kInk, spacing: 0.2),
+            style: _mono(size: 10 * s, weight: FontWeight.w700, color: _kBlack, spacing: 0.2),
           ),
         ],
       ),
@@ -520,7 +521,7 @@ class _OfferBubble extends StatelessWidget {
                   Icon(Icons.payments_outlined, size: 16 * s, color: _kGold),
                   SizedBox(width: 6 * s),
                   Text('FİYAT TEKLİFİ',
-                      style: _mono(size: 8 * s, color: _kTaupe, spacing: 0.8)),
+                      style: _mono(size: 8 * s, color: _kBlack, spacing: 0.8)),
                   const Spacer(),
                   Text(
                     _statusLabel,
@@ -540,7 +541,7 @@ class _OfferBubble extends StatelessWidget {
               if (offer.message.isNotEmpty) ...[
                 SizedBox(height: 4 * s),
                 Text(offer.message,
-                    style: _mono(size: 9 * s, color: _kTaupe, spacing: 0.2)),
+                    style: _mono(size: 9 * s, color: _kBlack, spacing: 0.2)),
               ],
               if (!isMe && offer.status == OfferStatus.pending) ...[
                 SizedBox(height: 10 * s),
@@ -584,7 +585,7 @@ class _OfferBubble extends StatelessWidget {
                 ),
               ],
               SizedBox(height: 4 * s),
-              Text(time, style: _mono(size: 7.5 * s, color: _kMuted, spacing: 0.5)),
+              Text(time, style: _mono(size: 7.5 * s, color: _kBlack, spacing: 0.5)),
             ],
           ),
         ),
@@ -637,7 +638,7 @@ class _DayChip extends StatelessWidget {
           color: Colors.black.withValues(alpha: 0.05),
           borderRadius: BorderRadius.zero,
         ),
-        child: Text(label, style: _mono(size: 8 * s, color: _kTaupe, spacing: 1.5)),
+        child: Text(label, style: _mono(size: 8 * s, color: _kBlack, spacing: 1.5)),
       ),
     );
   }
@@ -668,7 +669,7 @@ class _TheirBubble extends StatelessWidget {
           children: [
             Text.rich(
               TextSpan(
-                style: _mono(size: 10 * s, color: _kInk, spacing: 0.2),
+                style: _mono(size: 10 * s, color: _kBlack, spacing: 0.2),
                 children: _highlightSpans(text, _kGold),
               ),
             ),
@@ -676,7 +677,7 @@ class _TheirBubble extends StatelessWidget {
             Align(
               alignment: Alignment.centerRight,
               child: Text(time,
-                  style: _mono(size: 7.5 * s, color: _kMuted, spacing: 0.5)),
+                  style: _mono(size: 7.5 * s, color: _kBlack, spacing: 0.5)),
             ),
           ],
         ),
@@ -811,7 +812,7 @@ class _Composer extends StatelessWidget {
                   child: TextField(
                     controller: controller.messageController,
                     cursorColor: _kGold,
-                    style: _mono(size: 10 * s, color: _kInk, spacing: 0.2, height: 1.2),
+                    style: _mono(size: 10 * s, color: _kBlack, spacing: 0.2, height: 1.2),
                     decoration: InputDecoration(
                       isCollapsed: true,
                       filled: false,
@@ -822,7 +823,7 @@ class _Composer extends StatelessWidget {
                       disabledBorder: InputBorder.none,
                       hintText: 'Mesaj yaz...',
                       hintStyle:
-                          _mono(size: 10 * s, color: _kMuted, spacing: 0.2),
+                          _mono(size: 10 * s, color: _kBlack, spacing: 0.2),
                     ),
                     onSubmitted: (_) => controller.send(),
                   ),
@@ -867,12 +868,12 @@ void _showOfferSheet(
             TextField(
               controller: controller.offerAmountController,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              style: _mono(size: 11 * s, color: _kInk, spacing: 0.2),
+              style: _mono(size: 11 * s, color: _kBlack, spacing: 0.2),
               cursorColor: _kGold,
               decoration: InputDecoration(
                 isDense: true,
                 hintText: 'Tutar (₺)',
-                hintStyle: _mono(size: 11 * s, color: _kMuted, spacing: 0.2),
+                hintStyle: _mono(size: 11 * s, color: _kBlack, spacing: 0.2),
                 filled: true,
                 fillColor: Colors.white,
                 contentPadding: EdgeInsets.symmetric(
@@ -895,12 +896,12 @@ void _showOfferSheet(
             TextField(
               controller: controller.offerNoteController,
               maxLines: 2,
-              style: _mono(size: 11 * s, color: _kInk, spacing: 0.2),
+              style: _mono(size: 11 * s, color: _kBlack, spacing: 0.2),
               cursorColor: _kGold,
               decoration: InputDecoration(
                 isDense: true,
                 hintText: 'Not (opsiyonel)',
-                hintStyle: _mono(size: 11 * s, color: _kMuted, spacing: 0.2),
+                hintStyle: _mono(size: 11 * s, color: _kBlack, spacing: 0.2),
                 filled: true,
                 fillColor: Colors.white,
                 contentPadding: EdgeInsets.symmetric(

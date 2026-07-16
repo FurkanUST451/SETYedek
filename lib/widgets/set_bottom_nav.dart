@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 // ─── Palet (uygulamanın geri kalanıyla aynı) ──────────────────────────────────
 const _kNavBg = Color(0xFFFEFDFB);
 const _kGold = Color(0xFFD9A84E);
-const _kMuted = Color(0xFFB6AD9A);
+const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
 const _kDivider = Color(0x12000000);
 
 class SetNavItem {
@@ -74,7 +74,7 @@ class _NavTile extends StatelessWidget {
           style: GoogleFonts.spaceMono(
             fontSize: 10.5,
             fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
-            color: selected ? _kGold : _kMuted,
+            color: selected ? _kGold : _kBlack,
             letterSpacing: 0.6,
           ),
         ),
