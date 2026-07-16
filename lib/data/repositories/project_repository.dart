@@ -2,9 +2,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../models/offer_model.dart';
 import '../models/project_model.dart';
+import 'brief_repository.dart';
 
 class ProjectRepository {
+  ProjectRepository({BriefRepository? briefRepository})
+      : _briefRepo = briefRepository ?? BriefRepository();
+
   final FirebaseFirestore _db = FirebaseFirestore.instance;
+  final BriefRepository _briefRepo;
 
   CollectionReference<Map<String, dynamic>> get _projects =>
       _db.collection('projects');
@@ -14,6 +19,9 @@ class ProjectRepository {
     required String clientId,
     required String freelancerId,
   }) async {
+    final brief = offer.briefId.isNotEmpty
+        ? await _briefRepo.fetchBrief(offer.briefId)
+        : null;
     final ref = _projects.doc();
     final project = ProjectModel(
       id: ref.id,
@@ -27,6 +35,13 @@ class ProjectRepository {
       offerId: offer.id,
       briefId: offer.briefId,
       chatId: offer.chatId,
+      category: brief?.category,
+      shootingType: brief?.answers.shootingType,
+      vibes: brief?.answers.vibes,
+      dateRange: brief?.answers.dateRange,
+      deliveryTime: brief?.answers.deliveryTime,
+      location: brief?.answers.location,
+      notes: brief?.answers.notes,
     );
     await ref.set(project.toJson());
     return project;

@@ -26,6 +26,13 @@ class ProjectModel {
     this.briefId,
     this.chatId,
     this.deadline,
+    this.category,
+    this.shootingType,
+    this.vibes,
+    this.dateRange,
+    this.deliveryTime,
+    this.location,
+    this.notes,
   });
 
   final String id;
@@ -40,6 +47,15 @@ class ProjectModel {
   final String? briefId;
   final String? chatId;
   final DateTime? deadline;
+
+  // Brief'ten miras alınan detay alanları (brief kartıyla eşleşmesi için)
+  final String? category;
+  final String? shootingType;
+  final List<String>? vibes;
+  final String? dateRange;
+  final String? deliveryTime;
+  final String? location;
+  final String? notes;
 
   factory ProjectModel.fromJson(Map<String, dynamic> json) {
     return ProjectModel(
@@ -57,6 +73,13 @@ class ProjectModel {
       deadline: json['deadline'] != null
           ? DateTime.parse(json['deadline'] as String)
           : null,
+      category: json['category'] as String?,
+      shootingType: json['shootingType'] as String?,
+      vibes: (json['vibes'] as List<dynamic>?)?.cast<String>(),
+      dateRange: json['dateRange'] as String?,
+      deliveryTime: json['deliveryTime'] as String?,
+      location: json['location'] as String?,
+      notes: json['notes'] as String?,
     );
   }
 
@@ -73,6 +96,13 @@ class ProjectModel {
         'briefId': briefId,
         'chatId': chatId,
         'deadline': deadline?.toIso8601String(),
+        'category': category,
+        'shootingType': shootingType,
+        'vibes': vibes,
+        'dateRange': dateRange,
+        'deliveryTime': deliveryTime,
+        'location': location,
+        'notes': notes,
       };
 
   ProjectModel copyWith({
@@ -88,6 +118,13 @@ class ProjectModel {
     String? briefId,
     String? chatId,
     DateTime? deadline,
+    String? category,
+    String? shootingType,
+    List<String>? vibes,
+    String? dateRange,
+    String? deliveryTime,
+    String? location,
+    String? notes,
   }) {
     return ProjectModel(
       id: id ?? this.id,
@@ -102,6 +139,13 @@ class ProjectModel {
       briefId: briefId ?? this.briefId,
       chatId: chatId ?? this.chatId,
       deadline: deadline ?? this.deadline,
+      category: category ?? this.category,
+      shootingType: shootingType ?? this.shootingType,
+      vibes: vibes ?? this.vibes,
+      dateRange: dateRange ?? this.dateRange,
+      deliveryTime: deliveryTime ?? this.deliveryTime,
+      location: location ?? this.location,
+      notes: notes ?? this.notes,
     );
   }
 }

@@ -25,7 +25,10 @@ class InitialBinding extends Bindings {
     Get.put<FreelancerRepository>(FreelancerRepository(), permanent: true);
     Get.put<BriefRepository>(BriefRepository(), permanent: true);
     Get.put<ChatRepository>(ChatRepository(), permanent: true);
-    Get.put<ProjectRepository>(ProjectRepository(), permanent: true);
+    Get.put<ProjectRepository>(
+      ProjectRepository(briefRepository: Get.find<BriefRepository>()),
+      permanent: true,
+    );
     Get.put<OfferRepository>(
       OfferRepository(
         chatRepository: Get.find<ChatRepository>(),

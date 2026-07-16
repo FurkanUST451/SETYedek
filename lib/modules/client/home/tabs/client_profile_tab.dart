@@ -1,431 +1,491 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../../core/constants/app_assets.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../data/models/project_model.dart';
 import '../../../../routes/app_routes.dart';
 import '../../../app/auth_controller.dart';
 import '../../../app/user_controller.dart';
+import '../client_projects_controller.dart';
 
-class ClientProfileTab extends StatefulWidget {
+class ClientProfileTab extends StatelessWidget {
   const ClientProfileTab({super.key});
 
-  @override
-  State<ClientProfileTab> createState() => _ClientProfileTabState();
-}
-
-class _ClientProfileTabState extends State<ClientProfileTab> {
-  bool _twoFactor = true;
-
-  static const _cream = Color(0xFFF5EBD8);
   static const _amber = Color(0xFFE8B84B);
-  static const _dark = Color(0xFF1A1200);
+
+  static const _fullMonths = [
+    '', 'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
+    'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık',
+  ];
 
   @override
   Widget build(BuildContext context) {
     final user = Get.find<UserController>();
     final auth = Get.find<AuthController>();
+    final projectsController = Get.find<ClientProjectsController>();
 
     return Scaffold(
-      backgroundColor: _cream,
-      body: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(child: _buildHero(user)),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 120),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                const SizedBox(height: 20),
-                _buildSection('HESAP', [
-                  _SettingsRow(
-                    icon: Icons.person_outline_rounded,
-                    label: 'Profili Düzenle',
-                    sub: 'Ad, bio, konum, dil',
-                    onTap: () {},
-                  ),
-                  _SettingsRow(
-                    icon: Icons.email_outlined,
-                    label: 'E-posta & Telefon',
-                    sub: 'İletişim bilgilerini güncelle',
-                    onTap: () {},
-                  ),
-                  _SettingsRow(
-                    icon: Icons.lock_outline_rounded,
-                    label: 'Şifre Değiştir',
-                    onTap: () {},
-                  ),
-                  _SettingsRow(
-                    icon: Icons.security_outlined,
-                    label: 'İki Faktörlü Doğrulama',
-                    sub: 'Hesabını güvende tut',
-                    trailing: Transform.scale(
-                      scale: 0.8,
-                      child: Switch(
-                        value: _twoFactor,
-                        onChanged: (v) => setState(() => _twoFactor = v),
-                        activeColor: Colors.white,
-                        activeTrackColor: _amber,
-                        inactiveThumbColor: Colors.white,
-                        inactiveTrackColor: Colors.black12,
-                      ),
-                    ),
-                  ),
-                ]),
-                const SizedBox(height: 20),
-                _buildSection('ÖDEME', [
-                  _SettingsRow(
-                    icon: Icons.credit_card_outlined,
-                    label: 'Ödeme Yöntemleri',
-                    sub: 'Kart, havale',
-                    onTap: () {},
-                  ),
-                  _SettingsRow(
-                    icon: Icons.receipt_long_outlined,
-                    label: 'Sipariş Geçmişi',
-                    sub: 'Tüm fatura ve ödemeler',
-                    badge: '3 Yeni',
-                    onTap: () {},
-                  ),
-                  _SettingsRow(
-                    icon: Icons.business_outlined,
-                    label: 'Fatura Bilgileri',
-                    sub: 'Şirket adı, vergi no',
-                    onTap: () {},
-                  ),
-                ]),
-                const SizedBox(height: 20),
-                _buildSection('TERCİHLER', [
-                  _SettingsRow(
-                    icon: Icons.notifications_none_rounded,
-                    label: 'Bildirimler',
-                    sub: 'Push, e-posta tercihleri',
-                    onTap: () {},
-                  ),
-                  _SettingsRow(
-                    icon: Icons.language_outlined,
-                    label: 'Dil & Bölge',
-                    sub: 'Türkçe',
-                    onTap: () {},
-                  ),
-                ]),
-                const SizedBox(height: 20),
-                _buildSection('DESTEK', [
-                  _SettingsRow(
-                    icon: Icons.help_outline_rounded,
-                    label: 'Yardım Merkezi',
-                    onTap: () {},
-                  ),
-                  _SettingsRow(
-                    icon: Icons.chat_bubble_outline_rounded,
-                    label: 'Bize Ulaş',
-                    onTap: () {},
-                  ),
-                  _SettingsRow(
-                    icon: Icons.description_outlined,
-                    label: 'Kullanım Koşulları',
-                    onTap: () {},
-                  ),
-                ]),
-                const SizedBox(height: 20),
-                _buildSection('OTURUM', [
-                  _SettingsRow(
-                    icon: Icons.swap_horiz_rounded,
-                    label: 'Rolümü Değiştir',
-                    onTap: () => Get.offAllNamed(AppRoutes.roleSelection),
-                  ),
-                  _SettingsRow(
-                    icon: Icons.logout_rounded,
-                    label: 'Çıkış Yap',
-                    danger: true,
-                    onTap: () async {
-                      await auth.logout();
-                      Get.offAllNamed(AppRoutes.login);
-                    },
-                  ),
-                  _SettingsRow(
-                    icon: Icons.delete_outline_rounded,
-                    label: 'Hesabı Sil',
-                    danger: true,
-                    onTap: () {},
-                  ),
-                ]),
-                const SizedBox(height: 20),
-                Center(
-                  child: Text(
-                    'SET v1.0.0 · Tüm hakları saklıdır',
-                    style: AppTextStyles.caption.copyWith(
-                      color: Colors.black38,
-                      fontSize: 11,
-                    ),
-                  ),
-                ),
-              ]),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHero(UserController user) {
-    return SizedBox(
-      height: 260,
-      child: Stack(
-        children: [
-          // Background image
-          Positioned.fill(
-            child: Image.asset(AppAssets.choosePageBg, fit: BoxFit.cover, cacheWidth: 1080),
-          ),
-          // Gradient fade to cream
-          Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    _cream.withValues(alpha: 0.55),
-                    _cream,
-                  ],
-                  stops: const [0.25, 0.7, 1.0],
-                ),
-              ),
-            ),
-          ),
-          // Top SET wordmark
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: SafeArea(
-              bottom: false,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: Center(
-                  child: RichText(
-                    text: TextSpan(children: [
-                      TextSpan(
-                        text: 'SE',
-                        style: AppTextStyles.heading2.copyWith(
-                          color: Colors.black87,
-                          fontSize: 20,
-                          letterSpacing: 1.5,
-                        ),
-                      ),
-                      TextSpan(
-                        text: 'T',
-                        style: AppTextStyles.heading2.copyWith(
-                          color: _amber,
-                          fontSize: 20,
-                          letterSpacing: 1.5,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    ]),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          // User info row at bottom
-          Positioned(
-            bottom: 0,
-            left: 16,
-            right: 16,
-            child: Obx(() {
-              final u = user.currentUser;
-              final name = u?.name ?? 'Misafir';
-              final initials = name
-                  .split(' ')
-                  .take(2)
-                  .map((e) => e.isNotEmpty ? e[0] : '')
-                  .join()
-                  .toUpperCase();
-              return Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            // ── Top bar ──────────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(4, 8, 12, 0),
+              child: Row(
                 children: [
-                  // Avatar
-                  Container(
-                    width: 66,
-                    height: 66,
-                    decoration: BoxDecoration(
-                      color: _amber,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2.5),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.15),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    alignment: Alignment.center,
+                  const SizedBox(width: 44),
+                  Expanded(
                     child: Text(
-                      initials,
-                      style: AppTextStyles.heading2.copyWith(
-                        color: Colors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.w800,
+                      'Profilim',
+                      textAlign: TextAlign.center,
+                      style: AppTextStyles.heading3.copyWith(
+                        color: Colors.black87,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 7, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: _amber,
-                            borderRadius: BorderRadius.circular(6),
+                  IconButton(
+                    icon: const Icon(Icons.more_horiz, color: Colors.black54),
+                    onPressed: () {},
+                  ),
+                ],
+              ),
+            ),
+
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 120),
+                child: Obx(() {
+                  final u = user.currentUser;
+                  final name = u?.name ?? 'Kullanıcı';
+                  final initials = name
+                      .split(' ')
+                      .take(2)
+                      .map((e) => e.isNotEmpty ? e[0] : '')
+                      .join()
+                      .toUpperCase();
+                  final joined = u != null
+                      ? '${_fullMonths[u.createdAt.month]} ${u.createdAt.year} tarihinde katıldı'
+                      : '';
+
+                  return Column(
+                    children: [
+                      // ── Avatar (left) + name/joined (right) ──────────
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              Container(
+                                width: 76,
+                                height: 76,
+                                decoration: BoxDecoration(
+                                  color: _amber,
+                                  shape: BoxShape.circle,
+                                  image: u?.avatarUrl != null
+                                      ? DecorationImage(
+                                          image: NetworkImage(u!.avatarUrl!),
+                                          fit: BoxFit.cover,
+                                        )
+                                      : null,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color:
+                                          Colors.black.withValues(alpha: 0.1),
+                                      blurRadius: 14,
+                                      offset: const Offset(0, 6),
+                                    ),
+                                  ],
+                                ),
+                                alignment: Alignment.center,
+                                child: u?.avatarUrl == null
+                                    ? Text(
+                                        initials,
+                                        style: AppTextStyles.heading2.copyWith(
+                                          color: Colors.white,
+                                          fontSize: 26,
+                                          fontWeight: FontWeight.w800,
+                                        ),
+                                      )
+                                    : null,
+                              ),
+                              Positioned(
+                                bottom: 0,
+                                right: 0,
+                                child: GestureDetector(
+                                  onTap: () {},
+                                  child: Container(
+                                    width: 26,
+                                    height: 26,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                          color: Colors.white, width: 2.5),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black
+                                              .withValues(alpha: 0.1),
+                                          blurRadius: 6,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ],
+                                    ),
+                                    child: const Icon(
+                                      Icons.camera_alt_outlined,
+                                      size: 13,
+                                      color: Colors.black54,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          child: Text(
-                            'MÜŞTERİ',
-                            style: AppTextStyles.caption.copyWith(
-                              color: Colors.white,
-                              fontSize: 9,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 0.8,
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 6),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    name,
+                                    style: AppTextStyles.heading2.copyWith(
+                                      color: Colors.black87,
+                                      fontSize: 19,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  if (joined.isNotEmpty) ...[
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      children: [
+                                        const Icon(
+                                            Icons.calendar_today_outlined,
+                                            size: 13,
+                                            color: Colors.black38),
+                                        const SizedBox(width: 5),
+                                        Expanded(
+                                          child: Text(
+                                            joined,
+                                            style:
+                                                AppTextStyles.caption.copyWith(
+                                              color: Colors.black45,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ],
+                              ),
                             ),
                           ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      GestureDetector(
+                        onTap: () {},
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                                color: Colors.black.withValues(alpha: 0.1)),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.edit_outlined,
+                                  size: 15, color: Colors.black87),
+                              const SizedBox(width: 6),
+                              Text(
+                                'Profili Düzenle',
+                                style: AppTextStyles.button.copyWith(
+                                  color: Colors.black87,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        const SizedBox(height: 3),
-                        Text(
-                          name,
-                          style: AppTextStyles.heading2.copyWith(
-                            color: _dark,
-                            fontSize: 18,
+                      ),
+                      const SizedBox(height: 28),
+
+                      // ── Projelerim stats ─────────────────────────────
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Projelerim',
+                          style: AppTextStyles.heading3.copyWith(
+                            color: Colors.black87,
+                            fontSize: 15,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                        Text(
-                          u?.email ?? '',
-                          style: AppTextStyles.caption.copyWith(
-                            color: Colors.black45,
-                            fontSize: 11,
+                      ),
+                      const SizedBox(height: 10),
+                      _buildStatsRow(projectsController),
+                      const SizedBox(height: 24),
+
+                      // ── Hakkımda ──────────────────────────────────────
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Hakkımda',
+                          style: AppTextStyles.heading3.copyWith(
+                            color: Colors.black87,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                  // Profili Görüntüle
-                  GestureDetector(
-                    onTap: () {},
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Profili',
-                          style: AppTextStyles.caption.copyWith(
-                            color: Colors.black45,
-                            fontSize: 11,
+                      ),
+                      const SizedBox(height: 10),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.05),
+                              blurRadius: 10,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: Text(
+                          'Henüz bir açıklama eklemedin. "Profili Düzenle" ile kendini ve neler aradığını anlat.',
+                          style: AppTextStyles.body2.copyWith(
+                            color: Colors.black54,
+                            fontSize: 13,
+                            height: 1.55,
                           ),
                         ),
-                        Text(
-                          'Görüntüle',
-                          style: AppTextStyles.caption.copyWith(
-                            color: Colors.black45,
-                            fontSize: 11,
+                      ),
+                      const SizedBox(height: 24),
+
+                      // ── Hesap ─────────────────────────────────────────
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Hesap',
+                          style: AppTextStyles.heading3.copyWith(
+                            color: Colors.black87,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
-                        const Icon(Icons.chevron_right,
-                            color: Colors.black26, size: 16),
-                      ],
-                    ),
-                  ),
-                ],
-              );
-            }),
-          ),
-        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(18),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.05),
+                              blurRadius: 12,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          children: [
+                            _SettingsRow(
+                              icon: Icons.notifications_none_rounded,
+                              label: 'Bildirimler',
+                              onTap: () {},
+                            ),
+                            const _RowDivider(),
+                            _SettingsRow(
+                              icon: Icons.lock_outline_rounded,
+                              label: 'Gizlilik',
+                              onTap: () {},
+                            ),
+                            const _RowDivider(),
+                            _SettingsRow(
+                              icon: Icons.help_outline_rounded,
+                              label: 'Yardım Merkezi',
+                              onTap: () {},
+                            ),
+                            const _RowDivider(),
+                            _SettingsRow(
+                              icon: Icons.info_outline_rounded,
+                              label: 'Hakkımızda',
+                              onTap: () {},
+                            ),
+                            const _RowDivider(),
+                            _SettingsRow(
+                              icon: Icons.logout_rounded,
+                              label: 'Çıkış Yap',
+                              danger: true,
+                              showChevron: false,
+                              onTap: () async {
+                                await auth.logout();
+                                Get.offAllNamed(AppRoutes.login);
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                }),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildSection(String title, List<Widget> rows) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 8),
-          child: Text(
-            title,
-            style: AppTextStyles.caption.copyWith(
-              color: Colors.black38,
-              fontSize: 10,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 1.4,
+  Widget _buildStatsRow(ClientProjectsController controller) {
+    return Obx(() {
+      final created = controller.briefs.length;
+      final ongoing = controller.projects
+          .where((p) => p.status == ProjectStatus.active)
+          .length;
+      final completed = controller.projects
+          .where((p) => p.status == ProjectStatus.completed)
+          .length;
+
+      return Row(
+        children: [
+          Expanded(
+            child: _StatCard(
+              icon: Icons.folder_outlined,
+              iconBg: const Color(0xFFE9E4F7),
+              iconColor: const Color(0xFF7B61FF),
+              value: created,
+              label: 'Oluşturulan\nProje',
             ),
           ),
-        ),
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.78),
-            borderRadius: BorderRadius.circular(18),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 12,
-                offset: const Offset(0, 3),
-              ),
-            ],
+          const SizedBox(width: 10),
+          Expanded(
+            child: _StatCard(
+              icon: Icons.play_circle_outline_rounded,
+              iconBg: const Color(0xFFFCEBD9),
+              iconColor: const Color(0xFFE8882A),
+              value: ongoing,
+              label: 'Devam Eden\nProje',
+            ),
           ),
-          child: Column(
-            children: [
-              for (int i = 0; i < rows.length; i++) ...[
-                rows[i],
-                if (i < rows.length - 1)
-                  Divider(
-                    height: 1,
-                    thickness: 0.5,
-                    indent: 52,
-                    endIndent: 0,
-                    color: Colors.black.withValues(alpha: 0.06),
-                  ),
-              ],
-            ],
+          const SizedBox(width: 10),
+          Expanded(
+            child: _StatCard(
+              icon: Icons.check_circle_outline_rounded,
+              iconBg: const Color(0xFFE1F3E4),
+              iconColor: const Color(0xFF2E7D32),
+              value: completed,
+              label: 'Tamamlanan\nProje',
+            ),
           ),
-        ),
-      ],
+        ],
+      );
+    });
+  }
+}
+
+// ─── Stat card ───────────────────────────────────────────────────────────────
+
+class _StatCard extends StatelessWidget {
+  const _StatCard({
+    required this.icon,
+    required this.iconBg,
+    required this.iconColor,
+    required this.value,
+    required this.label,
+  });
+
+  final IconData icon;
+  final Color iconBg;
+  final Color iconColor;
+  final int value;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(color: iconBg, shape: BoxShape.circle),
+            child: Icon(icon, size: 18, color: iconColor),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            '$value',
+            style: AppTextStyles.heading2.copyWith(
+              color: Colors.black87,
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: AppTextStyles.caption.copyWith(
+              color: Colors.black45,
+              fontSize: 10.5,
+              height: 1.3,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
 
-// ─── Settings Row ─────────────────────────────────────────────────────────────
+// ─── Settings row ────────────────────────────────────────────────────────────
 
 class _SettingsRow extends StatelessWidget {
   const _SettingsRow({
     required this.icon,
     required this.label,
-    this.sub,
     this.onTap,
-    this.badge,
-    this.trailing,
     this.danger = false,
+    this.showChevron = true,
   });
 
   final IconData icon;
   final String label;
-  final String? sub;
   final VoidCallback? onTap;
-  final String? badge;
-  final Widget? trailing;
   final bool danger;
+  final bool showChevron;
 
-  static const _amber = Color(0xFFE8B84B);
   static const _iconBg = Color(0xFFF5EBD8);
 
   @override
   Widget build(BuildContext context) {
     final labelColor = danger ? Colors.red.shade600 : Colors.black87;
     final iconBgColor = danger ? Colors.red.shade50 : _iconBg;
-    final iconColor =
-        danger ? Colors.red.shade400 : const Color(0xFF8D6E63);
+    final iconColor = danger ? Colors.red.shade400 : const Color(0xFF8D6E63);
 
     return InkWell(
       onTap: onTap,
@@ -445,57 +505,34 @@ class _SettingsRow extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    label,
-                    style: AppTextStyles.body2.copyWith(
-                      color: labelColor,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  if (sub != null) ...[
-                    const SizedBox(height: 1),
-                    Text(
-                      sub!,
-                      style: AppTextStyles.caption.copyWith(
-                        color: Colors.black38,
-                        fontSize: 11,
-                      ),
-                    ),
-                  ],
-                ],
+              child: Text(
+                label,
+                style: AppTextStyles.body2.copyWith(
+                  color: labelColor,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
-            if (badge != null)
-              Container(
-                margin: const EdgeInsets.only(right: 6),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: _amber,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  badge!,
-                  style: AppTextStyles.caption.copyWith(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            if (trailing != null)
-              trailing!
-            else if (onTap != null && !danger)
-              const Icon(Icons.chevron_right,
-                  color: Colors.black26, size: 18),
+            if (showChevron)
+              const Icon(Icons.chevron_right, color: Colors.black26, size: 18),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _RowDivider extends StatelessWidget {
+  const _RowDivider();
+
+  @override
+  Widget build(BuildContext context) {
+    return Divider(
+      height: 1,
+      thickness: 0.5,
+      indent: 52,
+      color: Colors.black.withValues(alpha: 0.06),
     );
   }
 }
