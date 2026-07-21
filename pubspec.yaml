@@ -44,6 +44,7 @@ dependencies:
 
   # Animation
   rive: ^0.13.0
+  smooth_page_indicator: ^1.2.0+3
 
 dev_dependencies:
   flutter_test:
@@ -62,4 +63,7 @@ flutter:
     - assets/images/welcome_pages/
     - assets/images/login_pages/
     - assets/images/main_service_icons/
+    - assets/images/page_images/
+    - assets/images/profile_photos/
+    - assets/images/placeholder/
     - assets/animations/

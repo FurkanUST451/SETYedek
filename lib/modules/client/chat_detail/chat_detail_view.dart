@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../core/utils/avatar_image.dart';
 import '../../../data/models/brief_model.dart';
 import '../../../data/models/message_model.dart';
 import '../../../data/models/offer_model.dart';
@@ -16,7 +17,6 @@ const _kBubbleMe = Color(0xFF23212B); // giden balon (koyu)
 const _kTaupe = Color(0xFF9B8E7B);
 const _kMuted = Color(0xFFB6AD9A);
 const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
-const _kAvatarBg = Color(0xFFEADCBB);
 const _kAccepted = Color(0xFF6B8F71);
 const _kDanger = Color(0xFFBE6A5A);
 const _kCardBorder = Color(0x14000000);
@@ -49,14 +49,6 @@ const _monthsShort = [
   'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara',
 ];
 
-String _initialsOf(String name) {
-  final parts = name.trim().split(RegExp(r'\s+'));
-  if (parts.length >= 2 && parts[0].isNotEmpty && parts[1].isNotEmpty) {
-    return (parts[0][0] + parts[1][0]).toUpperCase();
-  }
-  final t = name.trim();
-  return t.isEmpty ? '?' : t.substring(0, t.length >= 2 ? 2 : 1).toUpperCase();
-}
 
 String _hhmm(DateTime dt) =>
     '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
@@ -169,21 +161,12 @@ class ChatDetailView extends GetView<ChatDetailController> {
                   ),
                 ),
                 SizedBox(width: 2 * s),
-                Container(
-                  width: 40 * s,
-                  height: 40 * s,
-                  decoration: const BoxDecoration(
-                    color: _kAvatarBg,
-                    shape: BoxShape.circle,
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    _initialsOf(controller.chatName),
-                    style: _mono(
-                        size: 11 * s,
-                        weight: FontWeight.w700,
-                        color: _kBlack,
-                        spacing: 0.5),
+                ClipOval(
+                  child: Image.asset(
+                    placeholderAvatarFor(null, controller.chatName),
+                    width: 40 * s,
+                    height: 40 * s,
+                    fit: BoxFit.cover,
                   ),
                 ),
                 SizedBox(width: 12 * s),

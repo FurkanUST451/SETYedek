@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 
+import '../../core/utils/avatar_image.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../../data/repositories/user_repository.dart';
 import '../../data/services/notification_service.dart';
@@ -56,6 +57,7 @@ class AuthController extends GetxController {
         surname: surname,
         age: age,
         gender: gender,
+        avatarUrl: placeholderAvatarFor(gender, authUser.id),
       );
       // Firestore'a kullanıcı profilini kaydet
       await _userRepo.upsertUser(fullUser);

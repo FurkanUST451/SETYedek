@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../../core/utils/avatar_image.dart';
 import '../../../../data/dummy/dummy_data.dart';
 import '../../../../data/models/freelancer_model.dart';
 import '../../../../data/repositories/freelancer_repository.dart';
@@ -1004,7 +1004,8 @@ class _FreelancerOwnProfileScreenState extends State<FreelancerOwnProfileScreen>
     final name = u?.fullName ?? 'Freelancer';
     final email = u?.email ?? '';
     final initial = name.trim().isNotEmpty ? name.trim()[0].toUpperCase() : '?';
-    final photoUrl = _freelancer?.profileImageUrl;
+    final photoUrl = _freelancer?.profileImageUrl ??
+        placeholderAvatarFor(u?.gender, u?.id ?? name);
 
     return Scaffold(
       backgroundColor: _kCream,
@@ -1049,31 +1050,21 @@ class _FreelancerOwnProfileScreenState extends State<FreelancerOwnProfileScreen>
                         border: Border.all(color: _kGold, width: 1.8),
                       ),
                       alignment: Alignment.center,
-                      child: (photoUrl != null && photoUrl.isNotEmpty)
-                          ? ClipOval(
-                              child: SizedBox(
-                                width: 92 * s,
-                                height: 92 * s,
-                                child: CachedNetworkImage(
-                                  imageUrl: photoUrl,
-                                  fit: BoxFit.cover,
-                                  placeholder: (_, _) => Text(
-                                    initial,
-                                    style: _serif(
-                                        size: 34 * s, weight: FontWeight.w500, color: _kGold),
-                                  ),
-                                  errorWidget: (_, _, _) => Text(
-                                    initial,
-                                    style: _serif(
-                                        size: 34 * s, weight: FontWeight.w500, color: _kGold),
-                                  ),
-                                ),
-                              ),
-                            )
-                          : Text(
+                      child: ClipOval(
+                        child: SizedBox(
+                          width: 92 * s,
+                          height: 92 * s,
+                          child: buildAvatarImage(
+                            photoUrl,
+                            size: 92 * s,
+                            placeholder: Text(
                               initial,
-                              style: _serif(size: 34 * s, weight: FontWeight.w500, color: _kGold),
+                              style: _serif(
+                                  size: 34 * s, weight: FontWeight.w500, color: _kGold),
                             ),
+                          ),
+                        ),
+                      ),
                     ),
                     Positioned(
                       right: -2 * s,

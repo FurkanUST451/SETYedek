@@ -14,6 +14,9 @@ import '../modules/client/chat_detail/chat_detail_view.dart';
 import '../modules/client/brief_detail/brief_detail_binding.dart';
 import '../modules/client/brief_detail/brief_detail_view.dart';
 import '../modules/client/project_detail/project_detail_view.dart';
+import '../modules/client/portfolio_project_detail/portfolio_project_detail_binding.dart';
+import '../modules/client/portfolio_project_detail/portfolio_project_detail_view.dart';
+import '../modules/client/portfolio_project_detail/portfolio_team_profile_view.dart';
 import '../modules/client/freelancer_detail/freelancer_detail_binding.dart';
 import '../modules/client/freelancer_detail/freelancer_detail_view.dart';
 import '../modules/client/freelancers_by_category/freelancers_by_category_binding.dart';
@@ -128,6 +131,15 @@ class AppPages {
     GetPage(
       name: AppRoutes.setProjects,
       page: () => const SetProjectsView(),
+    ),
+    GetPage(
+      name: AppRoutes.portfolioProjectDetail,
+      page: () => const PortfolioProjectDetailView(),
+      binding: PortfolioProjectDetailBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.portfolioTeamProfile,
+      page: () => const PortfolioTeamProfileView(),
     ),
 
     // Freelancer (Hizmet Ver) — implementation pending

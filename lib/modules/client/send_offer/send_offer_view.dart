@@ -95,32 +95,43 @@ class SendOfferView extends GetView<SendOfferController> {
               ),
               Expanded(
                 child: SingleChildScrollView(
-                  padding: EdgeInsets.fromLTRB(24 * s, 12 * s, 24 * s, 32 * s),
+                  padding: EdgeInsets.fromLTRB(0, 12 * s, 0, 24 * s),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        (controller.category.isNotEmpty
-                                ? controller.category
-                                : 'Video Çekim')
-                            .toUpperCase(),
-                        style: _mono(size: 8 * s, color: _kBlack, spacing: 1.5),
-                      ),
-                      SizedBox(height: 8 * s),
-                      Text(
-                        controller.isEditMode
-                            ? "Brief'ini\ngüncelle."
-                            : "Doğru brief'i\noluşturalım.",
-                        style: _serif(
-                            size: 40 * s,
-                            weight: FontWeight.w600,
-                            color: _kInk,
-                            height: 1.05),
-                      ),
-                      SizedBox(height: 8 * s),
-                      Text('Projene en uygun kreatif ekibi eşleştirelim.',
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 24 * s),
+                        child: Text(
+                          (controller.category.isNotEmpty
+                                  ? controller.category
+                                  : 'Video Çekim')
+                              .toUpperCase(),
                           style:
-                              _mono(size: 9 * s, color: _kBlack, spacing: 0.2)),
+                              _mono(size: 8 * s, color: _kBlack, spacing: 1.5),
+                        ),
+                      ),
+                      SizedBox(height: 8 * s),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 24 * s),
+                        child: Text(
+                          controller.isEditMode
+                              ? "Brief'ini\ngüncelle."
+                              : "Doğru brief'i\noluşturalım.",
+                          style: _serif(
+                              size: 40 * s,
+                              weight: FontWeight.w600,
+                              color: _kInk,
+                              height: 1.05),
+                        ),
+                      ),
+                      SizedBox(height: 8 * s),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 24 * s),
+                        child: Text(
+                            'Projene en uygun kreatif ekibi eşleştirelim.',
+                            style: _mono(
+                                size: 9 * s, color: _kBlack, spacing: 0.2)),
+                      ),
                       SizedBox(height: 24 * s),
 
                       _ShootingTypeRow(scale: s, controller: controller),
@@ -177,52 +188,55 @@ class SendOfferView extends GetView<SendOfferController> {
                               ),
                             )),
                       ],
-
-                      SizedBox(height: 28 * s),
-
-                      Obx(() => GestureDetector(
-                            onTap: controller.isSubmitting.value
-                                ? null
-                                : controller.submit,
-                            behavior: HitTestBehavior.opaque,
-                            child: Container(
-                              width: double.infinity,
-                              height: 54 * s,
-                              color: _kGold,
-                              alignment: Alignment.center,
-                              child: controller.isSubmitting.value
-                                  ? SizedBox(
-                                      width: 22 * s,
-                                      height: 22 * s,
-                                      child: const CircularProgressIndicator(
-                                          strokeWidth: 2.4, color: Colors.white),
-                                    )
-                                  : Text('DEVAM ET  →',
-                                      style: _mono(
-                                          size: 11 * s,
-                                          weight: FontWeight.w700,
-                                          color: Colors.white,
-                                          spacing: 1.5)),
-                            ),
-                          )),
-
-                      SizedBox(height: 14 * s),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.lock_outline, size: 11 * s, color: _kMuted),
-                          SizedBox(width: 5 * s),
-                          Flexible(
-                            child: Text(
-                              'Tüm bilgilerin güvenliği SET güvencesiyle korunur.',
-                              style: _mono(
-                                  size: 8 * s, color: _kBlack, spacing: 0.2),
-                            ),
-                          ),
-                        ],
-                      ),
                     ],
                   ),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(24 * s, 10 * s, 24 * s, 14 * s),
+                child: Column(
+                  children: [
+                    Obx(() => GestureDetector(
+                          onTap: controller.isSubmitting.value
+                              ? null
+                              : controller.submit,
+                          behavior: HitTestBehavior.opaque,
+                          child: Container(
+                            width: double.infinity,
+                            height: 54 * s,
+                            color: _kGold,
+                            alignment: Alignment.center,
+                            child: controller.isSubmitting.value
+                                ? SizedBox(
+                                    width: 22 * s,
+                                    height: 22 * s,
+                                    child: const CircularProgressIndicator(
+                                        strokeWidth: 2.4, color: Colors.white),
+                                  )
+                                : Text('DEVAM ET  →',
+                                    style: _mono(
+                                        size: 11 * s,
+                                        weight: FontWeight.w700,
+                                        color: Colors.white,
+                                        spacing: 1.5)),
+                          ),
+                        )),
+                    SizedBox(height: 14 * s),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.lock_outline, size: 11 * s, color: _kMuted),
+                        SizedBox(width: 5 * s),
+                        Flexible(
+                          child: Text(
+                            'Tüm bilgilerin güvenliği SET güvencesiyle korunur.',
+                            style: _mono(
+                                size: 8 * s, color: _kBlack, spacing: 0.2),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -411,19 +425,12 @@ class _DateRow extends StatelessWidget {
 
   Future<void> _pickRange(BuildContext context) async {
     final now = DateTime.now();
-    final picked = await showDateRangePicker(
+    final picked = await showDialog<DateTimeRange>(
       context: context,
-      firstDate: now,
-      lastDate: now.add(const Duration(days: 365)),
-      builder: (ctx, child) => Theme(
-        data: Theme.of(ctx).copyWith(
-          colorScheme: Theme.of(ctx).colorScheme.copyWith(
-                primary: _kGold,
-                onPrimary: Colors.white,
-                onSurface: _kInk,
-              ),
-        ),
-        child: child!,
+      barrierColor: Colors.black.withValues(alpha: 0.45),
+      builder: (_) => _DateRangeDialog(
+        firstDate: DateTime(now.year, now.month, now.day),
+        lastDate: now.add(const Duration(days: 365)),
       ),
     );
     if (picked != null) controller.setPickedDateRange(picked);
@@ -552,6 +559,250 @@ class _BriefRow extends StatelessWidget {
                         color: _kInk)),
               ),
             ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Tarih aralığı seç — küçük, kendi tasarımımıza uygun takvim modalı ────────
+const List<String> _kMonthNames = [
+  'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
+  'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık',
+];
+const List<String> _kWeekdayLetters = ['P', 'S', 'Ç', 'P', 'C', 'C', 'P'];
+
+bool _isSameDay(DateTime a, DateTime b) =>
+    a.year == b.year && a.month == b.month && a.day == b.day;
+
+class _DateRangeDialog extends StatefulWidget {
+  const _DateRangeDialog({required this.firstDate, required this.lastDate});
+
+  final DateTime firstDate;
+  final DateTime lastDate;
+
+  @override
+  State<_DateRangeDialog> createState() => _DateRangeDialogState();
+}
+
+class _DateRangeDialogState extends State<_DateRangeDialog> {
+  late DateTime _visibleMonth =
+      DateTime(widget.firstDate.year, widget.firstDate.month);
+  DateTime? _start;
+  DateTime? _end;
+
+  bool get _canGoPrev {
+    final prev = DateTime(_visibleMonth.year, _visibleMonth.month - 1);
+    return !prev.isBefore(
+        DateTime(widget.firstDate.year, widget.firstDate.month));
+  }
+
+  bool get _canGoNext {
+    final next = DateTime(_visibleMonth.year, _visibleMonth.month + 1);
+    return !next.isAfter(
+        DateTime(widget.lastDate.year, widget.lastDate.month));
+  }
+
+  void _changeMonth(int delta) {
+    setState(() {
+      _visibleMonth =
+          DateTime(_visibleMonth.year, _visibleMonth.month + delta);
+    });
+  }
+
+  void _onDayTap(DateTime day) {
+    setState(() {
+      if (_start == null || _end != null) {
+        _start = day;
+        _end = null;
+      } else if (day.isBefore(_start!)) {
+        _start = day;
+      } else {
+        _end = day;
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final s =
+        (MediaQuery.sizeOf(context).width / 390).clamp(0.85, 1.15).toDouble();
+
+    final daysInMonth =
+        DateUtils.getDaysInMonth(_visibleMonth.year, _visibleMonth.month);
+    final firstWeekday =
+        DateTime(_visibleMonth.year, _visibleMonth.month, 1).weekday; // 1=Pzt
+    final leadingBlanks = firstWeekday - 1;
+    final totalCells = leadingBlanks + daysInMonth;
+    final rowCount = (totalCells / 7).ceil();
+
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: EdgeInsets.symmetric(horizontal: 30 * s),
+      child: Container(
+        padding: EdgeInsets.fromLTRB(20 * s, 18 * s, 20 * s, 20 * s),
+        decoration: const BoxDecoration(
+          color: _kCream,
+          border: Border.fromBorderSide(BorderSide(color: _kCardBorder)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text('Tarih aralığı seç',
+                      style: _serif(
+                          size: 19 * s,
+                          weight: FontWeight.w600,
+                          color: _kInk)),
+                ),
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  behavior: HitTestBehavior.opaque,
+                  child: Icon(Icons.close_rounded,
+                      size: 20 * s, color: _kMuted),
+                ),
+              ],
+            ),
+            SizedBox(height: 4 * s),
+            Text(
+              _start == null
+                  ? 'Bir başlangıç tarihi seç'
+                  : _end == null
+                      ? '${_start!.day} ${_kMonthNames[_start!.month - 1]} → bitiş tarihi seç'
+                      : '${_start!.day} ${_kMonthNames[_start!.month - 1]} – ${_end!.day} ${_kMonthNames[_end!.month - 1]}',
+              style: _mono(size: 8.5 * s, color: _kMuted, spacing: 0.3),
+            ),
+            SizedBox(height: 14 * s),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                GestureDetector(
+                  onTap: _canGoPrev ? () => _changeMonth(-1) : null,
+                  behavior: HitTestBehavior.opaque,
+                  child: Icon(Icons.chevron_left_rounded,
+                      size: 22 * s,
+                      color: _canGoPrev ? _kInk : _kCardBorder),
+                ),
+                Text(
+                  '${_kMonthNames[_visibleMonth.month - 1]} ${_visibleMonth.year}',
+                  style: _mono(
+                      size: 10 * s,
+                      weight: FontWeight.w700,
+                      color: _kInk,
+                      spacing: 1),
+                ),
+                GestureDetector(
+                  onTap: _canGoNext ? () => _changeMonth(1) : null,
+                  behavior: HitTestBehavior.opaque,
+                  child: Icon(Icons.chevron_right_rounded,
+                      size: 22 * s,
+                      color: _canGoNext ? _kInk : _kCardBorder),
+                ),
+              ],
+            ),
+            SizedBox(height: 10 * s),
+            Row(
+              children: _kWeekdayLetters
+                  .map((d) => Expanded(
+                        child: Center(
+                          child: Text(d,
+                              style: _mono(
+                                  size: 8 * s, color: _kMuted, spacing: 0.5)),
+                        ),
+                      ))
+                  .toList(),
+            ),
+            SizedBox(height: 4 * s),
+            for (var row = 0; row < rowCount; row++)
+              Row(
+                children: [
+                  for (var col = 0; col < 7; col++)
+                    Expanded(
+                      child: Builder(builder: (_) {
+                        final cellIndex = row * 7 + col;
+                        final dayNum = cellIndex - leadingBlanks + 1;
+                        if (dayNum < 1 || dayNum > daysInMonth) {
+                          return SizedBox(height: 36 * s);
+                        }
+                        final day = DateTime(
+                            _visibleMonth.year, _visibleMonth.month, dayNum);
+                        final disabled = day.isBefore(widget.firstDate) ||
+                            day.isAfter(widget.lastDate);
+                        final isStart =
+                            _start != null && _isSameDay(day, _start!);
+                        final isEnd = _end != null && _isSameDay(day, _end!);
+                        final inRange = _start != null &&
+                            _end != null &&
+                            day.isAfter(_start!) &&
+                            day.isBefore(_end!);
+
+                        return GestureDetector(
+                          onTap: disabled ? null : () => _onDayTap(day),
+                          behavior: HitTestBehavior.opaque,
+                          child: Container(
+                            height: 36 * s,
+                            margin: EdgeInsets.symmetric(vertical: 1.5 * s),
+                            color: inRange
+                                ? _kGold.withValues(alpha: 0.15)
+                                : Colors.transparent,
+                            alignment: Alignment.center,
+                            child: Container(
+                              width: 28 * s,
+                              height: 28 * s,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: (isStart || isEnd)
+                                    ? _kGold
+                                    : Colors.transparent,
+                              ),
+                              child: Text(
+                                '$dayNum',
+                                style: _mono(
+                                  size: 10.5 * s,
+                                  weight: (isStart || isEnd)
+                                      ? FontWeight.w700
+                                      : FontWeight.w400,
+                                  color: disabled
+                                      ? _kCardBorder
+                                      : (isStart || isEnd)
+                                          ? Colors.white
+                                          : _kInk,
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      }),
+                    ),
+                ],
+              ),
+            SizedBox(height: 14 * s),
+            GestureDetector(
+              onTap: (_start != null && _end != null)
+                  ? () => Navigator.pop(
+                      context, DateTimeRange(start: _start!, end: _end!))
+                  : null,
+              behavior: HitTestBehavior.opaque,
+              child: Container(
+                width: double.infinity,
+                height: 46 * s,
+                alignment: Alignment.center,
+                color: (_start != null && _end != null)
+                    ? _kGold
+                    : _kMuted.withValues(alpha: 0.35),
+                child: Text('UYGULA',
+                    style: _mono(
+                        size: 10.5 * s,
+                        weight: FontWeight.w700,
+                        color: Colors.white,
+                        spacing: 1.5)),
+              ),
+            ),
           ],
         ),
       ),

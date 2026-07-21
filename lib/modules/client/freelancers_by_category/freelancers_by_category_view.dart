@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../core/utils/avatar_image.dart';
 import '../../../data/models/freelancer_model.dart';
 import '../../../data/models/user_model.dart';
 import '../../../widgets/video_viewer_page.dart';
@@ -276,20 +277,17 @@ class _FreelancerCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(
-                width: 64 * s,
-                height: 64 * s,
-                child: freelancer.profileImageUrl != null
-                    ? CachedNetworkImage(
-                        imageUrl: freelancer.profileImageUrl!,
-                        width: 64 * s,
-                        height: 64 * s,
-                        fit: BoxFit.cover,
-                        placeholder: (_, _) => _AvatarPlaceholder(size: 64 * s),
-                        errorWidget: (_, _, _) =>
-                            _AvatarPlaceholder(size: 64 * s),
-                      )
-                    : _AvatarPlaceholder(size: 64 * s),
+              ClipOval(
+                child: SizedBox(
+                  width: 64 * s,
+                  height: 64 * s,
+                  child: buildAvatarImage(
+                    freelancer.profileImageUrl ??
+                        placeholderAvatarFor(user.gender, freelancer.userId),
+                    size: 64 * s,
+                    placeholder: _AvatarPlaceholder(size: 64 * s),
+                  ),
+                ),
               ),
               SizedBox(width: 12 * s),
               Expanded(
@@ -446,7 +444,11 @@ class _AvatarPlaceholder extends StatelessWidget {
     return Container(
       width: size,
       height: size,
-      color: const Color(0xFFEADCBB),
+      decoration: const BoxDecoration(
+        shape: BoxShape.circle,
+        color: Color(0xFFEADCBB),
+      ),
+      alignment: Alignment.center,
       child: Icon(Icons.person, size: size * 0.56, color: _kTaupe),
     );
   }

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../core/utils/avatar_image.dart';
 import '../../../data/dummy/dummy_data.dart';
 import '../../../data/models/freelancer_model.dart';
 import '../../../data/repositories/freelancer_repository.dart';
@@ -160,7 +161,8 @@ class FreelancerOnboardingController extends GetxController {
         Get.find<UserController>().setUser(updatedUser);
       }
 
-      final profileImageUrl = await _uploadProfileImage(user.id);
+      final profileImageUrl = await _uploadProfileImage(user.id) ??
+          placeholderAvatarFor(user.gender, user.id);
 
       final freelancer = FreelancerModel(
         userId: user.id,

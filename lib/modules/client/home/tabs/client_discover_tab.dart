@@ -1,10 +1,9 @@
-import 'dart:math' as math;
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../../core/utils/avatar_image.dart';
 import '../../../../data/dummy/dummy_data.dart';
 import '../../../../data/models/work_model.dart';
 import '../../../app/works_controller.dart';
@@ -80,7 +79,6 @@ class ClientDiscoverTab extends StatefulWidget {
 class _ClientDiscoverTabState extends State<ClientDiscoverTab> {
   // null = "TÜMÜ" filtresi aktif
   WorkType? _filter;
-  bool _promoVisible = true;
 
   final WorksController _worksController = Get.find<WorksController>();
 
@@ -123,12 +121,10 @@ class _ClientDiscoverTabState extends State<ClientDiscoverTab> {
             return CustomScrollView(
               slivers: [
                 SliverToBoxAdapter(
-                  child: _Header(
-                    scale: s,
-                    promoVisible: _promoVisible,
-                    onDismissPromo: () =>
-                        setState(() => _promoVisible = false),
-                  ),
+                  child: _buildTopStrip(s),
+                ),
+                SliverToBoxAdapter(
+                  child: _Header(scale: s),
                 ),
                 SliverToBoxAdapter(
                   child: _FilterBar(
@@ -136,10 +132,6 @@ class _ClientDiscoverTabState extends State<ClientDiscoverTab> {
                     selected: _filter,
                     onSelect: (t) => setState(() => _filter = t),
                   ),
-                ),
-                SliverToBoxAdapter(
-                  child: Divider(
-                      height: 1, thickness: 1, color: _kDivider),
                 ),
                 SliverPadding(
                   padding: EdgeInsets.fromLTRB(26 * s, 10 * s, 26 * s, 130 * s),
@@ -166,21 +158,32 @@ class _ClientDiscoverTabState extends State<ClientDiscoverTab> {
       ),
     );
   }
+
+  // ── Sayfa tepesi — SET · KEŞFET + tam genişlik ayraç ──────────────
+  Widget _buildTopStrip(double s) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.fromLTRB(26 * s, 6 * s, 26 * s, 12 * s),
+          child: Text(
+            'SET · KEŞFET',
+            style: _mono(size: 8 * s, color: _kBlack, spacing: 2),
+          ),
+        ),
+        Container(height: 1, color: _kDivider),
+      ],
+    );
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────
 // HEADER — promo + "neler YAPTIK?" editoryal başlık
 // ─────────────────────────────────────────────────────────────────
 class _Header extends StatelessWidget {
-  const _Header({
-    required this.scale,
-    required this.promoVisible,
-    required this.onDismissPromo,
-  });
+  const _Header({required this.scale});
 
   final double scale;
-  final bool promoVisible;
-  final VoidCallback onDismissPromo;
 
   @override
   Widget build(BuildContext context) {
@@ -190,53 +193,6 @@ class _Header extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (promoVisible) ...[
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Yeni bir işi mi bitirdin?',
-                        style: _mono(
-                            size: 8 * s, color: _kBlack, spacing: 0.3),
-                      ),
-                      SizedBox(height: 4 * s),
-                      Text.rich(
-                        TextSpan(children: [
-                          TextSpan(
-                            text: 'Kadraja al, ',
-                            style: _mono(
-                                size: 8 * s, color: _kBlack, spacing: 0.3),
-                          ),
-                          TextSpan(
-                            text: 'buraya bırak.',
-                            style: _mono(
-                                size: 8 * s,
-                                weight: FontWeight.w700,
-                                color: _kGold,
-                                spacing: 0.3),
-                          ),
-                        ]),
-                      ),
-                    ],
-                  ),
-                ),
-                GestureDetector(
-                  onTap: onDismissPromo,
-                  behavior: HitTestBehavior.opaque,
-                  child: Padding(
-                    padding: EdgeInsets.all(6 * s),
-                    child: Icon(Icons.close_rounded,
-                        size: 18 * s, color: _kInk),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 48 * s),
-          ],
           // "neler" — serif italic, muted
           Text(
             'neler',
@@ -389,14 +345,6 @@ class _WorkCard extends StatelessWidget {
   final String duration;
   final String format;
 
-  String get _initials {
-    final parts = work.studio.trim().split(RegExp(r'\s+'));
-    if (parts.length >= 2 && parts[0].isNotEmpty && parts[1].isNotEmpty) {
-      return (parts[0][0] + parts[1][0]).toUpperCase();
-    }
-    final t = work.studio.trim();
-    return t.substring(0, math.min(2, t.length)).toUpperCase();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -409,23 +357,12 @@ class _WorkCard extends StatelessWidget {
           // Kimlik satırı
           Row(
             children: [
-              Container(
-                width: 38 * s,
-                height: 38 * s,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: _kGold.withValues(alpha: 0.10),
-                  border: Border.all(
-                      color: Colors.black.withValues(alpha: 0.12)),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  _initials,
-                  style: _mono(
-                      size: 9 * s,
-                      weight: FontWeight.w700,
-                      color: _kBlack,
-                      spacing: 0.5),
+              ClipOval(
+                child: Image.asset(
+                  placeholderAvatarFor(null, work.studio),
+                  width: 38 * s,
+                  height: 38 * s,
+                  fit: BoxFit.cover,
                 ),
               ),
               SizedBox(width: 14 * s),

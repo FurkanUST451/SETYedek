@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import 'category_picker_controller.dart';
 
@@ -21,6 +22,16 @@ const Map<String, String> _kCategoryIcons = {
   'Sosyal Medya Yönetimi': 'assets/images/main_service_icons/sosyal medya.png',
 };
 
+const Map<String, String> _kCategoryTags = {
+  'Video Çekim': 'REKLAM FİLMİ · MOTION · SET ÇEKİM',
+  'Kurgu': 'REKLAM · DİZİ · SOSYAL MEDYA KURGUSU',
+  'Ses Tasarımı': 'MİKS · SESLENDİRME · SOUND DESIGN',
+  'CGI & VFX': '3D MODELLEME · VFX · CGI ÜRÜN',
+  'Fotoğraf': 'ÜRÜN · PORTRE · REKLAM FOTOĞRAFI',
+  'Grafik Tasarım': 'LOGO · KATALOG · SOSYAL GÖRSEL',
+  'Sosyal Medya Yönetimi': 'İÇERİK · STRATEJİ · YÖNETİM',
+};
+
 TextStyle _serif({
   required double size,
   FontWeight weight = FontWeight.w500,
@@ -29,11 +40,27 @@ TextStyle _serif({
   bool italic = false,
 }) =>
     GoogleFonts.cormorantGaramond(
-        fontSize: size,
-        fontWeight: weight,
-        color: color,
-        height: height,
-        fontStyle: italic ? FontStyle.italic : FontStyle.normal);
+      fontSize: size,
+      fontWeight: weight,
+      color: color,
+      height: height,
+      fontStyle: italic ? FontStyle.italic : FontStyle.normal,
+      decoration: TextDecoration.none,
+    );
+
+TextStyle _mono({
+  required double size,
+  FontWeight weight = FontWeight.w400,
+  required Color color,
+  double spacing = 0.5,
+}) =>
+    GoogleFonts.spaceMono(
+      fontSize: size,
+      fontWeight: weight,
+      color: color,
+      letterSpacing: spacing,
+      decoration: TextDecoration.none,
+    );
 
 Widget _wordmark(double s) => RichText(
       text: TextSpan(children: [
@@ -61,8 +88,8 @@ class CategoryPickerView extends GetView<CategoryPickerController> {
 
   @override
   Widget build(BuildContext context) {
-    final double s =
-        (MediaQuery.sizeOf(context).width / 390).clamp(0.85, 1.15).toDouble();
+    final double screenWidth = MediaQuery.sizeOf(context).width;
+    final double s = (screenWidth / 390).clamp(0.85, 1.15).toDouble();
 
     return Scaffold(
       backgroundColor: _kCream,
@@ -93,33 +120,48 @@ class CategoryPickerView extends GetView<CategoryPickerController> {
                   ],
                 ),
               ),
-              SizedBox(height: 20 * s),
-              Text('Hizmetini seç,',
-                  style:
-                      _serif(size: 33 * s, weight: FontWeight.w600, color: _kInk)),
-              Text('fikrini hayata geçirelim.',
-                  style: _serif(
-                      size: 22 * s,
-                      weight: FontWeight.w500,
-                      color: _kMuted,
-                      italic: true)),
-              SizedBox(height: 12 * s),
-              Icon(Icons.keyboard_arrow_down_rounded,
-                  color: Colors.black, size: 26 * s),
-              SizedBox(height: 12 * s),
+              SizedBox(height: 22 * s),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 28 * s),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'dilediğin hizmeti seç',
+                      style: _serif(
+                          size: 17 * s,
+                          weight: FontWeight.w500,
+                          color: _kInk,
+                          italic: true),
+                    ),
+                    SizedBox(height: 4 * s),
+                    Text.rich(
+                      TextSpan(children: [
+                        TextSpan(
+                          text: 'Biz ',
+                          style: _serif(
+                              size: 40 * s,
+                              weight: FontWeight.w700,
+                              color: _kInk),
+                        ),
+                        TextSpan(
+                          text: 'üretelim!',
+                          style: _serif(
+                              size: 40 * s,
+                              weight: FontWeight.w700,
+                              color: _kGold),
+                        ),
+                      ]),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 22 * s),
               Expanded(
-                child: ListView.separated(
-                  padding: EdgeInsets.fromLTRB(24 * s, 4 * s, 24 * s, 24 * s),
-                  itemCount: controller.categories.length,
-                  separatorBuilder: (_, _) => SizedBox(height: 12 * s),
-                  itemBuilder: (_, i) {
-                    final cat = controller.categories[i];
-                    return _CategoryCard(
-                      scale: s,
-                      label: cat,
-                      onTap: () => controller.selectCategory(cat),
-                    );
-                  },
+                child: _CategoryCarousel(
+                  scale: s,
+                  categories: controller.categories,
+                  onContinue: controller.selectCategory,
                 ),
               ),
             ],
@@ -130,58 +172,207 @@ class CategoryPickerView extends GetView<CategoryPickerController> {
   }
 }
 
-class _CategoryCard extends StatelessWidget {
-  const _CategoryCard({
+class _CategoryCarousel extends StatefulWidget {
+  const _CategoryCarousel({
     required this.scale,
-    required this.label,
-    required this.onTap,
+    required this.categories,
+    required this.onContinue,
   });
 
   final double scale;
+  final List<String> categories;
+  final ValueChanged<String> onContinue;
+
+  @override
+  State<_CategoryCarousel> createState() => _CategoryCarouselState();
+}
+
+class _CategoryCarouselState extends State<_CategoryCarousel> {
+  late final PageController _pageController =
+      PageController(viewportFraction: 0.64);
+  int _activeIndex = 0;
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final s = widget.scale;
+    return Column(
+      children: [
+        Expanded(
+          child: PageView.builder(
+            controller: _pageController,
+            itemCount: widget.categories.length,
+            onPageChanged: (i) => setState(() => _activeIndex = i),
+            itemBuilder: (_, i) {
+              final cat = widget.categories[i];
+              return AnimatedBuilder(
+                animation: _pageController,
+                builder: (context, child) {
+                  double page = _activeIndex.toDouble();
+                  if (_pageController.hasClients &&
+                      _pageController.page != null) {
+                    page = _pageController.page!;
+                  }
+                  final delta = (page - i).abs().clamp(0.0, 1.0);
+                  final scale = 1 - delta * 0.14;
+                  final opacity = 1 - delta * 0.55;
+                  return Transform.scale(
+                    scale: scale,
+                    child: Opacity(opacity: opacity, child: child),
+                  );
+                },
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8 * s),
+                  child: _CategoryCard(
+                    scale: s,
+                    index: i,
+                    label: cat,
+                    active: i == _activeIndex,
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        SizedBox(height: 18 * s),
+        SmoothPageIndicator(
+          controller: _pageController,
+          count: widget.categories.length,
+          effect: WormEffect(
+            dotWidth: 7 * s,
+            dotHeight: 7 * s,
+            activeDotColor: _kGold,
+            dotColor: _kMuted.withValues(alpha: 0.4),
+            spacing: 8 * s,
+          ),
+        ),
+        SizedBox(height: 20 * s),
+        GestureDetector(
+          onTap: () => widget.onContinue(widget.categories[_activeIndex]),
+          behavior: HitTestBehavior.opaque,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 220),
+            width: double.infinity,
+            height: 54 * s,
+            alignment: Alignment.center,
+            decoration: const BoxDecoration(
+              color: _kGold,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'DEVAM ET',
+                  style: _mono(
+                      size: 11 * s,
+                      weight: FontWeight.w700,
+                      color: Colors.white,
+                      spacing: 1.8),
+                ),
+                SizedBox(width: 10 * s),
+                Icon(Icons.arrow_forward_rounded,
+                    size: 16 * s, color: Colors.white),
+              ],
+            ),
+          ),
+        ),
+        SizedBox(height: 24 * s),
+      ],
+    );
+  }
+}
+
+class _CategoryCard extends StatelessWidget {
+  const _CategoryCard({
+    required this.scale,
+    required this.index,
+    required this.label,
+    required this.active,
+  });
+
+  final double scale;
+  final int index;
   final String label;
-  final VoidCallback onTap;
+  final bool active;
 
   @override
   Widget build(BuildContext context) {
     final s = scale;
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        height: 68 * s,
-        padding: EdgeInsets.symmetric(horizontal: 20 * s),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          border: Border(
-            left: BorderSide(color: Colors.black, width: 3),
-            top: BorderSide(color: _kCardBorder),
-            right: BorderSide(color: _kCardBorder),
-            bottom: BorderSide(color: _kCardBorder),
-          ),
+    final firstSpaceIndex = label.indexOf(' ');
+    final firstWord =
+        firstSpaceIndex == -1 ? label : label.substring(0, firstSpaceIndex);
+    final restWord =
+        firstSpaceIndex == -1 ? '' : label.substring(firstSpaceIndex);
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOut,
+      padding: EdgeInsets.fromLTRB(20 * s, 22 * s, 20 * s, 22 * s),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20 * s),
+        border: Border.all(
+          color: active ? _kInk : _kCardBorder,
+          width: active ? 1.4 : 1,
         ),
-        child: Row(
-          children: [
-            SizedBox(
-              width: 32 * s,
-              height: 32 * s,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'HİZMET · ${(index + 1).toString().padLeft(2, '0')}',
+            style: _mono(
+                size: 9 * s,
+                weight: FontWeight.w700,
+                color: _kMuted,
+                spacing: 1.6),
+          ),
+          Expanded(
+            child: Center(
               child: Image.asset(
                 _kCategoryIcons[label] ?? '',
+                width: 192 * s,
                 fit: BoxFit.contain,
               ),
             ),
-            SizedBox(width: 16 * s),
-            Expanded(
-              child: Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style:
-                    _serif(size: 22 * s, weight: FontWeight.w600, color: _kInk),
+          ),
+          Text.rich(
+            TextSpan(children: [
+              TextSpan(
+                text: firstWord,
+                style: _serif(size: 28 * s, weight: FontWeight.w600, color: _kInk),
               ),
-            ),
-            Icon(Icons.arrow_forward_rounded, size: 18 * s, color: _kGold),
-          ],
-        ),
+              TextSpan(
+                text: restWord,
+                style:
+                    _serif(size: 28 * s, weight: FontWeight.w600, color: _kGold),
+              ),
+            ]),
+          ),
+          SizedBox(height: 6 * s),
+          Text(
+            _kCategoryTags[label] ?? '',
+            style: _mono(
+                size: 10.5 * s,
+                weight: FontWeight.w700,
+                color: _kInk,
+                spacing: 0.8),
+          ),
+          SizedBox(height: 4 * s),
+          Text(
+            've daha fazlası...',
+            style: _serif(
+                size: 15 * s,
+                weight: FontWeight.w500,
+                color: _kInk,
+                italic: true),
+          ),
+        ],
       ),
     );
   }

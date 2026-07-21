@@ -1,12 +1,12 @@
 import 'dart:io';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../../core/utils/avatar_image.dart';
 import '../../../../data/models/project_model.dart';
 import '../../../../data/repositories/user_repository.dart';
 import '../../../../routes/app_routes.dart';
@@ -307,43 +307,16 @@ class _ClientProfileTabState extends State<ClientProfileTab>
     );
   }
 
-  // ─── Üst başlık: SET / HESABIM + kimlik ─────────────────────────────────────
+  // ─── Sayfa tepesi: SET · PROFİL + tam genişlik ayraç ─────────────────────
   Widget _buildHeader(UserController user, double s) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.fromLTRB(26 * s, 22 * s, 26 * s, 14 * s),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              RichText(
-                text: TextSpan(children: [
-                  TextSpan(
-                    text: 'SE',
-                    style: GoogleFonts.spaceGrotesk(
-                      fontSize: 13 * s,
-                      fontWeight: FontWeight.w700,
-                      color: _kInk,
-                      letterSpacing: 2.5,
-                    ),
-                  ),
-                  TextSpan(
-                    text: 'T',
-                    style: GoogleFonts.spaceGrotesk(
-                      fontSize: 13 * s,
-                      fontWeight: FontWeight.w800,
-                      color: _kGold,
-                      letterSpacing: 2.5,
-                    ),
-                  ),
-                ]),
-              ),
-              Text(
-                'HESABIM',
-                style: _mono(size: 8 * s, color: _kBlack, spacing: 2),
-              ),
-            ],
+          padding: EdgeInsets.fromLTRB(26 * s, 6 * s, 26 * s, 12 * s),
+          child: Text(
+            'SET · PROFİL',
+            style: _mono(size: 8 * s, color: _kBlack, spacing: 2),
           ),
         ),
         Container(height: 1, color: _kDivider),
@@ -355,7 +328,9 @@ class _ClientProfileTabState extends State<ClientProfileTab>
             final email = u?.email ?? '';
             final initial =
                 name.trim().isNotEmpty ? name.trim()[0].toUpperCase() : '?';
-            final avatarUrl = u?.avatarUrl;
+            final avatarUrl = (u?.avatarUrl?.isNotEmpty ?? false)
+                ? u!.avatarUrl!
+                : placeholderAvatarFor(u?.gender, u?.id ?? name);
             return Row(
               children: [
                 // Çember avatar
@@ -371,36 +346,21 @@ class _ClientProfileTabState extends State<ClientProfileTab>
                         border: Border.all(color: _kGold, width: 1.6),
                       ),
                       alignment: Alignment.center,
-                      child: (avatarUrl != null && avatarUrl.isNotEmpty)
-                          ? ClipOval(
-                              child: SizedBox(
-                                width: 60 * s,
-                                height: 60 * s,
-                                child: CachedNetworkImage(
-                                  imageUrl: avatarUrl,
-                                  fit: BoxFit.cover,
-                                  placeholder: (_, _) => Text(
-                                    initial,
-                                    style: _serif(
-                                        size: 24 * s,
-                                        weight: FontWeight.w500,
-                                        color: _kGold),
-                                  ),
-                                  errorWidget: (_, _, _) => Text(
-                                    initial,
-                                    style: _serif(
-                                        size: 24 * s,
-                                        weight: FontWeight.w500,
-                                        color: _kGold),
-                                  ),
-                                ),
-                              ),
-                            )
-                          : Text(
+                      child: ClipOval(
+                        child: SizedBox(
+                          width: 60 * s,
+                          height: 60 * s,
+                          child: buildAvatarImage(
+                            avatarUrl,
+                            size: 60 * s,
+                            placeholder: Text(
                               initial,
                               style: _serif(
                                   size: 24 * s, weight: FontWeight.w500, color: _kGold),
                             ),
+                          ),
+                        ),
+                      ),
                     ),
                     Positioned(
                       right: -2 * s,

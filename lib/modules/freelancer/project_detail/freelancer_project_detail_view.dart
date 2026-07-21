@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../core/utils/avatar_image.dart';
 import '../../../data/models/project_model.dart';
 import 'project_detail_controller.dart';
 
@@ -497,27 +498,15 @@ class _FreelancerProjectDetailViewState
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: _kMuted.withValues(alpha: 0.3),
-                      image: client?.avatarUrl != null
-                          ? DecorationImage(
-                              image: NetworkImage(client!.avatarUrl!),
-                              fit: BoxFit.cover,
-                            )
-                          : null,
+                      image: DecorationImage(
+                        image: avatarImageProvider(
+                          client?.avatarUrl ??
+                              placeholderAvatarFor(
+                                  client?.gender, client?.id ?? 'client'),
+                        ),
+                        fit: BoxFit.cover,
+                      ),
                     ),
-                    child: client?.avatarUrl == null
-                        ? Center(
-                            child: Text(
-                              (client?.fullName.isNotEmpty ?? false)
-                                  ? client!.fullName[0].toUpperCase()
-                                  : '?',
-                              style: _mono(
-                                size: 16 * s,
-                                weight: FontWeight.w700,
-                                color: _kBlack,
-                              ),
-                            ),
-                          )
-                        : null,
                   ),
                   SizedBox(width: 12 * s),
                   Expanded(

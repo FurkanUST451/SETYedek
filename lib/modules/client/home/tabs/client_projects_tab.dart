@@ -46,13 +46,6 @@ TextStyle _mono({
       letterSpacing: spacing,
     );
 
-const _months = [
-  '', 'Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz',
-  'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara',
-];
-
-String _formatDate(DateTime d) => '${d.day} ${_months[d.month]} ${d.year}';
-
 // ─────────────────────────────────────────────────────────────────
 // TAB
 // ─────────────────────────────────────────────────────────────────
@@ -127,21 +120,29 @@ class _ClientProjectsTabState extends State<ClientProjectsTab> {
                         color: _kGold,
                         onRefresh: controller.loadBriefs,
                         child: ListView(
-                          padding: EdgeInsets.fromLTRB(
-                              24 * s, 6 * s, 24 * s, 130 * s),
+                          padding: EdgeInsets.fromLTRB(0, 6 * s, 0, 130 * s),
                           children: [
                             if (activeProjects.isNotEmpty) ...[
-                              _SectionLabel(scale: s, text: 'AKTİF PROJELER'),
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 24 * s),
+                                child: _SectionLabel(scale: s, text: 'AKTİF PROJELER'),
+                              ),
                               SizedBox(height: 12 * s),
                               for (final p in activeProjects) ...[
-                                _ProjectCard(scale: s, project: p),
+                                Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 24 * s),
+                                  child: _ProjectCard(scale: s, project: p),
+                                ),
                                 SizedBox(height: 18 * s),
                               ],
                               SizedBox(height: 4 * s),
                             ],
                             if (briefs.isNotEmpty) ...[
                               if (activeProjects.isNotEmpty) ...[
-                                _SectionLabel(scale: s, text: 'BRIEFLER'),
+                                Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 24 * s),
+                                  child: _SectionLabel(scale: s, text: 'BRIEFLER'),
+                                ),
                                 SizedBox(height: 12 * s),
                               ],
                               for (var i = 0; i < briefs.length; i++) ...[
@@ -165,7 +166,7 @@ class _ClientProjectsTabState extends State<ClientProjectsTab> {
     );
   }
 
-  // ── Sayfa tepesi — SET · ÜRETİM + tam genişlik ayraç ──────────────
+  // ── Sayfa tepesi — SET · PROJELERİM + tam genişlik ayraç ──────────
   Widget _buildTopStrip(double s) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -173,7 +174,7 @@ class _ClientProjectsTabState extends State<ClientProjectsTab> {
         Padding(
           padding: EdgeInsets.fromLTRB(26 * s, 6 * s, 26 * s, 12 * s),
           child: Text(
-            'SET · ÜRETİM',
+            'SET · PROJELERİM',
             style: _mono(size: 8 * s, color: _kBlack, spacing: 2),
           ),
         ),
@@ -274,7 +275,7 @@ class _ClientProjectsTabState extends State<ClientProjectsTab> {
   Widget _buildSetFab(double s, double bottom) {
     return Positioned(
       right: 24 * s,
-      bottom: bottom,
+      bottom: bottom - 46 * s,
       child: GestureDetector(
         onTap: () => Get.toNamed(AppRoutes.setProjects),
         behavior: HitTestBehavior.opaque,
@@ -417,14 +418,24 @@ class _BriefCard extends StatelessWidget {
   String get _bigTitle =>
       brief.category.isNotEmpty ? brief.category : brief.title;
 
-  String get _subtitle {
-    final type = brief.answers.shootingType;
-    final project = brief.title;
-    if (type != null && type.isNotEmpty && project.isNotEmpty) {
-      return '$type · «$project»';
+  String get _subtitle => brief.answers.shootingType ?? '';
+
+  String get _categoryAsset {
+    final cat = brief.category.toLowerCase();
+    if (cat.contains('video') || cat.contains('film')) {
+      return 'assets/images/main_service_icons/video.png';
+    } else if (cat.contains('fotoğraf') || cat.contains('photo')) {
+      return 'assets/images/main_service_icons/foto.png';
+    } else if (cat.contains('ses') || cat.contains('müzik')) {
+      return 'assets/images/main_service_icons/ses.png';
+    } else if (cat.contains('cgi') || cat.contains('vfx')) {
+      return 'assets/images/main_service_icons/cgi.png';
+    } else if (cat.contains('kurgu') || cat.contains('montaj')) {
+      return 'assets/images/main_service_icons/kurgu.png';
+    } else if (cat.contains('sosyal')) {
+      return 'assets/images/main_service_icons/sosyal medya.png';
     }
-    if (project.isNotEmpty) return '«$project»';
-    return type ?? '';
+    return 'assets/images/main_service_icons/grafiktasarim.png';
   }
 
   IconData get _categoryIcon {
@@ -441,28 +452,52 @@ class _BriefCard extends StatelessWidget {
     return Icons.work_rounded;
   }
 
+  // "50.000₺ - 120.000₺" -> "50K-120K", "300.000₺+" -> "300K+"
+  String _compactBudget(String raw) {
+    final matches =
+        RegExp(r'\d[\d.]*').allMatches(raw).map((m) => m.group(0)!).toList();
+    if (matches.isEmpty) return raw;
+    final parts = matches.map((numStr) {
+      final n = int.tryParse(numStr.replaceAll('.', '')) ?? 0;
+      if (n >= 1000) {
+        final k = n / 1000;
+        final kStr =
+            k == k.roundToDouble() ? k.toStringAsFixed(0) : k.toStringAsFixed(1);
+        return '${kStr}K';
+      }
+      return numStr;
+    }).toList();
+    return parts.join('-') + (raw.contains('+') ? '+' : '');
+  }
+
   @override
   Widget build(BuildContext context) {
     final s = scale;
     return GestureDetector(
       onTap: () => Get.toNamed(AppRoutes.briefDetail, arguments: {'brief': brief}),
       child: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: Colors.white,
-          border: Border.all(color: _kCardBorder),
+          border: Border(
+            top: BorderSide(color: _kCardBorder),
+            bottom: BorderSide(color: _kCardBorder),
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Durum satırı
             Padding(
-              padding: EdgeInsets.fromLTRB(18 * s, 16 * s, 14 * s, 0),
+              padding: EdgeInsets.fromLTRB(42 * s, 16 * s, 38 * s, 0),
               child: Row(
                 children: [
                   Container(
                     width: 8 * s,
                     height: 8 * s,
-                    color: _statusColor,
+                    decoration: BoxDecoration(
+                      color: _statusColor,
+                      shape: BoxShape.circle,
+                    ),
                   ),
                   SizedBox(width: 8 * s),
                   Text(
@@ -473,89 +508,71 @@ class _BriefCard extends StatelessWidget {
                         color: _kBlack,
                         spacing: 1.4),
                   ),
-                  const Spacer(),
-                  GestureDetector(
-                    onTap: () => Get.toNamed(AppRoutes.sendOffer, arguments: {
-                      'category': brief.category,
-                      'brief': brief,
-                    }),
-                    behavior: HitTestBehavior.opaque,
-                    child: Container(
-                      padding: EdgeInsets.all(6 * s),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.zero,
-                        border: Border.all(
-                            color: Colors.black.withValues(alpha: 0.12)),
-                      ),
-                      child: Icon(Icons.edit_outlined,
-                          size: 14 * s, color: _kTaupe),
-                    ),
-                  ),
                 ],
               ),
             ),
 
             // Kimlik satırı
             Padding(
-              padding: EdgeInsets.fromLTRB(18 * s, 16 * s, 18 * s, 0),
+              padding: EdgeInsets.fromLTRB(42 * s, 16 * s, 42 * s, 0),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
                     width: 48 * s,
                     height: 48 * s,
-                    decoration: BoxDecoration(
-                      color: _kGold,
-                      borderRadius: BorderRadius.zero,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
                     ),
-                    child: Icon(_categoryIcon,
-                        size: 24 * s, color: Colors.white),
+                    clipBehavior: Clip.antiAlias,
+                    child: Image.asset(
+                      _categoryAsset,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Icon(
+                          _categoryIcon,
+                          size: 22 * s,
+                          color: _kGold),
+                    ),
                   ),
                   SizedBox(width: 14 * s),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _bigTitle,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: _serif(
-                              size: 20 * s,
-                              weight: FontWeight.w600,
-                              color: _kInk),
-                        ),
-                        if (_subtitle.isNotEmpty) ...[
-                          SizedBox(height: 3 * s),
+                    child: SizedBox(
+                      height: 48 * s,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
                           Text(
-                            _subtitle,
+                            _bigTitle,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: _mono(
-                                size: 8 * s, color: _kBlack, spacing: 1),
+                            style: _serif(
+                                size: 20 * s,
+                                weight: FontWeight.w600,
+                                color: _kInk),
                           ),
+                          if (_subtitle.isNotEmpty) ...[
+                            SizedBox(height: 3 * s),
+                            Text(
+                              _subtitle,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: _mono(
+                                  size: 8 * s, color: _kBlack, spacing: 1),
+                            ),
+                          ],
                         ],
-                      ],
+                      ),
                     ),
                   ),
                   if (brief.sentToIds.isNotEmpty) ...[
                     SizedBox(width: 10 * s),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          '${brief.sentToIds.length}',
-                          style: _serif(
-                              size: 22 * s,
-                              weight: FontWeight.w700,
-                              color: _kGold),
-                        ),
-                        Text(
-                          'TEKLİF',
-                          style: _mono(
-                              size: 7 * s, color: _kBlack, spacing: 1.2),
-                        ),
-                      ],
+                    Text(
+                      '${brief.sentToIds.length}',
+                      style: _serif(
+                          size: 25 * s,
+                          weight: FontWeight.w700,
+                          color: _kGold),
                     ),
                   ],
                 ],
@@ -568,7 +585,7 @@ class _BriefCard extends StatelessWidget {
                 brief.answers.dateRange != null) ...[
               SizedBox(height: 18 * s),
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 18 * s),
+                padding: EdgeInsets.symmetric(horizontal: 42 * s),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -585,7 +602,9 @@ class _BriefCard extends StatelessWidget {
                         scale: s,
                         icon: Icons.payments_outlined,
                         label: 'BÜTÇE',
-                        value: brief.answers.budget ?? '—',
+                        value: brief.answers.budget != null
+                            ? _compactBudget(brief.answers.budget!)
+                            : '—',
                       ),
                     ),
                     Expanded(
@@ -604,9 +623,9 @@ class _BriefCard extends StatelessWidget {
             // Konum
             if (brief.answers.location != null &&
                 brief.answers.location!.isNotEmpty) ...[
-              SizedBox(height: 16 * s),
+              SizedBox(height: 24 * s),
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 18 * s),
+                padding: EdgeInsets.symmetric(horizontal: 42 * s),
                 child: Row(
                   children: [
                     Icon(Icons.location_on_outlined,
@@ -625,41 +644,82 @@ class _BriefCard extends StatelessWidget {
               ),
             ],
 
-            // Açıklama
+            // Açıklama + Revize Et
             if (brief.answers.notes != null &&
                 brief.answers.notes!.isNotEmpty) ...[
               SizedBox(height: 14 * s),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 18 * s),
-                child: Text(
-                  brief.answers.notes!,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: _mono(
-                      size: 9 * s, color: _kBlack, spacing: 0.2),
+              GestureDetector(
+                onTap: () => Get.toNamed(AppRoutes.sendOffer, arguments: {
+                  'category': brief.category,
+                  'brief': brief,
+                }),
+                behavior: HitTestBehavior.opaque,
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(42 * s, 0, 38 * s, 16 * s),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Icon(Icons.chat_bubble_outline_rounded,
+                          size: 13 * s, color: _kTaupe),
+                      SizedBox(width: 5 * s),
+                      Expanded(
+                        child: Text(
+                          brief.answers.notes!,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: _mono(
+                              size: 9 * s,
+                              weight: FontWeight.w700,
+                              color: _kInk,
+                              spacing: 0.2),
+                        ),
+                      ),
+                      SizedBox(width: 8 * s),
+                      Text(
+                        'REVİZE ET',
+                        style: _mono(
+                            size: 8 * s,
+                            weight: FontWeight.w700,
+                            color: _kGold,
+                            spacing: 1.2),
+                      ),
+                      SizedBox(width: 4 * s),
+                      Icon(Icons.chevron_right,
+                          size: 16 * s, color: _kGold),
+                    ],
+                  ),
+                ),
+              ),
+            ] else ...[
+              // Alt bilgi
+              SizedBox(height: 18 * s),
+              GestureDetector(
+                onTap: () => Get.toNamed(AppRoutes.sendOffer, arguments: {
+                  'category': brief.category,
+                  'brief': brief,
+                }),
+                behavior: HitTestBehavior.opaque,
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(42 * s, 12 * s, 38 * s, 14 * s),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text(
+                        'REVİZE ET',
+                        style: _mono(
+                            size: 8 * s,
+                            weight: FontWeight.w700,
+                            color: _kGold,
+                            spacing: 1.2),
+                      ),
+                      SizedBox(width: 4 * s),
+                      Icon(Icons.chevron_right,
+                          size: 16 * s, color: _kGold),
+                    ],
+                  ),
                 ),
               ),
             ],
-
-            // Alt bilgi
-            SizedBox(height: 18 * s),
-            Container(
-              decoration: const BoxDecoration(
-                border: Border(top: BorderSide(color: _kDivider)),
-              ),
-              padding: EdgeInsets.fromLTRB(18 * s, 12 * s, 14 * s, 14 * s),
-              child: Row(
-                children: [
-                  Text(
-                    'SON GÜNCELLEME · ${_formatDate(brief.updatedAt).toUpperCase()}',
-                    style: _mono(size: 8 * s, color: _kBlack, spacing: 0.8),
-                  ),
-                  const Spacer(),
-                  Icon(Icons.chevron_right,
-                      size: 16 * s, color: _kGold),
-                ],
-              ),
-            ),
           ],
         ),
       ),
@@ -703,7 +763,7 @@ class _MetaCell extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: _mono(
-              size: 10 * s, weight: FontWeight.w700, color: _kBlack, spacing: 0.3),
+              size: 10 * s, weight: FontWeight.w400, color: _kBlack, spacing: 0.3),
         ),
       ],
     );

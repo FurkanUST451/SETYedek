@@ -1,4 +1,6 @@
+import '../../core/constants/app_assets.dart';
 import '../models/freelancer_model.dart';
+import '../models/portfolio_project_model.dart';
 import '../models/user_model.dart';
 import '../models/work_model.dart';
 
@@ -66,13 +68,160 @@ class DummyData {
     ),
   ];
 
+  static final List<PortfolioProjectModel> portfolioProjects = [
+    PortfolioProjectModel(
+      id: 'w1',
+      title: 'Mercedes\nCampaign',
+      subtitle: 'Lüks. Performans.\nSinema...',
+      tagLabel: 'TİCARİ REKLAM',
+      isFeatured: true,
+      year: '2023',
+      durationLabel: '4 HAFTA',
+      status: PortfolioStatus.completed,
+      description:
+          "Mercedes'in yeni model lansmanı için sinematik bir tanıtım filmi "
+          'hazırlandı. Güç, zarafet ve ileri teknolojiyi vurgulayan görsel bir '
+          'anlatı oluşturuldu.',
+      category: 'Video Çekim',
+      budgetRangeLabel: '250K - 500K ₺',
+      location: 'İstanbul',
+      coverImageUrl: AppAssets.portfolioMercedesBg,
+      galleryImageUrls: AppAssets.portfolioMercedesGallery,
+      team: [
+        PortfolioTeamMember(
+          name: 'Eren A.',
+          role: 'YÖNETMEN',
+          avatarUrl: AppAssets.profilePhotosMale[0],
+        ),
+        PortfolioTeamMember(
+          name: 'Murat K.',
+          role: 'GÖRÜNTÜ YÖN.',
+          avatarUrl: AppAssets.profilePhotosMale[1],
+        ),
+        PortfolioTeamMember(
+          name: 'Selin D.',
+          role: 'KURGU',
+          avatarUrl: AppAssets.profilePhotosFemale[0],
+        ),
+        PortfolioTeamMember(
+          name: 'Deniz Y.',
+          role: 'VFX ARTIST',
+          avatarUrl: AppAssets.profilePhotosFemale[1],
+        ),
+        PortfolioTeamMember(
+          name: 'Kaan T.',
+          role: 'SES TASARIM',
+          avatarUrl: AppAssets.profilePhotosMale[2],
+        ),
+        PortfolioTeamMember(
+          name: 'İlker P.',
+          role: 'COLORIST',
+          avatarUrl: AppAssets.profilePhotosMale[3],
+        ),
+      ],
+      processStages: const [
+        PortfolioProcessStage(label: 'Brief & Analiz', done: true),
+        PortfolioProcessStage(label: 'Pre-Prodüksiyon', done: true),
+        PortfolioProcessStage(label: 'Prodüksiyon', done: true),
+        PortfolioProcessStage(label: 'Post-Prodüksiyon', done: true),
+        PortfolioProcessStage(label: 'Teslim', done: true),
+      ],
+    ),
+    PortfolioProjectModel(
+      id: 'w4',
+      title: 'Nike Motion Project',
+      subtitle: 'Hareket. Enerji. Marka.',
+      tagLabel: 'VİDEO',
+      year: '2023',
+      durationLabel: '3 HAFTA',
+      status: PortfolioStatus.completed,
+      description:
+          "Nike'ın yeni koleksiyonu için dinamik bir motion graphics serisi "
+          'üretildi. Sosyal medya formatlarına özel kurgular hazırlandı.',
+      category: 'Kurgu',
+      budgetRangeLabel: '100K - 250K ₺',
+      location: 'İstanbul',
+      galleryImageUrls: const [],
+      team: [
+        PortfolioTeamMember(
+          name: 'Ayşe Y.',
+          role: 'YÖNETMEN',
+          avatarUrl: AppAssets.profilePhotosFemale[2],
+        ),
+        PortfolioTeamMember(
+          name: 'Ozan B.',
+          role: 'MOTION DESIGNER',
+          avatarUrl: AppAssets.profilePhotosMale[0],
+        ),
+        PortfolioTeamMember(
+          name: 'Nil K.',
+          role: 'KURGU',
+          avatarUrl: AppAssets.profilePhotosFemale[3],
+        ),
+      ],
+      processStages: const [
+        PortfolioProcessStage(label: 'Brief & Analiz', done: true),
+        PortfolioProcessStage(label: 'Pre-Prodüksiyon', done: true),
+        PortfolioProcessStage(label: 'Prodüksiyon', done: true),
+        PortfolioProcessStage(label: 'Post-Prodüksiyon', done: true),
+        PortfolioProcessStage(label: 'Teslim', done: true),
+      ],
+    ),
+    PortfolioProjectModel(
+      id: 'w5',
+      title: 'Netflix Documentary',
+      subtitle: 'Gerçek hikayeler, sinematik anlatım.',
+      tagLabel: 'BELGESEL',
+      year: '2024',
+      durationLabel: '8 HAFTA',
+      status: PortfolioStatus.ongoing,
+      description:
+          'Netflix için hazırlanan belgesel projesinde çekim yönetiminden '
+          'renk düzeltmeye kadar tüm prodüksiyon süreci yürütüldü.',
+      category: 'Video Çekim',
+      budgetRangeLabel: '500K - 1M ₺',
+      location: 'İstanbul',
+      galleryImageUrls: const [],
+      team: [
+        PortfolioTeamMember(
+          name: 'Barış S.',
+          role: 'YÖNETMEN',
+          avatarUrl: AppAssets.profilePhotosMale[1],
+        ),
+        PortfolioTeamMember(
+          name: 'Ece T.',
+          role: 'GÖRÜNTÜ YÖN.',
+          avatarUrl: AppAssets.profilePhotosFemale[0],
+        ),
+        PortfolioTeamMember(
+          name: 'Mert A.',
+          role: 'KURGU',
+          avatarUrl: AppAssets.profilePhotosMale[2],
+        ),
+        PortfolioTeamMember(
+          name: 'Pınar C.',
+          role: 'SES TASARIM',
+          avatarUrl: AppAssets.profilePhotosFemale[1],
+        ),
+      ],
+      processStages: const [
+        PortfolioProcessStage(label: 'Brief & Analiz', done: true),
+        PortfolioProcessStage(label: 'Pre-Prodüksiyon', done: true),
+        PortfolioProcessStage(label: 'Prodüksiyon', done: true),
+        PortfolioProcessStage(label: 'Post-Prodüksiyon'),
+        PortfolioProcessStage(label: 'Teslim'),
+      ],
+    ),
+  ];
+
   static final List<UserModel> users = [
     UserModel(
       id: 'u1',
       name: 'Aylin Demir',
       email: 'aylin@set.app',
       role: UserRole.freelancer,
-      avatarUrl: null,
+      gender: 'kadin',
+      avatarUrl: AppAssets.profilePhotosFemale[0],
       createdAt: DateTime(2025, 6, 12),
     ),
     UserModel(
@@ -80,7 +229,8 @@ class DummyData {
       name: 'Mert Kaya',
       email: 'mert@set.app',
       role: UserRole.freelancer,
-      avatarUrl: null,
+      gender: 'erkek',
+      avatarUrl: AppAssets.profilePhotosMale[0],
       createdAt: DateTime(2025, 7, 1),
     ),
     UserModel(
@@ -88,7 +238,8 @@ class DummyData {
       name: 'Selin Acar',
       email: 'selin@set.app',
       role: UserRole.freelancer,
-      avatarUrl: null,
+      gender: 'kadin',
+      avatarUrl: AppAssets.profilePhotosFemale[1],
       createdAt: DateTime(2025, 8, 4),
     ),
     UserModel(
@@ -96,7 +247,8 @@ class DummyData {
       name: 'Burak Yılmaz',
       email: 'burak@set.app',
       role: UserRole.freelancer,
-      avatarUrl: null,
+      gender: 'erkek',
+      avatarUrl: AppAssets.profilePhotosMale[1],
       createdAt: DateTime(2025, 9, 18),
     ),
     UserModel(
@@ -104,7 +256,8 @@ class DummyData {
       name: 'Eda Şen',
       email: 'eda@set.app',
       role: UserRole.freelancer,
-      avatarUrl: null,
+      gender: 'kadin',
+      avatarUrl: AppAssets.profilePhotosFemale[2],
       createdAt: DateTime(2025, 10, 22),
     ),
     UserModel(
@@ -112,7 +265,8 @@ class DummyData {
       name: 'Can Aksoy',
       email: 'can@set.app',
       role: UserRole.freelancer,
-      avatarUrl: null,
+      gender: 'erkek',
+      avatarUrl: AppAssets.profilePhotosMale[2],
       createdAt: DateTime(2025, 11, 5),
     ),
     UserModel(
@@ -120,7 +274,8 @@ class DummyData {
       name: 'Kaan Özdemir',
       email: 'kaan@set.app',
       role: UserRole.freelancer,
-      avatarUrl: null,
+      gender: 'erkek',
+      avatarUrl: AppAssets.profilePhotosMale[3],
       createdAt: DateTime(2025, 11, 10),
     ),
     UserModel(
@@ -128,7 +283,8 @@ class DummyData {
       name: 'Zeynep Arslan',
       email: 'zeynep@set.app',
       role: UserRole.freelancer,
-      avatarUrl: null,
+      gender: 'kadin',
+      avatarUrl: AppAssets.profilePhotosFemale[3],
       createdAt: DateTime(2025, 11, 15),
     ),
     UserModel(
@@ -136,7 +292,8 @@ class DummyData {
       name: 'Emre Koç',
       email: 'emre@set.app',
       role: UserRole.freelancer,
-      avatarUrl: null,
+      gender: 'erkek',
+      avatarUrl: AppAssets.profilePhotosMale[0],
       createdAt: DateTime(2025, 11, 20),
     ),
     UserModel(
@@ -144,7 +301,8 @@ class DummyData {
       name: 'Deniz Şahin',
       email: 'deniz@set.app',
       role: UserRole.freelancer,
-      avatarUrl: null,
+      gender: 'kadin',
+      avatarUrl: AppAssets.profilePhotosFemale[0],
       createdAt: DateTime(2025, 12, 1),
     ),
   ];
@@ -159,6 +317,7 @@ class DummyData {
       location: 'İstanbul',
       rating: 4.9,
       portfolio: const [],
+      profileImageUrl: AppAssets.profilePhotosFemale[0],
     ),
     FreelancerModel(
       userId: 'u2',
@@ -168,6 +327,7 @@ class DummyData {
       location: 'Ankara',
       rating: 4.7,
       portfolio: const [],
+      profileImageUrl: AppAssets.profilePhotosMale[0],
     ),
     FreelancerModel(
       userId: 'u3',
@@ -177,6 +337,7 @@ class DummyData {
       location: 'İzmir',
       rating: 4.8,
       portfolio: const [],
+      profileImageUrl: AppAssets.profilePhotosFemale[1],
     ),
     FreelancerModel(
       userId: 'u4',
@@ -186,6 +347,7 @@ class DummyData {
       location: 'İstanbul',
       rating: 4.6,
       portfolio: const [],
+      profileImageUrl: AppAssets.profilePhotosMale[1],
     ),
     FreelancerModel(
       userId: 'u5',
@@ -195,6 +357,7 @@ class DummyData {
       location: 'Antalya',
       rating: 4.85,
       portfolio: const [],
+      profileImageUrl: AppAssets.profilePhotosFemale[2],
     ),
     FreelancerModel(
       userId: 'u6',
@@ -204,6 +367,7 @@ class DummyData {
       location: 'İstanbul',
       rating: 4.95,
       portfolio: const [],
+      profileImageUrl: AppAssets.profilePhotosMale[2],
     ),
     FreelancerModel(
       userId: 'u7',
@@ -213,6 +377,7 @@ class DummyData {
       location: 'İstanbul',
       rating: 4.8,
       portfolio: const [],
+      profileImageUrl: AppAssets.profilePhotosMale[3],
     ),
     FreelancerModel(
       userId: 'u8',
@@ -222,6 +387,7 @@ class DummyData {
       location: 'İstanbul',
       rating: 4.95,
       portfolio: const [],
+      profileImageUrl: AppAssets.profilePhotosFemale[3],
     ),
     FreelancerModel(
       userId: 'u9',
@@ -231,6 +397,7 @@ class DummyData {
       location: 'İzmir',
       rating: 4.7,
       portfolio: const [],
+      profileImageUrl: AppAssets.profilePhotosMale[0],
     ),
     FreelancerModel(
       userId: 'u10',
@@ -240,6 +407,7 @@ class DummyData {
       location: 'İstanbul',
       rating: 4.85,
       portfolio: const [],
+      profileImageUrl: AppAssets.profilePhotosFemale[0],
     ),
   ];
 }

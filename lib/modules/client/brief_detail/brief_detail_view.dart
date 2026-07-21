@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../core/utils/avatar_image.dart';
 import '../../../data/models/freelancer_model.dart';
 import 'brief_detail_controller.dart';
 
@@ -106,6 +107,42 @@ class BriefDetailView extends GetView<BriefDetailController> {
     return Icons.work_rounded;
   }
 
+  String get _categoryAsset {
+    final cat = controller.brief.category.toLowerCase();
+    if (cat.contains('video') || cat.contains('film')) {
+      return 'assets/images/main_service_icons/video.png';
+    } else if (cat.contains('fotoğraf') || cat.contains('photo')) {
+      return 'assets/images/main_service_icons/foto.png';
+    } else if (cat.contains('ses') || cat.contains('müzik')) {
+      return 'assets/images/main_service_icons/ses.png';
+    } else if (cat.contains('cgi') || cat.contains('vfx')) {
+      return 'assets/images/main_service_icons/cgi.png';
+    } else if (cat.contains('kurgu') || cat.contains('montaj')) {
+      return 'assets/images/main_service_icons/kurgu.png';
+    } else if (cat.contains('sosyal')) {
+      return 'assets/images/main_service_icons/sosyal medya.png';
+    }
+    return 'assets/images/main_service_icons/grafiktasarim.png';
+  }
+
+  // "50.000₺ - 120.000₺" -> "50K-120K", "300.000₺+" -> "300K+"
+  String _compactBudget(String raw) {
+    final matches =
+        RegExp(r'\d[\d.]*').allMatches(raw).map((m) => m.group(0)!).toList();
+    if (matches.isEmpty) return raw;
+    final parts = matches.map((numStr) {
+      final n = int.tryParse(numStr.replaceAll('.', '')) ?? 0;
+      if (n >= 1000) {
+        final k = n / 1000;
+        final kStr =
+            k == k.roundToDouble() ? k.toStringAsFixed(0) : k.toStringAsFixed(1);
+        return '${kStr}K';
+      }
+      return numStr;
+    }).toList();
+    return parts.join('-') + (raw.contains('+') ? '+' : '');
+  }
+
   // İlerleme — freelancer'ın eklediği aşamaların salt-okunur görünümü.
   List<_Milestone> get _milestones {
     final brief = controller.brief;
@@ -182,7 +219,7 @@ class BriefDetailView extends GetView<BriefDetailController> {
 
               Expanded(
                 child: SingleChildScrollView(
-                  padding: EdgeInsets.fromLTRB(20 * s, 6 * s, 20 * s, 0),
+                  padding: EdgeInsets.fromLTRB(0, 6 * s, 0, 0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -304,10 +341,13 @@ class BriefDetailView extends GetView<BriefDetailController> {
   Widget _buildHeaderCard(double s) {
     final brief = controller.brief;
     return Container(
-      padding: EdgeInsets.all(16 * s),
+      padding: EdgeInsets.fromLTRB(36 * s, 16 * s, 36 * s, 16 * s),
       decoration: const BoxDecoration(
         color: Colors.white,
-        border: Border.fromBorderSide(BorderSide(color: _kCardBorder)),
+        border: Border(
+          top: BorderSide(color: _kCardBorder),
+          bottom: BorderSide(color: _kCardBorder),
+        ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -315,9 +355,14 @@ class BriefDetailView extends GetView<BriefDetailController> {
           Container(
             width: 56 * s,
             height: 56 * s,
-            color: _kGold,
-            alignment: Alignment.center,
-            child: Icon(_categoryIcon, size: 28 * s, color: Colors.white),
+            decoration: const BoxDecoration(color: Colors.white),
+            clipBehavior: Clip.antiAlias,
+            child: Image.asset(
+              _categoryAsset,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) =>
+                  Icon(_categoryIcon, size: 28 * s, color: _kGold),
+            ),
           ),
           SizedBox(width: 14 * s),
           Expanded(
@@ -361,9 +406,11 @@ class BriefDetailView extends GetView<BriefDetailController> {
   Widget _buildBriefGrid(dynamic a, double s) {
     final items = <_GridItem>[];
 
-    void add(bool cond, IconData icon, String label, String value) {
+    void add(bool cond, IconData icon, String label, String value,
+        {bool singleLine = false}) {
       if (cond && value.isNotEmpty) {
-        items.add(_GridItem(icon: icon, label: label, value: value));
+        items.add(_GridItem(
+            icon: icon, label: label, value: value, singleLine: singleLine));
       }
     }
 
@@ -372,12 +419,6 @@ class BriefDetailView extends GetView<BriefDetailController> {
       Icons.movie_creation_outlined,
       'Çekim Türü',
       (a.shootingType as String?) ?? '',
-    );
-    add(
-      a.vibes != null && (a.vibes as List).isNotEmpty,
-      Icons.show_chart_rounded,
-      'Duygu',
-      a.vibes != null ? (a.vibes as List<String>).join(', ') : '',
     );
     add(
       a.dateRange != null,
@@ -395,13 +436,14 @@ class BriefDetailView extends GetView<BriefDetailController> {
       a.budget != null,
       Icons.payments_outlined,
       'Bütçe',
-      (a.budget as String?) ?? '',
+      a.budget != null ? _compactBudget(a.budget as String) : '',
     );
     add(
       a.location != null,
       Icons.location_on_outlined,
       'Lokasyon',
       (a.location as String?) ?? '',
+      singleLine: true,
     );
 
     if (items.isEmpty) return const SizedBox.shrink();
@@ -595,10 +637,13 @@ class _Section extends StatelessWidget {
     final s = scale;
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.fromLTRB(16 * s, 14 * s, 16 * s, 16 * s),
+      padding: EdgeInsets.fromLTRB(36 * s, 14 * s, 36 * s, 16 * s),
       decoration: const BoxDecoration(
         color: Colors.white,
-        border: Border.fromBorderSide(BorderSide(color: _kCardBorder)),
+        border: Border(
+          top: BorderSide(color: _kCardBorder),
+          bottom: BorderSide(color: _kCardBorder),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -633,10 +678,12 @@ class _GridItem {
     required this.icon,
     required this.label,
     required this.value,
+    this.singleLine = false,
   });
   final IconData icon;
   final String label;
   final String value;
+  final bool singleLine;
 }
 
 class _GridCell extends StatelessWidget {
@@ -665,17 +712,33 @@ class _GridCell extends StatelessWidget {
           ],
         ),
         SizedBox(height: 4 * s),
-        Text(
-          item.value,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: _mono(
-            size: 10 * s,
-            weight: FontWeight.w700,
-            color: _kBlack,
-            spacing: 0.2,
+        if (item.singleLine)
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              item.value,
+              maxLines: 1,
+              style: _mono(
+                size: 10 * s,
+                weight: FontWeight.w400,
+                color: _kBlack,
+                spacing: 0.2,
+              ),
+            ),
+          )
+        else
+          Text(
+            item.value,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: _mono(
+              size: 10 * s,
+              weight: FontWeight.w400,
+              color: _kBlack,
+              spacing: 0.2,
+            ),
           ),
-        ),
       ],
     );
   }
@@ -736,28 +799,16 @@ class _FreelancerRow extends StatelessWidget {
             width: 40 * s,
             height: 40 * s,
             decoration: BoxDecoration(
+              shape: BoxShape.circle,
               color: const Color(0xFFEADCBB),
-              image: freelancer.profileImageUrl != null
-                  ? DecorationImage(
-                      image: NetworkImage(freelancer.profileImageUrl!),
-                      fit: BoxFit.cover,
-                    )
-                  : null,
+              image: DecorationImage(
+                image: avatarImageProvider(
+                  freelancer.profileImageUrl ??
+                      placeholderAvatarFor(null, freelancer.userId),
+                ),
+                fit: BoxFit.cover,
+              ),
             ),
-            alignment: Alignment.center,
-            child: freelancer.profileImageUrl == null
-                ? Text(
-                    freelancer.name.isNotEmpty
-                        ? freelancer.name[0].toUpperCase()
-                        : '?',
-                    style: _mono(
-                      size: 12 * s,
-                      weight: FontWeight.w700,
-                      color: _kBlack,
-                      spacing: 0.5,
-                    ),
-                  )
-                : null,
           ),
           SizedBox(width: 12 * s),
           Expanded(
@@ -847,7 +898,7 @@ class _MilestoneRow extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: _mono(
                       size: 11 * s,
-                      weight: FontWeight.w700,
+                      weight: FontWeight.w400,
                       color: _kBlack,
                       spacing: 0.2,
                     ),
@@ -859,7 +910,7 @@ class _MilestoneRow extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: _mono(
                       size: 9 * s,
-                      weight: FontWeight.w600,
+                      weight: FontWeight.w400,
                       color: _kGold,
                       spacing: 0.3,
                     ),
@@ -953,15 +1004,25 @@ class _MilestoneDot extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = scale;
     final size = 26 * s;
-    return Container(
+    return SizedBox(
       width: size,
       height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: Colors.white,
-        border: Border.all(color: _kInk, width: 1.4),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          for (final offset in const [
+            Offset(-0.4, 0),
+            Offset(0.4, 0),
+            Offset(0, -0.4),
+            Offset(0, 0.4),
+          ])
+            Transform.translate(
+              offset: offset,
+              child: Icon(Icons.check_rounded, size: 22 * s, color: _kInk),
+            ),
+          Icon(Icons.check_rounded, size: 22 * s, color: _kInk),
+        ],
       ),
-      child: Icon(Icons.check_rounded, size: 14 * s, color: _kInk),
     );
   }
 }

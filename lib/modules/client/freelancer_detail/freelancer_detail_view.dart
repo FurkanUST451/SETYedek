@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../core/utils/avatar_image.dart';
 import '../../../data/models/freelancer_model.dart';
 import '../../../widgets/video_viewer_page.dart';
 import 'freelancer_detail_controller.dart';
@@ -114,25 +115,22 @@ class FreelancerDetailView extends GetView<FreelancerDetailController> {
                           padding: EdgeInsets.fromLTRB(24 * s, 14 * s, 24 * s, 0),
                           child: Column(
                             children: [
-                              // Avatar (keskin kare + online göstergesi)
+                              // Avatar (dairesel + online göstergesi)
                               Stack(
                                 clipBehavior: Clip.none,
                                 children: [
-                                  SizedBox(
-                                    width: 92 * s,
-                                    height: 92 * s,
-                                    child: f?.profileImageUrl != null
-                                        ? CachedNetworkImage(
-                                            imageUrl: f!.profileImageUrl!,
-                                            width: 92 * s,
-                                            height: 92 * s,
-                                            fit: BoxFit.cover,
-                                            placeholder: (_, _) =>
-                                                _avatarPlaceholder(s),
-                                            errorWidget: (_, _, _) =>
-                                                _avatarPlaceholder(s),
-                                          )
-                                        : _avatarPlaceholder(s),
+                                  ClipOval(
+                                    child: SizedBox(
+                                      width: 92 * s,
+                                      height: 92 * s,
+                                      child: buildAvatarImage(
+                                        f?.profileImageUrl ??
+                                            placeholderAvatarFor(
+                                                u?.gender, f?.userId ?? name),
+                                        size: 92 * s,
+                                        placeholder: _avatarPlaceholder(s),
+                                      ),
+                                    ),
                                   ),
                                   Positioned(
                                     bottom: 4 * s,
@@ -294,7 +292,11 @@ class FreelancerDetailView extends GetView<FreelancerDetailController> {
 Widget _avatarPlaceholder(double s) => Container(
       width: 92 * s,
       height: 92 * s,
-      color: const Color(0xFFEADCBB),
+      decoration: const BoxDecoration(
+        shape: BoxShape.circle,
+        color: Color(0xFFEADCBB),
+      ),
+      alignment: Alignment.center,
       child: Icon(Icons.person, size: 48 * s, color: _kTaupe),
     );
 

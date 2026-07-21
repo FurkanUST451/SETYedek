@@ -6,6 +6,8 @@ class AppAssets {
   static const String _splashScreens = '$_images/splash_screens';
   static const String _welcomePages = '$_images/welcome_pages';
   static const String _loginPages = '$_images/login_pages';
+  static const String _profilePhotos = '$_images/profile_photos';
+  static const String _placeholder = '$_images/placeholder';
 
   // Login / choose-auth screens
   static const String loginLogo = '$_loginPages/logo.png';
@@ -33,4 +35,27 @@ class AppAssets {
   static const String welcomeMascot1 = '$_welcomePages/welcome_page_mascot_1.png';
   static const String welcomeMascot2 = '$_welcomePages/welcome_page_mascot_2.png';
   static const String welcomeMascot3 = '$_welcomePages/welcome_page_mascot_3.png';
+
+  // Yer tutucu profil fotoğrafları — cinsiyete göre dummy kullanıcılara dağıtılır
+  static const List<String> profilePhotosFemale = [
+    '$_profilePhotos/female1.png',
+    '$_profilePhotos/female2.png',
+    '$_profilePhotos/female3.png',
+    '$_profilePhotos/female4.png',
+  ];
+  static const List<String> profilePhotosMale = [
+    '$_profilePhotos/male1.png',
+    '$_profilePhotos/male2.png',
+    '$_profilePhotos/male3.png',
+    '$_profilePhotos/male4.png',
+  ];
+
+  // Proje detayı — Mercedes Campaign yer tutucu görselleri
+  static const String portfolioMercedesBg = '$_placeholder/mercedes_bg.png';
+  static const List<String> portfolioMercedesGallery = [
+    '$_placeholder/mercedes_project_image.png',
+    '$_placeholder/mercedes_project_image2.png',
+    '$_placeholder/mercedes_project_image3.png',
+    '$_placeholder/mercedes_project_image4.png',
+  ];
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../../core/utils/avatar_image.dart';
 import '../../../../modules/app/user_controller.dart';
 import '../../../../routes/app_routes.dart';
 import '../freelancer_chats_controller.dart';
@@ -13,7 +14,6 @@ const _kInk = Color(0xFF35333F);
 const _kMuted = Color(0xFFB6AD9A);
 const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
 const _kDivider = Color(0x12000000);
-const _kAvatarBg = Color(0xFFEADCBB);
 
 TextStyle _serif({
   required double size,
@@ -39,14 +39,6 @@ const _monthsShort = [
 ];
 const _weekdaysShort = ['', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
 
-String _initialsOf(String name) {
-  final parts = name.trim().split(RegExp(r'\s+'));
-  if (parts.length >= 2 && parts[0].isNotEmpty && parts[1].isNotEmpty) {
-    return (parts[0][0] + parts[1][0]).toUpperCase();
-  }
-  final t = name.trim();
-  return t.isEmpty ? '?' : t.substring(0, t.length >= 2 ? 2 : 1).toUpperCase();
-}
 
 class FreelancerChatTab extends StatefulWidget {
   const FreelancerChatTab({super.key});
@@ -266,18 +258,12 @@ class _ChatRow extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: 46 * s,
-              height: 46 * s,
-              decoration: const BoxDecoration(
-                color: _kAvatarBg,
-                shape: BoxShape.circle,
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                _initialsOf(name),
-                style: _mono(
-                    size: 12 * s, weight: FontWeight.w700, color: _kBlack, spacing: 0.5),
+            ClipOval(
+              child: Image.asset(
+                placeholderAvatarFor(null, name),
+                width: 46 * s,
+                height: 46 * s,
+                fit: BoxFit.cover,
               ),
             ),
             SizedBox(width: 14 * s),
