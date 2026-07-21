@@ -106,7 +106,7 @@ class FreelancerOnboardingView extends GetView<FreelancerOnboardingController> {
                 ),
               ),
               Padding(
-                padding: EdgeInsets.fromLTRB(24 * s, 8 * s, 24 * s, 20 * s),
+                padding: EdgeInsets.fromLTRB(0, 8 * s, 0, 20 * s),
                 child: Obx(() {
                   if (controller.isLoading.value) {
                     return Center(child: CircularProgressIndicator(color: _kGold));
